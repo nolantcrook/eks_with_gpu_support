@@ -3,5 +3,5 @@ include "root" {
 }
 
 include "env" {
-  path = "${dirname(find_in_parent_folders())}/../environments/${get_env("ENV", "dev")}/terragrunt.hcl"
+  path = "${get_repo_root()}/environments/${get_env("ENV", "dev")}/terragrunt.hcl"
 } 
