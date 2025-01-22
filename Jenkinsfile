@@ -25,7 +25,7 @@ pipeline {
             steps {
                 dir('terraform/foundation') {
                     withEnv(["ENV=${params.ENV}"]) {
-                        sh 'terragrunt init -y'
+                        sh 'terragrunt init --terragrunt-non-interactive'
                         sh 'terragrunt plan -out=tfplan'
                         input message: 'Do you want to apply the Foundation changes?'
                         sh 'terragrunt apply -auto-approve tfplan'
@@ -38,7 +38,7 @@ pipeline {
             steps {
                 dir('terraform/storage') {
                     withEnv(["ENV=${params.ENV}"]) {
-                        sh 'terragrunt init'
+                        sh 'terragrunt init --terragrunt-non-interactive'
                         sh 'terragrunt plan -out=tfplan'
                         input message: 'Do you want to apply the Storage changes?'
                         sh 'terragrunt apply -auto-approve tfplan'
@@ -51,7 +51,7 @@ pipeline {
             steps {
                 dir('terraform/compute') {
                     withEnv(["ENV=${params.ENV}"]) {
-                        sh 'terragrunt init'
+                        sh 'terragrunt init --terragrunt-non-interactive'
                         sh 'terragrunt plan -out=tfplan'
                         input message: 'Do you want to apply the Compute changes?'
                         sh 'terragrunt apply -auto-approve tfplan'
