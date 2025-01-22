@@ -2,8 +2,17 @@ pipeline {
     agent any
     
     environment {
-        TF_DIR = 'terraform/cluster'
+        AWS_REGION = 'us-west-2'
     }
+
+    parameters {
+        choice(
+            name: 'ENV',
+            choices: ['dev', 'prod'],
+            description: 'Select the environment to deploy'
+        )
+    }
+    
     
     stages {
         stage('Checkout') {
@@ -12,32 +21,41 @@ pipeline {
             }
         }
         
-        stage('Terraform Init') {
+        stage('Foundation Infrastructure') {
             steps {
-                dir(TF_DIR) {
-                    sh 'terraform init'
+                dir('terraform/foundation') {
+                    withEnv(["ENV=${params.ENV}"]) {
+                        sh 'terragrunt init'
+                        sh 'terragrunt plan -out=tfplan'
+                        input message: 'Do you want to apply the Foundation changes?'
+                        sh 'terragrunt apply -auto-approve tfplan'
+                    }
                 }
             }
         }
         
-        stage('Terraform Plan') {
+        stage('Storage Infrastructure') {
             steps {
-                dir(TF_DIR) {
-                    sh 'terraform plan -out=tfplan'
+                dir('terraform/storage') {
+                    withEnv(["ENV=${params.ENV}"]) {
+                        sh 'terragrunt init'
+                        sh 'terragrunt plan -out=tfplan'
+                        input message: 'Do you want to apply the Storage changes?'
+                        sh 'terragrunt apply -auto-approve tfplan'
+                    }
                 }
             }
         }
         
-        stage('Approval') {
+        stage('Compute Infrastructure') {
             steps {
-                input message: 'Do you want to apply the Terraform changes?'
-            }
-        }
-        
-        stage('Terraform Apply') {
-            steps {
-                dir(TF_DIR) {
-                    sh 'terraform apply -auto-approve tfplan'
+                dir('terraform/compute') {
+                    withEnv(["ENV=${params.ENV}"]) {
+                        sh 'terragrunt init'
+                        sh 'terragrunt plan -out=tfplan'
+                        input message: 'Do you want to apply the Compute changes?'
+                        sh 'terragrunt apply -auto-approve tfplan'
+                    }
                 }
             }
         }
@@ -45,10 +63,11 @@ pipeline {
     
     post {
         always {
-            dir(TF_DIR) {
-                // Clean up the plan file
-                sh 'rm -f tfplan'
-            }
+            sh '''
+                rm -f terraform/foundation/tfplan
+                rm -f terraform/storage/tfplan
+                rm -f terraform/compute/tfplan
+            '''
         }
     }
 }
