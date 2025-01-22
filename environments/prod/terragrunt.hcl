@@ -6,13 +6,12 @@ remote_state {
   }
   config = {
     bucket         = "eks-stable-diffusion-terraform-state"
-    key            = "${path_relative_to_include()}/terraform.tfstate"
+    key            = "${path_relative_from_include()}/terraform.tfstate"
     region         = "us-west-2"
     encrypt        = true
     dynamodb_table = "terraform-state-lock"
     
-    
-    # Add tags to the S3 bucket (optional but recommended)
+    # Add tags to the S3 bucket
     s3_bucket_tags = {
       Name        = "Terraform State Store"
       Environment = "prod"
@@ -29,6 +28,15 @@ remote_state {
   }
 }
 
+# Add a locals block to help with path construction
+locals {
+  # Parse the path relative to the git root
+  relative_path = replace(
+    path_relative_to_include(),
+    "environments/${get_env("ENV", "prod")}",
+    get_env("ENV", "prod")
+  )
+}
 
 inputs = {
   environment = "prod"
