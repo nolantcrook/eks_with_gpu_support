@@ -14,17 +14,12 @@ pipeline {
     }
     
     
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-        
+    stages { 
         stage('Foundation Infrastructure') {
             steps {
                 dir('terraform/foundation') {
                     withEnv(["ENV=${params.ENV}"]) {
+                        sh pwd
                         sh 'terragrunt init --terragrunt-non-interactive'
                         sh 'terragrunt plan -out=tfplan'
                         input message: 'Do you want to apply the Foundation changes?'
