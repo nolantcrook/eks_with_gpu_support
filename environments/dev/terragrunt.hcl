@@ -11,8 +11,6 @@ remote_state {
     encrypt        = true
     dynamodb_table = "terraform-state-lock"
     
-    # Enable auto creation of the S3 bucket
-    skip_bucket_creation = false
     
     # Add tags to the S3 bucket (optional but recommended)
     s3_bucket_tags = {
@@ -20,9 +18,7 @@ remote_state {
       Environment = "dev"
       Terraform   = "true"
     }
-    
-    # Enable versioning for state files
-    enable_bucket_versioning = true
+
     
     # Add DynamoDB table settings for state locking
     dynamodb_table_tags = {
@@ -33,15 +29,6 @@ remote_state {
   }
 }
 
-generate "provider" {
-  path      = "provider.tf"
-  if_exists = "overwrite_terragrunt"
-  contents  = <<EOF
-provider "aws" {
-  region = "us-west-2"
-}
-EOF
-}
 
 inputs = {
   environment = "dev"
