@@ -10,6 +10,26 @@ remote_state {
     region         = "us-west-2"
     encrypt        = true
     dynamodb_table = "terraform-state-lock"
+    
+    # Enable auto creation of the S3 bucket
+    skip_bucket_creation = false
+    
+    # Add tags to the S3 bucket (optional but recommended)
+    s3_bucket_tags = {
+      Name        = "Terraform State Store"
+      Environment = "dev"
+      Terraform   = "true"
+    }
+    
+    # Enable versioning for state files
+    enable_bucket_versioning = true
+    
+    # Add DynamoDB table settings for state locking
+    dynamodb_table_tags = {
+      Name        = "Terraform State Lock Table"
+      Environment = "dev"
+      Terraform   = "true"
+    }
   }
 }
 
