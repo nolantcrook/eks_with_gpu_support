@@ -1,6 +1,9 @@
-```groovy
 pipeline {
     agent any
+    
+    environment {
+        TF_DIR = 'terraform/cluster'
+    }
     
     stages {
         stage('Checkout') {
@@ -9,19 +12,43 @@ pipeline {
             }
         }
         
-        stage('Build') {
+        stage('Terraform Init') {
             steps {
-                sh 'echo "Building..."'
-                // Add your build steps here
+                dir(TF_DIR) {
+                    sh 'terraform init'
+                }
             }
         }
         
-        stage('Test') {
+        stage('Terraform Plan') {
             steps {
-                sh 'echo "Testing..."'
-                // Add your test steps here
+                dir(TF_DIR) {
+                    sh 'terraform plan -out=tfplan'
+                }
+            }
+        }
+        
+        stage('Approval') {
+            steps {
+                input message: 'Do you want to apply the Terraform changes?'
+            }
+        }
+        
+        stage('Terraform Apply') {
+            steps {
+                dir(TF_DIR) {
+                    sh 'terraform apply -auto-approve tfplan'
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            dir(TF_DIR) {
+                // Clean up the plan file
+                sh 'rm -f tfplan'
             }
         }
     }
 }
-```
