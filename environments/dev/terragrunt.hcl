@@ -6,10 +6,11 @@ remote_state {
   }
   config = {
     bucket         = "eks-stable-diffusion-terraform-state"
-    key            = "${path_relative_from_include()}/terraform.tfstate"
+    key            = "${get_env("ENV", "dev")}/terraform/${basename(get_terragrunt_dir())}/terraform.tfstate"
     region         = "us-west-2"
     encrypt        = true
     dynamodb_table = "terraform-state-lock"
+
     
     # Add tags to the S3 bucket
     s3_bucket_tags = {
