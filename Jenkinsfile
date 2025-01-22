@@ -26,7 +26,7 @@ pipeline {
                 dir('terraform/foundation') {
                     withEnv(["ENV=${params.ENV}"]) {
                         sh 'pwd'
-                        sh 'terragrunt init --terragrunt-non-interactive'
+                        sh 'terragrunt init --terragrunt-non-interactive -reconfigure'
                         sh 'terragrunt plan -out=tfplan'
                         input message: 'Do you want to apply the Foundation changes?'
                         sh 'terragrunt apply -auto-approve tfplan'
