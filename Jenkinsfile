@@ -14,7 +14,13 @@ pipeline {
     }
     
     
-    stages { 
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
         stage('Foundation Infrastructure') {
             steps {
                 dir('terraform/foundation') {
