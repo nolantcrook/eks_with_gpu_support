@@ -7,7 +7,7 @@ locals {
 
 resource "aws_eks_access_entry" "eks_gpu_workshop" {
   cluster_name  = aws_eks_cluster.eks_gpu.name
-  principal_arn = "local.sandbox_user"
+  principal_arn = local.sandbox_user
   type          = "STANDARD"
 }
 
