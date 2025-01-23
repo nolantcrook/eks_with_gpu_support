@@ -1,11 +1,4 @@
-locals {
-  subnets = [
-    "subnet-e9720ea2",
-    "subnet-f6dc8f8f",
-    "subnet-c56830ed",
-    "subnet-6a7a5730"
-  ]
-}
+
 
 resource "aws_eks_cluster" "eks_gpu" {
   name = "eks-gpu"
