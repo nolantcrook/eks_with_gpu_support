@@ -2,7 +2,7 @@ data "terraform_remote_state" "networking" {
   backend = "s3"
   config = {
     bucket = "eks-stable-diffusion-terraform-state"
-    key    = "${get_env("ENV", "dev")}/terraform/networking/terraform.tfstate"
+    key    = "${var.environment}/terraform/networking/terraform.tfstate"
     region = "us-west-2"
   }
 }

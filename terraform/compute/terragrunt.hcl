@@ -4,4 +4,8 @@ include "env" {
 
 dependencies {
   paths = ["../foundation", "../storage", "../networking"]
+}
+
+inputs = {
+  environment = get_env("ENV", "dev")
 } 
