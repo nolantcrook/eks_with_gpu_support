@@ -26,7 +26,7 @@ pipeline {
                 dir('terraform/foundation') {
                     withEnv(["ENV=${params.ENV}"]) {
                         sh 'pwd'
-                        sh 'terragrunt init --terragrunt-non-interactive -reconfigure'
+                        sh 'terragrunt init --terragrunt-non-interactive'
                         sh 'terragrunt plan -out=tfplan'
                         input message: 'Do you want to apply the Foundation changes?'
                         sh 'terragrunt apply -auto-approve tfplan'
@@ -47,7 +47,21 @@ pipeline {
                 }
             }
         }
+
         
+        stage('NetworkingInfrastructure') {
+            steps {
+                dir('terraform/networking') {
+                    withEnv(["ENV=${params.ENV}"]) {
+                        sh 'terragrunt init --terragrunt-non-interactive'
+                        sh 'terragrunt plan -out=tfplan'
+                        input message: 'Do you want to apply the networking changes?'
+                        sh 'terragrunt apply -auto-approve tfplan'
+                    }
+                }
+            }
+        }
+
         stage('Compute Infrastructure') {
             steps {
                 dir('terraform/compute') {

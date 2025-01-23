@@ -2,7 +2,7 @@ resource "aws_eks_node_group" "arm" {
   cluster_name    = aws_eks_cluster.eks_gpu.name
   node_group_name = "eks-arm-1"
   node_role_arn   = aws_iam_role.node.arn
-  subnet_ids      = local.subnets
+  subnet_ids      = local.private_subnet_ids
   ami_type        = "AL2_ARM_64"
   capacity_type   = "SPOT"
   instance_types = [

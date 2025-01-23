@@ -18,7 +18,10 @@ resource "aws_eks_cluster" "eks_gpu" {
   version  = "1.31"
 
   vpc_config {
-    subnet_ids = local.subnets
+    subnet_ids              = local.private_subnet_ids
+    security_group_ids      = [local.cluster_security_group_id]
+    endpoint_private_access = true
+    endpoint_public_access  = true
   }
 
   depends_on = [
