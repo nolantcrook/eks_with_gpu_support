@@ -16,6 +16,11 @@ pipeline {
             choices: ['apply', 'destroy'],
             description: 'Select action (apply or destroy)'
         )
+        booleanParam(
+            name: 'AUTO_APPROVE',
+            defaultValue: false,
+            description: 'Automatically approve all deployment stages'
+        )
     }
     
     
@@ -34,12 +39,16 @@ pipeline {
                             if (params.ACTION == 'apply') {
                                 sh 'terragrunt init --terragrunt-non-interactive'
                                 sh 'terragrunt plan -out=tfplan'
-                                input message: 'Do you want to apply the Foundation changes?'
+                                if (!params.AUTO_APPROVE) {
+                                    input message: 'Do you want to apply the Foundation changes?'
+                                }
                                 sh 'terragrunt apply -auto-approve tfplan'
                             } else {
                                 sh 'terragrunt init --terragrunt-non-interactive'
                                 sh 'terragrunt plan -destroy -out=tfplan'
-                                input message: 'Do you want to destroy the Foundation infrastructure?'
+                                if (!params.AUTO_APPROVE) {
+                                    input message: 'Do you want to destroy the Foundation infrastructure?'
+                                }
                                 sh 'terragrunt apply -auto-approve tfplan'
                             }
                         }
@@ -56,12 +65,16 @@ pipeline {
                             if (params.ACTION == 'apply') {
                                 sh 'terragrunt init --terragrunt-non-interactive'
                                 sh 'terragrunt plan -out=tfplan'
-                                input message: 'Do you want to apply the Storage changes?'
+                                if (!params.AUTO_APPROVE) {
+                                    input message: 'Do you want to apply the Storage changes?'
+                                }
                                 sh 'terragrunt apply -auto-approve tfplan'
                             } else {
                                 sh 'terragrunt init --terragrunt-non-interactive'
                                 sh 'terragrunt plan -destroy -out=tfplan'
-                                input message: 'Do you want to destroy the Storage infrastructure?'
+                                if (!params.AUTO_APPROVE) {
+                                    input message: 'Do you want to destroy the Storage infrastructure?'
+                                }
                                 sh 'terragrunt apply -auto-approve tfplan'
                             }
                         }
@@ -79,12 +92,16 @@ pipeline {
                             if (params.ACTION == 'apply') {
                                 sh 'terragrunt init --terragrunt-non-interactive'
                                 sh 'terragrunt plan -out=tfplan'
-                                input message: 'Do you want to apply the Networking changes?'
+                                if (!params.AUTO_APPROVE) {
+                                    input message: 'Do you want to apply the Networking changes?'
+                                }
                                 sh 'terragrunt apply -auto-approve tfplan'
                             } else {
                                 sh 'terragrunt init --terragrunt-non-interactive'
                                 sh 'terragrunt plan -destroy -out=tfplan'
-                                input message: 'Do you want to destroy the Networking infrastructure?'
+                                if (!params.AUTO_APPROVE) {
+                                    input message: 'Do you want to destroy the Networking infrastructure?'
+                                }
                                 sh 'terragrunt apply -auto-approve tfplan'
                             }
                         }
@@ -101,12 +118,16 @@ pipeline {
                             if (params.ACTION == 'apply') {
                                 sh 'terragrunt init --terragrunt-non-interactive'
                                 sh 'terragrunt plan -out=tfplan'
-                                input message: 'Do you want to apply the Compute changes?'
+                                if (!params.AUTO_APPROVE) {
+                                    input message: 'Do you want to apply the Compute changes?'
+                                }
                                 sh 'terragrunt apply -auto-approve tfplan'
                             } else {
                                 sh 'terragrunt init --terragrunt-non-interactive'
                                 sh 'terragrunt plan -destroy -out=tfplan'
-                                input message: 'Do you want to destroy the Compute infrastructure?'
+                                if (!params.AUTO_APPROVE) {
+                                    input message: 'Do you want to destroy the Compute infrastructure?'
+                                }
                                 sh 'terragrunt apply -auto-approve tfplan'
                             }
                         }
