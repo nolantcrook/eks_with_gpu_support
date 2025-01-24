@@ -1,7 +1,5 @@
-
-
 resource "aws_eks_cluster" "eks_gpu" {
-  name = "eks-gpu"
+  name = "eks-gpu-${var.environment}"
 
   access_config {
     authentication_mode = "API"
@@ -23,7 +21,7 @@ resource "aws_eks_cluster" "eks_gpu" {
 }
 
 resource "aws_iam_role" "cluster" {
-  name = "eks-gpu-cluster-role"
+  name = "eks-gpu-cluster-role-${var.environment}"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
