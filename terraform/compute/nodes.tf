@@ -8,6 +8,7 @@ resource "aws_eks_node_group" "arm" {
   instance_types = [
     "m6g.large",
     "m6g.xlarge",
+    "m6g.2xlarge"
   ]
 
   scaling_config {
