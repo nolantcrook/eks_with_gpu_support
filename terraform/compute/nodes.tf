@@ -6,8 +6,8 @@ resource "aws_eks_node_group" "arm" {
   ami_type        = "AL2_ARM_64"
   capacity_type   = "SPOT"
   instance_types = [
-    "m6g.medium",
     "m6g.large",
+    "m6g.xlarge",
   ]
 
   scaling_config {
@@ -18,6 +18,11 @@ resource "aws_eks_node_group" "arm" {
 
   update_config {
     max_unavailable = 1
+  }
+
+  tags = {
+    Name        = "eks-arm-${var.environment}"
+    Environment = var.environment
   }
 
   depends_on = [
