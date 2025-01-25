@@ -33,6 +33,39 @@ resource "aws_eks_node_group" "arm" {
   ]
 }
 
+resource "aws_eks_node_group" "x86" {
+  cluster_name    = aws_eks_cluster.eks_gpu.name
+  node_group_name = "eks-x86-1"
+  node_role_arn   = aws_iam_role.node.arn
+  subnet_ids      = local.private_subnet_ids
+  
+  instance_types = [
+    "t3.large",
+    "t3.xlarge"
+  ]
+
+  scaling_config {
+    desired_size = 1
+    max_size     = 3
+    min_size     = 1
+  }
+
+  update_config {
+    max_unavailable = 1
+  }
+
+  tags = {
+    Name        = "eks-x86-${var.environment}"
+    Environment = var.environment
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
+  ]
+}
+
 resource "aws_iam_role" "node" {
   name = "eks-arm-1-node-role"
 
