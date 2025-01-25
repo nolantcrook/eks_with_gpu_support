@@ -8,7 +8,9 @@ data "terraform_remote_state" "networking" {
 }
 
 locals {
-  vpc_id                    = data.terraform_remote_state.networking.outputs.vpc_id
-  private_subnet_ids        = data.terraform_remote_state.networking.outputs.private_subnet_ids
+  vpc_id                   = data.terraform_remote_state.networking.outputs.vpc_id
+  private_subnet_ids       = data.terraform_remote_state.networking.outputs.private_subnet_ids
+  public_subnet_ids        = data.terraform_remote_state.networking.outputs.public_subnet_ids
   cluster_security_group_id = data.terraform_remote_state.networking.outputs.cluster_security_group_id
+  argocd_security_group_id = data.terraform_remote_state.networking.outputs.argocd_security_group_id
 }
