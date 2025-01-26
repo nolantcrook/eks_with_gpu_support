@@ -67,7 +67,7 @@ resource "aws_eks_node_group" "x86" {
 }
 
 resource "aws_iam_role" "node" {
-  name = "eks-arm-1-node-role"
+  name = "eks-node-role-${var.environment}"
 
   assume_role_policy = jsonencode({
     Statement = [{
@@ -93,5 +93,10 @@ resource "aws_iam_role_policy_attachment" "AmazonEKS_CNI_Policy" {
 
 resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.node.name
+}
+
+resource "aws_iam_role_policy_attachment" "node_secrets_access" {
+  policy_arn = local.secrets_access_policy_arn
   role       = aws_iam_role.node.name
 }
