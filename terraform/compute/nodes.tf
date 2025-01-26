@@ -23,8 +23,8 @@ resource "aws_eks_node_group" "x86" {
   }
 
   labels = {
-    lifecycle = "Ec2Spot"
-    aws.amazon.com/spot = "true"
+    "lifecycle" = "Ec2Spot"
+    "node.kubernetes.io/lifecycle" = "spot"
   }
 
   taint {
@@ -79,6 +79,6 @@ resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
 }
 
 resource "aws_iam_role_policy_attachment" "node_secrets_access" {
-  policy_arn = local.secrets_access_policy_arn
+  policy_arn = data.terraform_remote_state.foundation.outputs.secrets_access_policy_arn
   role       = aws_iam_role.node.name
 }
