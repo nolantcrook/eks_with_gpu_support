@@ -15,6 +15,16 @@ resource "aws_eks_cluster" "eks_gpu" {
     endpoint_public_access  = true
   }
 
+  # Enable managed node groups
+  enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+
+  # Add tags for spot instance management
+  tags = {
+    Environment = var.environment
+    "k8s.io/cluster-autoscaler/enabled" = "true"
+    "k8s.io/cluster-autoscaler/${var.environment}" = "owned"
+  }
+
   depends_on = [
     aws_iam_role_policy_attachment.cluster,
   ]
