@@ -16,7 +16,7 @@ resource "aws_secretsmanager_secret_version" "github_credentials" {
 
 # IAM policy to allow EKS cluster to read the secret
 resource "aws_iam_policy" "secrets_access" {
-  name        = "eks-github-secrets-access"
+  name        = "eks-github-secrets"
   description = "Allow EKS to access GitHub credentials in Secrets Manager"
 
   policy = jsonencode({
