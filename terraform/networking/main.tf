@@ -139,11 +139,11 @@ resource "aws_security_group" "argocd" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description = "HTTP from my IP only"
-    from_port   = 80
-    to_port     = 80
+    description = "HTTPS from my IP only"
+    from_port   = 443
+    to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["76.129.127.17/32"]  # Replace with your IP, e.g., "203.0.113.0/32"
+    cidr_blocks = ["76.129.127.17/32"]
   }
 
   egress {
