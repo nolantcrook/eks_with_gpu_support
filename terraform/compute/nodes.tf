@@ -43,12 +43,6 @@ resource "aws_eks_node_group" "x86_spot" {
     "node.kubernetes.io/lifecycle" = "spot"
   }
 
-  taint {
-    key    = "spot"
-    value  = "true"
-    effect = "NO_SCHEDULE"
-  }
-
   tags = {
     Name        = "eks-x86-spot-${var.environment}"
     Environment = var.environment
