@@ -59,8 +59,8 @@ resource "aws_wafv2_web_acl" "argocd" {
     name     = "AllowedIPs"
     priority = 1
 
-    override_action {
-      none {}
+    action {
+      allow {}
     }
 
     statement {
@@ -122,12 +122,14 @@ resource "aws_lb_listener" "argocd" {
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = aws_acm_certificate.argocd.arn
+  certificate_arn   = aws_acm_certificate_validation.argocd.certificate_arn
 
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.argocd.arn
   }
+
+  depends_on = [aws_acm_certificate_validation.argocd]
 }
 
 # WAF association with ALB
