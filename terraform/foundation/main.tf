@@ -1,6 +1,6 @@
 # Create AWS Secrets Manager secret for GitHub credentials
 resource "aws_secretsmanager_secret" "github_credentials" {
-  name        = "github/stable-diffusion-gitops"
+  name        = "github/stable-diffusion-gitops-secret"
   description = "GitHub credentials for ArgoCD"
 }
 
