@@ -160,10 +160,10 @@ resource "aws_security_group" "argocd" {
   }
 }
 
-# Update cluster security group
-resource "aws_security_group_rule" "nginx_from_alb" {
+# Update cluster security group rules
+resource "aws_security_group_rule" "nginx_ingress" {
   type                     = "ingress"
-  from_port               = 30080  # NGINX NodePort
+  from_port               = 30080
   to_port                 = 30080
   protocol                = "tcp"
   source_security_group_id = aws_security_group.argocd.id
@@ -171,13 +171,13 @@ resource "aws_security_group_rule" "nginx_from_alb" {
   description             = "Allow ALB to NGINX Ingress"
 }
 
-# Allow internal traffic for NGINX
-resource "aws_security_group_rule" "nginx_internal" {
+# Allow internal traffic for NGINX (if not already defined elsewhere)
+resource "aws_security_group_rule" "cluster_internal" {
   type                     = "ingress"
   from_port               = 0
   to_port                 = 65535
   protocol                = "tcp"
   source_security_group_id = aws_security_group.cluster.id
   security_group_id       = aws_security_group.cluster.id
-  description             = "Allow internal traffic for NGINX"
+  description             = "Allow internal cluster traffic"
 }

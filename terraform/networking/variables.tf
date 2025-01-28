@@ -17,4 +17,10 @@ variable "single_az_dev" {
   description = "Whether to use a single AZ in dev environment"
   type        = bool
   default     = true
+}
+
+variable "create_multi_az_alb" {
+  description = "Whether to create a multi-AZ ALB"
+  type        = bool
+  default     = false  # Default to false for dev
 } 

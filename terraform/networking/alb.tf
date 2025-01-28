@@ -85,17 +85,22 @@ resource "aws_wafv2_web_acl" "argocd" {
 
 # Application Load Balancer
 resource "aws_lb" "argocd" {
-  name               = "argocd-alb"
+  name               = "argocd-alb-${var.environment}"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.argocd.id]
-  subnets           = aws_subnet.public[*].id
+  
+  # Use all public subnets in prod, but only one in dev
+  subnets = (var.environment == "dev" && var.single_az_dev) ? [aws_subnet.public["us-west-2a"].id] : values(aws_subnet.public)[*].id
+
+  # If in dev environment, enable deletion protection only in prod
+  enable_deletion_protection = var.environment == "prod"
 
   tags = {
-    Name = "argocd-alb"
+    Environment = var.environment
   }
 
-  # Add lifecycle rule
+  # Add a lifecycle rule to handle the subnet change
   lifecycle {
     create_before_destroy = true
   }
