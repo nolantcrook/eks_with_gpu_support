@@ -183,4 +183,21 @@ data "aws_autoscaling_groups" "eks_nodes" {
     name   = "tag:kubernetes.io/cluster/${local.cluster_name}"
     values = ["owned"]
   }
+}
+
+# Allow ALB to access NodePort
+resource "aws_security_group_rule" "nodes_from_alb" {
+  type                     = "ingress"
+  from_port               = 30080
+  to_port                 = 30080
+  protocol                = "tcp"
+  source_security_group_id = aws_security_group.argocd.id
+  security_group_id       = data.aws_security_group.nodes.id
+}
+
+# Get the node security group
+data "aws_security_group" "nodes" {
+  tags = {
+    "eks:cluster-name" = local.cluster_name
+  }
 } 
