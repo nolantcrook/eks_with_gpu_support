@@ -139,11 +139,11 @@ resource "aws_security_group" "argocd" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description = "HTTPS from my IP only"
+    description = "HTTPS from anywhere (WAF handles IP restriction)"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["76.129.127.17/32"]
+    cidr_blocks = ["0.0.0.0/0"]  # WAF will restrict to your IP
   }
 
   egress {

@@ -166,23 +166,21 @@ resource "aws_route53_record" "argocd" {
   }
 }
 
-# Attach EKS nodes to target group
-resource "aws_autoscaling_attachment" "argocd" {
-  autoscaling_group_name = data.aws_autoscaling_groups.eks_nodes.names[0]
-  lb_target_group_arn    = aws_lb_target_group.argocd.arn
-
-  # Add lifecycle rule
-  lifecycle {
-    create_before_destroy = true
-  }
+# Register EKS nodes directly with target group
+resource "aws_lb_target_group_attachment" "argocd" {
+  count            = length(data.aws_instances.eks_nodes.ids)
+  target_group_arn = aws_lb_target_group.argocd.arn
+  target_id        = data.aws_instances.eks_nodes.ids[count.index]
+  port             = 30080
 }
 
-# Get ASG names
-data "aws_autoscaling_groups" "eks_nodes" {
-  filter {
-    name   = "tag:kubernetes.io/cluster/${local.cluster_name}"
-    values = ["owned"]
+# Get EKS node instances
+data "aws_instances" "eks_nodes" {
+  instance_tags = {
+    "kubernetes.io/cluster/eks-gpu-${var.environment}" = "owned"
   }
+
+  instance_state_names = ["running"]
 }
 
 # Security group rule to allow ALB to reach the nodes
