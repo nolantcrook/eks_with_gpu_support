@@ -94,6 +94,11 @@ resource "aws_lb" "argocd" {
   tags = {
     Name = "argocd-alb"
   }
+
+  # Add lifecycle rule
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # Target Group
@@ -102,7 +107,7 @@ resource "aws_lb_target_group" "argocd" {
   port        = 30080  # Match the NodePort
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
-  target_type = "instance"  # Change to instance type
+  target_type = "instance"
 
   health_check {
     enabled             = true
@@ -110,23 +115,14 @@ resource "aws_lb_target_group" "argocd" {
     interval            = 30
     matcher            = "200-399"
     path               = "/"
-    port               = "30080"  # Match the NodePort
+    port               = "30080"
     timeout            = 5
     unhealthy_threshold = 2
   }
-}
 
-# Attach EKS nodes to target group
-resource "aws_autoscaling_attachment" "argocd" {
-  autoscaling_group_name = data.aws_autoscaling_groups.eks_nodes.names[0]
-  lb_target_group_arn    = aws_lb_target_group.argocd.arn
-}
-
-# Get ASG names
-data "aws_autoscaling_groups" "eks_nodes" {
-  filter {
-    name   = "tag:kubernetes.io/cluster/${local.cluster_name}"
-    values = ["owned"]
+  # Add lifecycle rule to handle dependency
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
@@ -144,6 +140,11 @@ resource "aws_lb_listener" "argocd" {
   }
 
   depends_on = [aws_acm_certificate_validation.argocd]
+
+  # Add lifecycle rule to handle dependency
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # WAF association with ALB
@@ -162,5 +163,24 @@ resource "aws_route53_record" "argocd" {
     name                   = aws_lb.argocd.dns_name
     zone_id                = aws_lb.argocd.zone_id
     evaluate_target_health = true
+  }
+}
+
+# Attach EKS nodes to target group
+resource "aws_autoscaling_attachment" "argocd" {
+  autoscaling_group_name = data.aws_autoscaling_groups.eks_nodes.names[0]
+  lb_target_group_arn    = aws_lb_target_group.argocd.arn
+
+  # Add lifecycle rule
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# Get ASG names
+data "aws_autoscaling_groups" "eks_nodes" {
+  filter {
+    name   = "tag:kubernetes.io/cluster/${local.cluster_name}"
+    values = ["owned"]
   }
 } 
