@@ -1,6 +1,6 @@
 # Create AWS Secrets Manager secret for GitHub credentials
 resource "aws_secretsmanager_secret" "github_credentials" {
-  name        = "github/stable-diffusion-gitops-secret"
+  name        = "github/stable-diff-gitops-secret"
   description = "GitHub credentials for ArgoCD"
 }
 
@@ -36,7 +36,7 @@ resource "aws_iam_policy" "secrets_access" {
 
 # Create AWS Secrets Manager secret for Route53 Zone ID
 resource "aws_secretsmanager_secret" "route53_zone_id" {
-  name        = "route53/zone-id"
+  name        = "route53/zone-id-hello-world-domain"
   description = "Route53 Zone ID for DNS management"
 }
 
