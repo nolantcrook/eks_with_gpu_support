@@ -5,12 +5,12 @@ output "vpc_id" {
 
 output "public_subnet_ids" {
   description = "List of public subnet IDs"
-  value       = aws_subnet.public[*].id
+  value       = values(aws_subnet.public)[*].id
 }
 
 output "private_subnet_ids" {
   description = "List of private subnet IDs"
-  value       = aws_subnet.private[*].id
+  value       = values(aws_subnet.private)[*].id
 }
 
 output "cluster_security_group_id" {
@@ -23,7 +23,7 @@ output "argocd_security_group_id" {
   value       = aws_security_group.argocd.id
 }
 
-# output "argocd_alb_dns_name" {
-#   description = "DNS name of the ArgoCD ALB"
-#   value       = aws_lb.argocd.dns_name
-# } 
+output "argocd_alb_dns_name" {
+  description = "DNS name of the ArgoCD ALB"
+  value       = aws_lb.argocd.dns_name
+} 

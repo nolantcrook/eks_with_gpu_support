@@ -24,3 +24,8 @@ variable "create_multi_az_alb" {
   type        = bool
   default     = false  # Default to false for dev
 } 
+
+variable "node_asg_name" {
+  description = "Name of the EKS node autoscaling group"
+  type        = string
+}

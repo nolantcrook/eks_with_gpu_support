@@ -1,7 +1,5 @@
 locals {
-  all_azs = ["us-west-2a", "us-west-2b", "us-west-2c"]
-  # Use single AZ for dev, all AZs for prod
-  azs = var.environment == "dev" && var.single_az_dev ? ["us-west-2a"] : local.all_azs
+  azs = ["us-west-2a", "us-west-2b", "us-west-2c"]
 }
 
 resource "aws_vpc" "main" {

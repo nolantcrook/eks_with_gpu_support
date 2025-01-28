@@ -95,6 +95,11 @@ resource "aws_lb" "argocd" {
   tags = {
     Environment = var.environment
   }
+
+  access_logs {
+    bucket  = aws_s3_bucket.alb_logs.bucket
+    enabled = true
+  }
 }
 
 # Target Group for NGINX Ingress Controller
@@ -191,3 +196,29 @@ resource "aws_security_group_rule" "alb_to_node" {
   source_security_group_id = aws_security_group.argocd.id  # ALB's security group
   security_group_id       = aws_security_group.cluster.id  # Using the cluster security group we already have
 }
+
+# Create S3 bucket for ALB logs
+resource "aws_s3_bucket" "alb_logs" {
+  bucket = "argocd-alb-logs-${data.aws_caller_identity.current.account_id}"
+}
+
+resource "aws_s3_bucket_policy" "alb_logs" {
+  bucket = aws_s3_bucket.alb_logs.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_elb_service_account.main.id}:root"
+        }
+        Action = "s3:PutObject"
+        Resource = "${aws_s3_bucket.alb_logs.arn}/*"
+      }
+    ]
+  })
+}
+
+# Data sources for ALB logging
+data "aws_elb_service_account" "main" {}
+data "aws_caller_identity" "current" {}
