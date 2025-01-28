@@ -19,7 +19,7 @@ output "cluster_security_group_id" {
 }
 
 output "argocd_security_group_id" {
-  description = "Security group ID for ArgoCD"
+  description = "Security group ID for the ArgoCD ALB"
   value       = aws_security_group.argocd.id
 }
 

@@ -13,19 +13,7 @@ variable "environment" {
   type        = string
 }
 
-variable "single_az_dev" {
-  description = "Whether to use a single AZ in dev environment"
-  type        = bool
-  default     = true
-}
-
-variable "create_multi_az_alb" {
-  description = "Whether to create a multi-AZ ALB"
-  type        = bool
-  default     = false  # Default to false for dev
-} 
-
-variable "node_asg_name" {
-  description = "Name of the EKS node autoscaling group"
-  type        = string
-}
+# Removing unused variables:
+# - single_az_dev
+# - create_multi_az_alb
+# - node_asg_name
