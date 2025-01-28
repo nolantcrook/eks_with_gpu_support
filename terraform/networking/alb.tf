@@ -89,20 +89,11 @@ resource "aws_lb" "argocd" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.argocd.id]
-  
-  # Use all public subnets in prod, but only one in dev
-  subnets = (var.environment == "dev" && var.single_az_dev) ? [aws_subnet.public["us-west-2a"].id] : values(aws_subnet.public)[*].id
-
-  # If in dev environment, enable deletion protection only in prod
+  subnets           = aws_subnet.public[*].id
   enable_deletion_protection = var.environment == "prod"
 
   tags = {
     Environment = var.environment
-  }
-
-  # Add a lifecycle rule to handle the subnet change
-  lifecycle {
-    create_before_destroy = true
   }
 }
 
