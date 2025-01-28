@@ -99,10 +99,10 @@ resource "aws_lb" "argocd" {
 # Target Group
 resource "aws_lb_target_group" "argocd" {
   name        = "argocd-tg"
-  port        = 80
+  port        = 30080  # Match the NodePort
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
-  target_type = "ip"
+  target_type = "instance"  # Change to instance type
 
   health_check {
     enabled             = true
@@ -110,9 +110,23 @@ resource "aws_lb_target_group" "argocd" {
     interval            = 30
     matcher            = "200-399"
     path               = "/"
-    port               = "traffic-port"
+    port               = "30080"  # Match the NodePort
     timeout            = 5
     unhealthy_threshold = 2
+  }
+}
+
+# Attach EKS nodes to target group
+resource "aws_autoscaling_attachment" "argocd" {
+  autoscaling_group_name = data.aws_autoscaling_groups.eks_nodes.names[0]
+  lb_target_group_arn    = aws_lb_target_group.argocd.arn
+}
+
+# Get ASG names
+data "aws_autoscaling_groups" "eks_nodes" {
+  filter {
+    name   = "tag:kubernetes.io/cluster/${local.cluster_name}"
+    values = ["owned"]
   }
 }
 

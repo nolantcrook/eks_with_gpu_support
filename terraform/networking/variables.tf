@@ -6,4 +6,9 @@
 variable "route53_zone_id_secret_arn" {
   description = "ARN of the Route53 Zone ID secret"
   type        = string
+}
+
+variable "environment" {
+  description = "Environment name (dev/prod)"
+  type        = string
 } 
