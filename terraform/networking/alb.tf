@@ -192,12 +192,5 @@ resource "aws_security_group_rule" "alb_to_node" {
   to_port                 = 30080
   protocol                = "tcp"
   source_security_group_id = aws_security_group.argocd.id  # ALB's security group
-  security_group_id       = aws_security_group.cluster.id  # EKS nodes' security group
-}
-
-# Get the node security group
-data "aws_security_group" "nodes" {
-  tags = {
-    "eks:cluster-name" = local.cluster_name
-  }
+  security_group_id       = aws_security_group.cluster.id  # Using the cluster security group we already have
 } 
