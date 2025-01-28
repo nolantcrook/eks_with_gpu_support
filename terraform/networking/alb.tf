@@ -113,11 +113,12 @@ resource "aws_lb_target_group" "argocd" {
     enabled             = true
     healthy_threshold   = 2
     interval            = 30
-    matcher            = "200-399"
-    path               = "/healthz"  # ArgoCD health check endpoint
+    matcher            = "200-399,301,302,307"  # Accept redirects too
+    path               = "/healthz"
     port               = "30080"
-    timeout            = 5
-    unhealthy_threshold = 2
+    timeout            = 10
+    unhealthy_threshold = 5
+    protocol           = "HTTP"
   }
 
   # Add lifecycle rule to handle dependency
@@ -182,4 +183,4 @@ resource "aws_security_group_rule" "alb_to_node" {
   protocol                = "tcp"
   source_security_group_id = aws_security_group.argocd.id  # ALB's security group
   security_group_id       = aws_security_group.cluster.id  # Using the cluster security group we already have
-} 
+}
