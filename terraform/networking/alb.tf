@@ -174,15 +174,6 @@ resource "aws_lb_target_group_attachment" "argocd" {
   port             = 30080
 }
 
-# Get EKS node instances
-data "aws_instances" "eks_nodes" {
-  instance_tags = {
-    "kubernetes.io/cluster/eks-gpu-${var.environment}" = "owned"
-  }
-
-  instance_state_names = ["running"]
-}
-
 # Security group rule to allow ALB to reach the nodes
 resource "aws_security_group_rule" "alb_to_node" {
   type                     = "ingress"
