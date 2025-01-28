@@ -34,3 +34,40 @@ resource "aws_eks_addon" "pod_identity" {
 #   addon_name   = "aws-load-balancer-controller"
 #   addon_version = "v2.7.1-eksbuild.1"
 # }
+
+# Add Helm provider
+provider "helm" {
+  kubernetes {
+    host                   = aws_eks_cluster.eks_gpu.endpoint
+    cluster_ca_certificate = base64decode(aws_eks_cluster.eks_gpu.certificate_authority[0].data)
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args        = ["eks", "get-token", "--cluster-name", aws_eks_cluster.eks_gpu.name]
+    }
+  }
+}
+
+# Install NGINX Ingress Controller
+resource "helm_release" "nginx_ingress" {
+  name       = "nginx-ingress"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart      = "ingress-nginx"
+  namespace  = "ingress-nginx"
+  create_namespace = true
+
+  set {
+    name  = "controller.service.type"
+    value = "NodePort"
+  }
+
+  set {
+    name  = "controller.service.targetPorts.http"
+    value = "80"
+  }
+
+  set {
+    name  = "controller.service.targetPorts.https"
+    value = "443"
+  }
+}

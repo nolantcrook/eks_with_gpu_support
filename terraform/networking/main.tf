@@ -1,5 +1,7 @@
 locals {
-  azs = ["us-west-2a", "us-west-2b", "us-west-2c"]
+  all_azs = ["us-west-2a", "us-west-2b", "us-west-2c"]
+  # Use single AZ for dev, all AZs for prod
+  azs = var.environment == "dev" && var.single_az_dev ? ["us-west-2a"] : local.all_azs
 }
 
 resource "aws_vpc" "main" {
@@ -156,4 +158,26 @@ resource "aws_security_group" "argocd" {
   tags = {
     Name = "eks-argocd"
   }
+}
+
+# Update cluster security group
+resource "aws_security_group_rule" "nginx_from_alb" {
+  type                     = "ingress"
+  from_port               = 30080  # NGINX NodePort
+  to_port                 = 30080
+  protocol                = "tcp"
+  source_security_group_id = aws_security_group.argocd.id
+  security_group_id       = aws_security_group.cluster.id
+  description             = "Allow ALB to NGINX Ingress"
+}
+
+# Allow internal traffic for NGINX
+resource "aws_security_group_rule" "nginx_internal" {
+  type                     = "ingress"
+  from_port               = 0
+  to_port                 = 65535
+  protocol                = "tcp"
+  source_security_group_id = aws_security_group.cluster.id
+  security_group_id       = aws_security_group.cluster.id
+  description             = "Allow internal traffic for NGINX"
 }

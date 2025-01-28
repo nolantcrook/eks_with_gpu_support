@@ -101,30 +101,32 @@ resource "aws_lb" "argocd" {
   }
 }
 
-# Target Group
-resource "aws_lb_target_group" "argocd" {
-  name        = "argocd-tg"
-  port        = 30080  # The NodePort where ArgoCD is listening
+# Target Group for NGINX Ingress Controller
+resource "aws_lb_target_group" "nginx" {
+  name        = "nginx-ingress"
+  port        = 30080           # Changed to match the NodePort
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
-  target_type = "instance"  # We're targeting the EKS nodes
+  target_type = "instance"
 
   health_check {
     enabled             = true
     healthy_threshold   = 2
     interval            = 30
-    matcher            = "200-399,301,302,307"  # Accept redirects too
+    matcher            = "200-399"
     path               = "/healthz"
-    port               = "30080"
+    port               = "30080"  # Explicitly set to NodePort
     timeout            = 10
     unhealthy_threshold = 5
-    protocol           = "HTTP"
   }
+}
 
-  # Add lifecycle rule to handle dependency
-  lifecycle {
-    create_before_destroy = true
-  }
+# Register EKS nodes with target group
+resource "aws_lb_target_group_attachment" "nginx" {
+  count            = length(data.aws_instances.eks_nodes.ids)
+  target_group_arn = aws_lb_target_group.nginx.arn
+  target_id        = data.aws_instances.eks_nodes.ids[count.index]
+  port             = 30080  # NGINX NodePort
 }
 
 # ALB Listener
@@ -137,7 +139,7 @@ resource "aws_lb_listener" "argocd" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.argocd.arn
+    target_group_arn = aws_lb_target_group.nginx.arn
   }
 
   depends_on = [aws_acm_certificate_validation.argocd]
@@ -167,12 +169,21 @@ resource "aws_route53_record" "argocd" {
   }
 }
 
-# Register EKS nodes directly with target group
-resource "aws_lb_target_group_attachment" "argocd" {
-  count            = length(data.aws_instances.eks_nodes.ids)
-  target_group_arn = aws_lb_target_group.argocd.arn
-  target_id        = data.aws_instances.eks_nodes.ids[count.index]
-  port             = 30080
+# Update listener rule
+resource "aws_lb_listener_rule" "argocd" {
+  listener_arn = aws_lb_listener.argocd.arn
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.nginx.arn
+  }
+
+  condition {
+    host_header {
+      values = ["argocd.hello-world-domain.com"]
+    }
+  }
 }
 
 # Security group rule to allow ALB to reach the nodes

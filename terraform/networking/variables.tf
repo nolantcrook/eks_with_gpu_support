@@ -9,6 +9,12 @@ variable "route53_zone_id_secret_arn" {
 }
 
 variable "environment" {
-  description = "Environment name (dev/prod)"
+  description = "Environment name (dev or prod)"
   type        = string
+}
+
+variable "single_az_dev" {
+  description = "Whether to use a single AZ in dev environment"
+  type        = bool
+  default     = true
 } 
