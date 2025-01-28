@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Port Routing Diagram</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="mermaid">
+        graph LR
+            subgraph DNS
+                Domain[argocd.hello-world-domain.com]
+            end
+
+            subgraph ALB[Application Load Balancer]
+                Listener[HTTPS Listener<br>Port 443<br>SSL Certificate]
+                TargetGroup[Target Group<br>Port 30080]
+            end
+
+            subgraph EKS_Node[EKS Node Private Subnet]
+                NodePort[NodePort Service<br>Port 30080]
+                NGINX[NGINX Ingress Controller<br>Container Ports:<br>80 for HTTP<br>443 for HTTPS]
+            end
+
+            subgraph K8s_Services[Kubernetes Services]
+                ArgoService[ArgoCD Service<br>Port: 8080<br>Target Port: 8080]
+                ArgoPod[ArgoCD Pod<br>Container Port: 8080]
+            end
+
+            Domain -->|DNS Resolution| Listener
+            Listener -->|Forward| TargetGroup
+            TargetGroup -->|HTTP| NodePort
+            NodePort -->|Forward| NGINX
+            NGINX -->|Route based on host/path| ArgoService
+            ArgoService -->|Forward to target port| ArgoPod
+
+            style Domain fill:#f9f,stroke:#333
+            style ALB fill:#dfd,stroke:#333
+            style EKS_Node fill:#ddf,stroke:#333
+            style K8s_Services fill:#ffd,stroke:#333
+
+            %% Add notes for clarity
+            classDef note fill:#fff,stroke:#333,stroke-dasharray: 5 5
+            class Notes note
+
+            Notes1[SSL termination<br>happens here]
+            Notes2[NGINX listens on both ports<br>80 for HTTP<br>443 for HTTPS<br>NodePort exposes 30080]
+            Notes3[Internal K8s<br>routing on 8080]
+
+            Listener --- Notes1
+            NodePort --- Notes2
+            ArgoService --- Notes3
+    </div>
+    <script>
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+</body>
+</html>
