@@ -104,17 +104,17 @@ resource "aws_lb" "argocd" {
 # Target Group
 resource "aws_lb_target_group" "argocd" {
   name        = "argocd-tg"
-  port        = 30080  # Match the NodePort
+  port        = 30080  # The NodePort where ArgoCD is listening
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
-  target_type = "instance"
+  target_type = "instance"  # We're targeting the EKS nodes
 
   health_check {
     enabled             = true
     healthy_threshold   = 2
     interval            = 30
     matcher            = "200-399"
-    path               = "/"
+    path               = "/healthz"  # ArgoCD health check endpoint
     port               = "30080"
     timeout            = 5
     unhealthy_threshold = 2
@@ -185,14 +185,14 @@ data "aws_autoscaling_groups" "eks_nodes" {
   }
 }
 
-# Allow ALB to access NodePort
-resource "aws_security_group_rule" "nodes_from_alb" {
+# Security group rule to allow ALB to reach the nodes
+resource "aws_security_group_rule" "alb_to_node" {
   type                     = "ingress"
-  from_port               = 30080
+  from_port               = 30080  # NodePort
   to_port                 = 30080
   protocol                = "tcp"
-  source_security_group_id = aws_security_group.argocd.id
-  security_group_id       = data.aws_security_group.nodes.id
+  source_security_group_id = aws_security_group.argocd.id  # ALB's security group
+  security_group_id       = aws_security_group.cluster.id  # EKS nodes' security group
 }
 
 # Get the node security group
