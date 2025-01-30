@@ -141,14 +141,6 @@ resource "aws_lb_listener" "argocd" {
 }
 
 # Route53 record for ArgoCD
-data "aws_secretsmanager_secret" "route53_zone_id" {
-  arn = var.route53_zone_id_secret_arn
-}
-
-data "aws_secretsmanager_secret_version" "route53_zone_id" {
-  secret_id = data.aws_secretsmanager_secret.route53_zone_id.id
-}
-
 resource "aws_route53_record" "argocd" {
   zone_id = data.aws_secretsmanager_secret_version.route53_zone_id.secret_string
   name    = "argocd.hello-world-domain.com"
@@ -192,7 +184,3 @@ resource "aws_security_group_rule" "allow_alb_to_nodes" {
   security_group_id        = aws_security_group.cluster.id
   source_security_group_id = aws_security_group.argocd.id
 }
-
-# Data sources for ALB logging
-data "aws_elb_service_account" "main" {}
-data "aws_caller_identity" "current" {}
