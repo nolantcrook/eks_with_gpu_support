@@ -29,7 +29,4 @@ inputs = {
     "us-west-2a",
     "us-west-2b"
   ]
-  
-  # ALB configuration
-  create_multi_az_alb = get_env("ENV", "dev") == "prod" ? true : false
 }

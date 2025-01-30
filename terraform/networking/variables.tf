@@ -13,12 +13,6 @@ variable "environment" {
   type        = string
 }
 
-variable "create_multi_az_alb" {
-  description = "Whether to create a multi-AZ ALB"
-  type        = bool
-  default     = false  # Default to false for dev
-}
-
 variable "vpc_cidr" {
   description = "CIDR block for VPC"
   type        = string

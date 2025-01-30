@@ -89,7 +89,7 @@ resource "aws_lb" "argocd" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.argocd.id]
-  subnets           = var.create_multi_az_alb ? aws_subnet.public[*].id : [aws_subnet.public[0].id]
+  subnets           = aws_subnet.public[*].id
 
   access_logs {
     bucket  = split(":", var.alb_logs_bucket_arn)[5]  # Extract bucket name from ARN
