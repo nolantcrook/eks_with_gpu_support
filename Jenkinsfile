@@ -5,6 +5,7 @@ pipeline {
         AWS_REGION = 'us-west-2'
         AWS_CONFIG_FILE = '/root/.aws/config'
         AWS_SHARED_CREDENTIALS_FILE = '/root/.aws/credentials'
+        KUBECONFIG = '/root/.kube/config'
         // ARGOCD_SERVER = 'argocd.example.com' // Update this with your ArgoCD server address
         // ARGOCD_AUTH_TOKEN = credentials('argocd-auth-token') // Create this in Jenkins
     }
@@ -31,6 +32,18 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+        
+        // Add EKS authentication stage
+        stage('Configure kubectl') {
+            steps {
+                script {
+                    sh """
+                        mkdir -p /root/.kube
+                        aws eks update-kubeconfig --name eks-gpu-${params.ENV} --region ${AWS_REGION}
+                    """
+                }
             }
         }
         
@@ -121,6 +134,11 @@ pipeline {
                         dir('terraform/compute') {
                             withEnv(["ENV=${params.ENV}"]) {
                                 script {
+                                    // Add explicit helm cleanup before terraform destroy
+                                    sh """
+                                        helm uninstall nginx-ingress -n ingress-nginx || true
+                                        kubectl delete namespace ingress-nginx || true
+                                    """
                                     sh 'terragrunt init --terragrunt-non-interactive'
                                     sh 'terragrunt plan -destroy -out=tfplan'
                                     if (!params.AUTO_APPROVE) {
