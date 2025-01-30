@@ -26,9 +26,39 @@ pipeline {
             defaultValue: false,
             description: 'Automatically approve all deployment stages'
         )
+        booleanParam(
+            name: 'FOUNDATION',
+            defaultValue: false,
+            description: 'Include Foundation stage'
+        )
+        booleanParam(
+            name: 'STORAGE',
+            defaultValue: false,
+            description: 'Include Storage stage'
+        )
+        booleanParam(
+            name: 'NETWORKING',
+            defaultValue: false,
+            description: 'Include Networking stage'
+        )
+        booleanParam(
+            name: 'COMPUTE',
+            defaultValue: false,
+            description: 'Include Compute stage'
+        )
     }
     
     stages {
+        stage('Validate Parameters') {
+            steps {
+                script {
+                    if (!params.FOUNDATION && !params.STORAGE && !params.NETWORKING && !params.COMPUTE) {
+                        error "At least one stage must be selected!"
+                    }
+                }
+            }
+        }
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -38,13 +68,16 @@ pipeline {
         // Configure kubectl only for apply operations
         stage('Configure kubectl') {
             when {
-                expression { params.ACTION == 'destroy' }
+                allOf {
+                    expression { params.ACTION == 'apply' }
+                    expression { params.COMPUTE }
+                }
             }
             steps {
                 script {
                     sh """
                         mkdir -p /root/.kube
-                        aws eks update-kubeconfig --name eks-gpu-${params.ENV} --region ${AWS_REGION} || true
+                        aws eks update-kubeconfig --name eks-gpu-${params.ENV} --region ${AWS_REGION}
                     """
                 }
             }
@@ -57,6 +90,9 @@ pipeline {
             }
             stages {
                 stage('Foundation Infrastructure') {
+                    when {
+                        expression { params.FOUNDATION }
+                    }
                     steps {
                         dir('terraform/foundation') {
                             withEnv(["ENV=${params.ENV}"]) {
@@ -74,6 +110,9 @@ pipeline {
                 }
                 
                 stage('Storage Infrastructure') {
+                    when {
+                        expression { params.STORAGE }
+                    }
                     steps {
                         dir('terraform/storage') {
                             withEnv(["ENV=${params.ENV}"]) {
@@ -91,6 +130,9 @@ pipeline {
                 }
                 
                 stage('Networking Infrastructure') {
+                    when {
+                        expression { params.NETWORKING }
+                    }
                     steps {
                         dir('terraform/networking') {
                             withEnv(["ENV=${params.ENV}"]) {
@@ -108,6 +150,9 @@ pipeline {
                 }
                 
                 stage('Compute Infrastructure') {
+                    when {
+                        expression { params.COMPUTE }
+                    }
                     steps {
                         dir('terraform/compute') {
                             withEnv(["ENV=${params.ENV}"]) {
@@ -133,6 +178,9 @@ pipeline {
             }
             stages {
                 stage('Destroy Compute Infrastructure') {
+                    when {
+                        expression { params.COMPUTE }
+                    }
                     steps {
                         dir('terraform/compute') {
                             withEnv(["ENV=${params.ENV}"]) {
@@ -173,6 +221,9 @@ pipeline {
                 }
                 
                 stage('Destroy Networking Infrastructure') {
+                    when {
+                        expression { params.NETWORKING }
+                    }
                     steps {
                         dir('terraform/networking') {
                             withEnv(["ENV=${params.ENV}"]) {
@@ -190,6 +241,9 @@ pipeline {
                 }
                 
                 stage('Destroy Storage Infrastructure') {
+                    when {
+                        expression { params.STORAGE }
+                    }
                     steps {
                         dir('terraform/storage') {
                             withEnv(["ENV=${params.ENV}"]) {
@@ -207,6 +261,9 @@ pipeline {
                 }
                 
                 stage('Destroy Foundation Infrastructure') {
+                    when {
+                        expression { params.FOUNDATION }
+                    }
                     steps {
                         dir('terraform/foundation') {
                             withEnv(["ENV=${params.ENV}"]) {
