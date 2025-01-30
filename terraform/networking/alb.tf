@@ -192,8 +192,8 @@ resource "aws_security_group_rule" "allow_alb_to_nodes" {
   from_port                = 30080
   to_port                  = 30443
   protocol                 = "tcp"
-  security_group_id        = aws_security_group.eks_nodes.id
-  source_security_group_id = aws_security_group.alb.id
+  security_group_id        = aws_security_group.cluster.id
+  source_security_group_id = aws_security_group.argocd.id
 }
 
 

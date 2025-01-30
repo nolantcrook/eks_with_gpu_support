@@ -70,4 +70,40 @@ resource "helm_release" "nginx_ingress" {
     name  = "controller.service.targetPorts.https"
     value = "443"
   }
+
+  lifecycle {
+    ignore_changes = [
+      set,
+      version,
+    ]
+    create_before_destroy = true
+  }
+
+  depends_on = [
+    aws_eks_cluster.eks_gpu,
+    aws_eks_addon.vpc_cni,
+    aws_eks_addon.coredns
+  ]
+}
+
+# Add cleanup for Helm releases
+resource "null_resource" "helm_cleanup" {
+  triggers = {
+    cluster_name = aws_eks_cluster.eks_gpu.name
+    helm_release_name = helm_release.nginx_ingress.name
+    helm_namespace = helm_release.nginx_ingress.namespace
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = <<-EOT
+      kubectl config use-context $(aws eks update-kubeconfig --name ${self.triggers.cluster_name} --region us-west-2 --output text)
+      helm uninstall ${self.triggers.helm_release_name} -n ${self.triggers.helm_namespace} || true
+      kubectl delete namespace ${self.triggers.helm_namespace} || true
+    EOT
+  }
+
+  depends_on = [
+    helm_release.nginx_ingress
+  ]
 }
