@@ -85,20 +85,20 @@ resource "aws_wafv2_web_acl" "argocd" {
 
 # Application Load Balancer
 resource "aws_lb" "argocd" {
-  name               = "argocd-alb-${var.environment}"
+  name               = "argocd-${var.environment}"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.argocd.id]
-  subnets           = aws_subnet.public[*].id
-  enable_deletion_protection = var.environment == "prod"
-
-  tags = {
-    Environment = var.environment
-  }
+  subnets           = var.create_multi_az_alb ? aws_subnet.public[*].id : [aws_subnet.public[0].id]
 
   access_logs {
-    bucket  = aws_s3_bucket.alb_logs.bucket
+    bucket  = split(":", var.alb_logs_bucket_arn)[5]  # Extract bucket name from ARN
     enabled = true
+  }
+
+  tags = {
+    Name        = "argocd-${var.environment}"
+    Environment = var.environment
   }
 }
 
@@ -194,29 +194,6 @@ resource "aws_security_group_rule" "allow_alb_to_nodes" {
   protocol                 = "tcp"
   security_group_id        = aws_security_group.cluster.id
   source_security_group_id = aws_security_group.argocd.id
-}
-
-
-# Create S3 bucket for ALB logs
-resource "aws_s3_bucket" "alb_logs" {
-  bucket = "argocd-alb-logs-${data.aws_caller_identity.current.account_id}"
-}
-
-resource "aws_s3_bucket_policy" "alb_logs" {
-  bucket = aws_s3_bucket.alb_logs.id
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_elb_service_account.main.id}:root"
-        }
-        Action = "s3:PutObject"
-        Resource = "${aws_s3_bucket.alb_logs.arn}/*"
-      }
-    ]
-  })
 }
 
 # Data sources for ALB logging
