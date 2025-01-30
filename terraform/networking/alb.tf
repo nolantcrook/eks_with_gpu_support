@@ -142,7 +142,7 @@ resource "aws_lb_listener" "argocd" {
 
 # Route53 record for ArgoCD
 resource "aws_route53_record" "argocd" {
-  zone_id = data.aws_secretsmanager_secret_version.route53_zone_id.secret_string
+  zone_id = local.route53_zone_id
   name    = "argocd.hello-world-domain.com"
   type    = "A"
 
