@@ -55,11 +55,22 @@ resource "aws_internet_gateway" "main" {
   }
 }
 
+# EIP for NAT Gateway
+resource "aws_eip" "nat" {
+  count = length(var.public_subnet_cidrs)
+  domain = "vpc"
+
+  tags = {
+    Name        = "eks-gpu-nat-${var.environment}-${var.availability_zones[count.index]}"
+    Environment = var.environment
+  }
+}
+
 # NAT Gateway
 resource "aws_nat_gateway" "main" {
   count         = length(var.public_subnet_cidrs)
   subnet_id     = aws_subnet.public[count.index].id
-  connectivity_type = "public"
+  allocation_id = aws_eip.nat[count.index].id
 
   tags = {
     Name        = "eks-gpu-${var.environment}-${var.availability_zones[count.index]}"
