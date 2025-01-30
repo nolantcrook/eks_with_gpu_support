@@ -35,8 +35,11 @@ pipeline {
             }
         }
         
-        // Add EKS authentication stage
+        // Configure kubectl only for apply operations
         stage('Configure kubectl') {
+            when {
+                expression { params.ACTION == 'destroy' }
+            }
             steps {
                 script {
                     sh """
@@ -123,7 +126,7 @@ pipeline {
             }
         }
         
-        // Destroy stages in reverse order
+        // Destroy stages
         stage('Destroy Infrastructure') {
             when {
                 expression { params.ACTION == 'destroy' }
@@ -134,16 +137,34 @@ pipeline {
                         dir('terraform/compute') {
                             withEnv(["ENV=${params.ENV}"]) {
                                 script {
-                                    // Add explicit helm cleanup before terraform destroy
+                                    // Try to clean up Kubernetes resources if cluster exists
+                                    try {
+                                        sh """
+                                            mkdir -p /root/.kube
+                                            if aws eks describe-cluster --name eks-gpu-${params.ENV} --region ${AWS_REGION} >/dev/null 2>&1; then
+                                                echo "Cluster exists, attempting cleanup..."
+                                                aws eks update-kubeconfig --name eks-gpu-${params.ENV} --region ${AWS_REGION} || true
+                                                helm uninstall nginx-ingress -n ingress-nginx || true
+                                                kubectl delete namespace ingress-nginx || true
+                                            else
+                                                echo "Cluster does not exist, skipping cleanup..."
+                                            fi
+                                        """
+                                    } catch (Exception e) {
+                                        echo "Failed to cleanup Kubernetes resources, continuing with destroy: ${e.message}"
+                                    }
+                                    
+                                    // Proceed with terraform destroy
                                     sh """
-                                        helm uninstall nginx-ingress -n ingress-nginx || true
-                                        kubectl delete namespace ingress-nginx || true
+                                        terragrunt init --terragrunt-non-interactive
+                                        terragrunt state list | grep -q helm_release.nginx_ingress && terragrunt state rm helm_release.nginx_ingress || true
+                                        terragrunt plan -destroy -out=tfplan
                                     """
-                                    sh 'terragrunt init --terragrunt-non-interactive'
-                                    sh 'terragrunt plan -destroy -out=tfplan'
+                                    
                                     if (!params.AUTO_APPROVE) {
                                         input message: 'Do you want to destroy the Compute infrastructure?'
                                     }
+                                    
                                     sh 'terragrunt apply -auto-approve tfplan'
                                 }
                             }
