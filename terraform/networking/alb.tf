@@ -83,7 +83,7 @@ resource "aws_wafv2_web_acl" "argocd" {
   }
 }
 
-# Application Load Balancer
+# ALB for ArgoCD
 resource "aws_lb" "argocd" {
   name               = "argocd-${var.environment}"
   internal           = false
@@ -92,7 +92,7 @@ resource "aws_lb" "argocd" {
   subnets           = aws_subnet.public[*].id
 
   access_logs {
-    bucket  = split(":", var.alb_logs_bucket_arn)[5]  # Extract bucket name from ARN
+    bucket  = split(":", var.alb_logs_bucket_arn)[5]
     enabled = true
   }
 
@@ -102,64 +102,55 @@ resource "aws_lb" "argocd" {
   }
 }
 
-# Target Group for NGINX Ingress Controller
-resource "aws_lb_target_group" "nginx" {
-  name        = "nginx-ingress"
-  port        = 30080           # Matches the NodePort
+# Target group for ArgoCD
+resource "aws_lb_target_group" "argocd" {
+  name        = "argocd-${var.environment}"
+  port        = 80
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
-  target_type = "instance"       # Or "ip" if using IP mode in the ALB Controller
+  target_type = "ip"
 
   health_check {
     enabled             = true
     healthy_threshold   = 2
-    interval            = 30
-    matcher             = "200-399"
-    path                = "/healthz" # Ensure this path exists
-    timeout             = 10
-    unhealthy_threshold = 5
+    interval            = 15
+    matcher            = "200"
+    path               = "/"
+    port               = "traffic-port"
+    protocol           = "HTTP"
+    timeout            = 5
+    unhealthy_threshold = 2
   }
-}
 
-
-# Register EKS nodes with target group
-resource "aws_lb_target_group_attachment" "nginx" {
-  count            = length(data.aws_instances.eks_nodes.ids)
-  target_group_arn = aws_lb_target_group.nginx.arn
-  target_id        = data.aws_instances.eks_nodes.ids[count.index]
-  port             = 30080  # NGINX NodePort
+  tags = {
+    Name        = "argocd-${var.environment}"
+    Environment = var.environment
+  }
 }
 
 # ALB Listener
 resource "aws_lb_listener" "argocd" {
   load_balancer_arn = aws_lb.argocd.arn
-  port              = "443"
-  protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = aws_acm_certificate_validation.argocd.certificate_arn
+  port              = "80"
+  protocol          = "HTTP"
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.nginx.arn
-  }
-
-  depends_on = [aws_acm_certificate_validation.argocd]
-
-  # Add lifecycle rule to handle dependency
-  lifecycle {
-    create_before_destroy = true
+    target_group_arn = aws_lb_target_group.argocd.arn
   }
 }
 
-# WAF association with ALB
-resource "aws_wafv2_web_acl_association" "argocd" {
-  resource_arn = aws_lb.argocd.arn
-  web_acl_arn  = aws_wafv2_web_acl.argocd.arn
+# Route53 record for ArgoCD
+data "aws_secretsmanager_secret" "route53_zone_id" {
+  arn = var.route53_zone_id_secret_arn
 }
 
-# DNS record for ALB
+data "aws_secretsmanager_secret_version" "route53_zone_id" {
+  secret_id = data.aws_secretsmanager_secret.route53_zone_id.id
+}
+
 resource "aws_route53_record" "argocd" {
-  zone_id = local.route53_zone_id
+  zone_id = data.aws_secretsmanager_secret_version.route53_zone_id.secret_string
   name    = "argocd.hello-world-domain.com"
   type    = "A"
 
@@ -170,6 +161,12 @@ resource "aws_route53_record" "argocd" {
   }
 }
 
+# WAF association with ALB
+resource "aws_wafv2_web_acl_association" "argocd" {
+  resource_arn = aws_lb.argocd.arn
+  web_acl_arn  = aws_wafv2_web_acl.argocd.arn
+}
+
 # Update listener rule
 resource "aws_lb_listener_rule" "argocd" {
   listener_arn = aws_lb_listener.argocd.arn
@@ -177,7 +174,7 @@ resource "aws_lb_listener_rule" "argocd" {
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.nginx.arn
+    target_group_arn = aws_lb_target_group.argocd.arn
   }
 
   condition {
