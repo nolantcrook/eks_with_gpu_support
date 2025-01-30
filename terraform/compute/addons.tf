@@ -35,19 +35,6 @@ resource "aws_eks_addon" "pod_identity" {
 #   addon_version = "v2.7.1-eksbuild.1"
 # }
 
-# Add Helm provider
-provider "helm" {
-  kubernetes {
-    host                   = aws_eks_cluster.eks_gpu.endpoint
-    cluster_ca_certificate = base64decode(aws_eks_cluster.eks_gpu.certificate_authority[0].data)
-    exec {
-      api_version = "client.authentication.k8s.io/v1beta1"
-      command     = "aws"
-      args        = ["eks", "get-token", "--cluster-name", aws_eks_cluster.eks_gpu.name]
-    }
-  }
-}
-
 # Install NGINX Ingress Controller
 resource "helm_release" "nginx_ingress" {
   name       = "nginx-ingress"

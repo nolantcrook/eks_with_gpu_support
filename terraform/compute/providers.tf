@@ -1,3 +1,7 @@
+provider "aws" {
+  region = "us-west-2"
+}
+
 provider "helm" {
   kubernetes {
     host                   = aws_eks_cluster.eks_gpu.endpoint
@@ -18,4 +22,4 @@ provider "kubernetes" {
     command     = "aws"
     args        = ["eks", "get-token", "--cluster-name", aws_eks_cluster.eks_gpu.name, "--region", "us-west-2"]
   }
-} 
+}
