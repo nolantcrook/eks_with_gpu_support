@@ -28,16 +28,7 @@ resource "aws_eks_addon" "pod_identity" {
     addon_version = "v1.3.4-eksbuild.1"
 }
 
-# Add AWS Load Balancer Controller addon
-resource "aws_eks_addon" "aws_load_balancer_controller" {
-  cluster_name = aws_eks_cluster.eks_gpu.name
-  addon_name   = "aws-load-balancer-controller"
-  addon_version = "v2.7.1-eksbuild.1"
-
-  depends_on = [
-    aws_eks_cluster.eks_gpu,
-    aws_eks_addon.vpc_cni
-  ]
-}
-
-# Remove the commented out NGINX ingress and its cleanup
+# No AWS Load Balancer Controller needed since:
+# 1. ALB is managed by Terraform
+# 2. Traffic routes directly to NGINX ingress NodePort
+# 3. NGINX ingress handles internal service routing
