@@ -128,7 +128,7 @@ resource "aws_lb_target_group" "argocd" {
   }
 }
 
-# HTTP Listener (new) - redirects HTTP to HTTPS
+# HTTP Listener (redirects to HTTPS)
 resource "aws_lb_listener" "argocd_http" {
   load_balancer_arn = aws_lb.argocd.arn
   port              = "80"
@@ -145,7 +145,7 @@ resource "aws_lb_listener" "argocd_http" {
   }
 }
 
-# HTTPS Listener (modified with better SSL policy)
+# HTTPS Listener
 resource "aws_lb_listener" "argocd" {
   load_balancer_arn = aws_lb.argocd.arn
   port              = "443"
@@ -193,35 +193,4 @@ resource "aws_lb_listener_rule" "argocd" {
       values = ["argocd.hello-world-domain.com"]
     }
   }
-}
-
-# Security group rule (modified to include port 80)
-resource "aws_security_group_rule" "allow_alb_to_nodes" {
-  type                     = "ingress"
-  from_port                = 30080
-  to_port                  = 30443
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.cluster.id
-  source_security_group_id = aws_security_group.argocd.id
-}
-
-# Add explicit security group rules for ALB
-resource "aws_security_group_rule" "alb_http_ingress" {
-  type              = "ingress"
-  from_port         = 80
-  to_port           = 80
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.argocd.id
-  description       = "Allow HTTP traffic for redirect"
-}
-
-resource "aws_security_group_rule" "alb_https_ingress" {
-  type              = "ingress"
-  from_port         = 443
-  to_port           = 443
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.argocd.id
-  description       = "Allow HTTPS traffic"
 }

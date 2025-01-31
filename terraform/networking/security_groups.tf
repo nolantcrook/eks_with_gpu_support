@@ -1,13 +1,15 @@
+# ALB to NodePort (for NGINX Ingress)
 resource "aws_security_group_rule" "alb_to_nginx" {
   type                     = "ingress"
-  from_port                = 30080
+  from_port                = 30080  # NGINX NodePort
   to_port                  = 30080
   protocol                 = "tcp"
-  source_security_group_id = aws_security_group.argocd.id
+  source_security_group_id = aws_security_group.argocd.id  # ALB security group
   security_group_id        = aws_security_group.cluster.id
   description             = "Allow ALB to NGINX Ingress NodePort"
 }
 
+# ALB Egress to Cluster
 resource "aws_security_group_rule" "alb_to_cluster_egress" {
   type                     = "egress"
   from_port                = 0
@@ -18,6 +20,7 @@ resource "aws_security_group_rule" "alb_to_cluster_egress" {
   description             = "Allow ALB to send traffic to cluster"
 }
 
+# ALB Ingress Rules (HTTP/HTTPS from internet)
 resource "aws_security_group_rule" "alb_http_ingress" {
   type              = "ingress"
   from_port         = 80
