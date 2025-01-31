@@ -32,6 +32,8 @@ resource "aws_eks_cluster" "eks_gpu" {
 
   depends_on = [
     aws_iam_role_policy_attachment.cluster,
+    aws_eks_node_group.x86_spot,
+    aws_eks_node_group.x86_ondemand
   ]
 }
 
