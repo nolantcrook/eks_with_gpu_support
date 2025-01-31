@@ -6,7 +6,7 @@ resource "aws_eks_cluster" "eks_gpu" {
   }
 
   role_arn = aws_iam_role.cluster.arn
-  version  = "1.31"
+  version  = "2.5"
 
   vpc_config {
     subnet_ids              = concat(local.private_subnet_ids, local.public_subnet_ids)
