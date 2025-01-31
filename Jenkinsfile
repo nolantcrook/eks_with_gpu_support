@@ -205,7 +205,6 @@ pipeline {
                                     // Proceed with terraform destroy
                                     sh """
                                         terragrunt init --terragrunt-non-interactive
-                                        terragrunt state list | grep -q helm_release.nginx_ingress && terragrunt state rm helm_release.nginx_ingress || true
                                         terragrunt plan -destroy -out=tfplan
                                     """
 
