@@ -29,49 +29,54 @@ resource "aws_eks_addon" "pod_identity" {
 }
 
 # Add AWS Load Balancer Controller addon
-# resource "aws_eks_addon" "aws_load_balancer_controller" {
-#   cluster_name = aws_eks_cluster.eks_gpu.name
-#   addon_name   = "aws-load-balancer-controller"
-#   addon_version = "v2.7.1-eksbuild.1"
-# }
-
-# Install NGINX Ingress Controller
-resource "helm_release" "nginx_ingress" {
-  name       = "nginx-ingress"
-  repository = "https://kubernetes.github.io/ingress-nginx"
-  chart      = "ingress-nginx"
-  namespace  = "ingress-nginx"
-  create_namespace = true
-
-  set {
-    name  = "controller.service.type"
-    value = "NodePort"
-  }
-
-  set {
-    name  = "controller.service.targetPorts.http"
-    value = "80"
-  }
-
-  set {
-    name  = "controller.service.targetPorts.https"
-    value = "443"
-  }
-
-  lifecycle {
-    ignore_changes = [
-      set,
-      version,
-    ]
-    create_before_destroy = true
-  }
+resource "aws_eks_addon" "aws_load_balancer_controller" {
+  cluster_name = aws_eks_cluster.eks_gpu.name
+  addon_name   = "aws-load-balancer-controller"
+  addon_version = "v2.7.1-eksbuild.1"
 
   depends_on = [
     aws_eks_cluster.eks_gpu,
-    aws_eks_addon.vpc_cni,
-    aws_eks_addon.coredns
+    aws_eks_addon.vpc_cni
   ]
 }
+
+# Install NGINX Ingress Controller
+# resource "helm_release" "nginx_ingress" {
+#   name       = "nginx-ingress"
+#   repository = "https://kubernetes.github.io/ingress-nginx"
+#   chart      = "ingress-nginx"
+#   namespace  = "ingress-nginx"
+#   create_namespace = true
+#
+#   set {
+#     name  = "controller.service.type"
+#     value = "NodePort"
+#   }
+#
+#   set {
+#     name  = "controller.service.targetPorts.http"
+#     value = "80"
+#   }
+#
+#   set {
+#     name  = "controller.service.targetPorts.https"
+#     value = "443"
+#   }
+#
+#   lifecycle {
+#     ignore_changes = [
+#       set,
+#       version,
+#     ]
+#     create_before_destroy = true
+#   }
+#
+#   depends_on = [
+#     aws_eks_cluster.eks_gpu,
+#     aws_eks_addon.vpc_cni,
+#     aws_eks_addon.coredns
+#   ]
+# }
 
 # Add cleanup for Helm releases
 resource "null_resource" "helm_cleanup" {
