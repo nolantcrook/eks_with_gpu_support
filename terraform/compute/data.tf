@@ -1,8 +1,8 @@
 data "terraform_remote_state" "networking" {
   backend = "s3"
   config = {
-    bucket = "hello-world-terraform-state"
-    key    = "env:/${var.environment}/networking/terraform.tfstate"
+    bucket = "eks-stable-diffusion-terraform-state"
+    key    = "${var.environment}/terraform/networking/terraform.tfstate"
     region = "us-west-2"
   }
 }
@@ -10,8 +10,8 @@ data "terraform_remote_state" "networking" {
 data "terraform_remote_state" "foundation" {
   backend = "s3"
   config = {
-    bucket = "hello-world-terraform-state"
-    key    = "env:/${var.environment}/foundation/terraform.tfstate"
+    bucket = "eks-stable-diffusion-terraform-state"
+    key    = "${var.environment}/terraform/foundation/terraform.tfstate"
     region = "us-west-2"
   }
 }
