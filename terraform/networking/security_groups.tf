@@ -1,21 +1,11 @@
-resource "aws_security_group_rule" "alb_to_argocd" {
+resource "aws_security_group_rule" "alb_to_nginx" {
   type                     = "ingress"
-  from_port                = 8080
-  to_port                  = 8080
+  from_port                = 30080
+  to_port                  = 30080
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.argocd.id
   security_group_id        = aws_security_group.cluster.id
-  description             = "Allow ALB health checks to ArgoCD server"
-}
-
-resource "aws_security_group_rule" "alb_to_nodes" {
-  type                     = "ingress"
-  from_port                = 30000
-  to_port                  = 32767
-  protocol                 = "tcp"
-  source_security_group_id = aws_security_group.argocd.id
-  security_group_id        = aws_security_group.cluster.id
-  description             = "Allow ALB traffic to NodePort range"
+  description             = "Allow ALB to NGINX Ingress NodePort"
 }
 
 resource "aws_security_group_rule" "alb_to_cluster_egress" {
@@ -26,4 +16,24 @@ resource "aws_security_group_rule" "alb_to_cluster_egress" {
   source_security_group_id = aws_security_group.cluster.id
   security_group_id        = aws_security_group.argocd.id
   description             = "Allow ALB to send traffic to cluster"
+}
+
+resource "aws_security_group_rule" "alb_http_ingress" {
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.argocd.id
+  description       = "Allow HTTP traffic for redirect"
+}
+
+resource "aws_security_group_rule" "alb_https_ingress" {
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.argocd.id
+  description       = "Allow HTTPS traffic"
 } 
