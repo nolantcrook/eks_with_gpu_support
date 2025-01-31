@@ -24,6 +24,6 @@ resource "aws_security_group_rule" "alb_to_cluster_egress" {
   to_port                  = 65535
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.cluster.id
-  security_group_id        = aws_security_group.argocd_alb.id
+  security_group_id        = aws_security_group.argocd.id
   description             = "Allow ALB to send traffic to cluster"
 } 
