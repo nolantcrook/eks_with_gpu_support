@@ -30,25 +30,25 @@ output "argocd_alb_dns_name" {
 
 output "certificate_arn" {
   description = "ARN of the ACM certificate"
-  value       = aws_acm_certificate.domain.arn
+  value       = aws_acm_certificate.argocd.arn
 }
 
 output "waf_acl_arn" {
   description = "ARN of the WAF ACL"
-  value       = aws_wafv2_web_acl.main.arn
+  value       = aws_wafv2_web_acl.argocd.arn
 }
 
 output "alb_security_group_id" {
   description = "ID of the ALB security group"
-  value       = aws_security_group.alb.id
+  value       = aws_security_group.argocd.id
 }
 
 resource "aws_ssm_parameter" "argocd_ingress_params" {
   name  = "/eks/${var.environment}/argocd/ingress"
   type  = "SecureString"
   value = jsonencode({
-    certificate_arn      = aws_acm_certificate.domain.arn
-    waf_acl_arn         = aws_wafv2_web_acl.main.arn
-    alb_security_group_id = aws_security_group.alb.id
+    certificate_arn      = aws_acm_certificate.argocd.arn
+    waf_acl_arn         = aws_wafv2_web_acl.argocd.arn
+    alb_security_group_id = aws_security_group.argocd.id
   })
 } 
