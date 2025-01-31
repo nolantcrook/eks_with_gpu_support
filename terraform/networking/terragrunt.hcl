@@ -14,7 +14,7 @@ inputs = {
   environment = get_env("ENV", "dev")
   route53_zone_id_secret_arn = dependency.foundation.outputs.route53_zone_id_secret_arn
   alb_logs_bucket_arn = dependency.storage.outputs.alb_logs_bucket_arn
-  
+
   # Network configuration
   vpc_cidr = "10.0.0.0/16"
   public_subnet_cidrs = [

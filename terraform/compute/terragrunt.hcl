@@ -11,4 +11,4 @@ inputs = {
   vpc_id = dependency.networking.outputs.vpc_id
   private_subnet_ids = dependency.networking.outputs.private_subnet_ids
   cluster_security_group_id = dependency.networking.outputs.cluster_security_group_id
-} 
+}

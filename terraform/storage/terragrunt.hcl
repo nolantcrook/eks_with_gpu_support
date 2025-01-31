@@ -8,4 +8,4 @@ dependency "foundation" {
 
 inputs = {
   environment = get_env("ENV", "dev")
-} 
+}

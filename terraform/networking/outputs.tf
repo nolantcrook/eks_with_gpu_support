@@ -44,11 +44,11 @@ output "alb_security_group_id" {
 }
 
 resource "aws_ssm_parameter" "argocd_ingress_params" {
-  name  = "/eks/${var.environment}/argocd/ingress"
-  type  = "SecureString"
+  name = "/eks/${var.environment}/argocd/ingress"
+  type = "SecureString"
   value = jsonencode({
-    certificate_arn      = aws_acm_certificate.argocd.arn
-    waf_acl_arn         = aws_wafv2_web_acl.argocd.arn
+    certificate_arn       = aws_acm_certificate.argocd.arn
+    waf_acl_arn           = aws_wafv2_web_acl.argocd.arn
     alb_security_group_id = aws_security_group.argocd.id
   })
-} 
+}

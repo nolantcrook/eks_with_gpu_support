@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    
+
     environment {
         AWS_REGION = 'us-west-2'
         AWS_CONFIG_FILE = '/root/.aws/config'
@@ -9,7 +9,7 @@ pipeline {
         // ARGOCD_SERVER = 'argocd.example.com' // Update this with your ArgoCD server address
         // ARGOCD_AUTH_TOKEN = credentials('argocd-auth-token') // Create this in Jenkins
     }
-    
+
     parameters {
         choice(
             name: 'ENV',
@@ -47,7 +47,7 @@ pipeline {
             description: 'Include Compute stage'
         )
     }
-    
+
     stages {
         stage('Validate Parameters') {
             steps {
@@ -64,7 +64,7 @@ pipeline {
                 checkout scm
             }
         }
-        
+
         // Configure kubectl only for apply operations
         stage('Configure kubectl') {
             when {
@@ -82,7 +82,7 @@ pipeline {
                 }
             }
         }
-        
+
         // Apply stages
         stage('Apply Infrastructure') {
             when {
@@ -108,7 +108,7 @@ pipeline {
                         }
                     }
                 }
-                
+
                 stage('Storage Infrastructure') {
                     when {
                         expression { params.STORAGE }
@@ -128,7 +128,7 @@ pipeline {
                         }
                     }
                 }
-                
+
                 stage('Networking Infrastructure') {
                     when {
                         expression { params.NETWORKING }
@@ -148,7 +148,7 @@ pipeline {
                         }
                     }
                 }
-                
+
                 stage('Compute Infrastructure') {
                     when {
                         expression { params.COMPUTE }
@@ -170,7 +170,7 @@ pipeline {
                 }
             }
         }
-        
+
         // Destroy stages
         stage('Destroy Infrastructure') {
             when {
@@ -201,25 +201,25 @@ pipeline {
                                     } catch (Exception e) {
                                         echo "Failed to cleanup Kubernetes resources, continuing with destroy: ${e.message}"
                                     }
-                                    
+
                                     // Proceed with terraform destroy
                                     sh """
                                         terragrunt init --terragrunt-non-interactive
                                         terragrunt state list | grep -q helm_release.nginx_ingress && terragrunt state rm helm_release.nginx_ingress || true
                                         terragrunt plan -destroy -out=tfplan
                                     """
-                                    
+
                                     if (!params.AUTO_APPROVE) {
                                         input message: 'Do you want to destroy the Compute infrastructure?'
                                     }
-                                    
+
                                     sh 'terragrunt apply -auto-approve tfplan'
                                 }
                             }
                         }
                     }
                 }
-                
+
                 stage('Destroy Networking Infrastructure') {
                     when {
                         expression { params.NETWORKING }
@@ -239,7 +239,7 @@ pipeline {
                         }
                     }
                 }
-                
+
                 stage('Destroy Storage Infrastructure') {
                     when {
                         expression { params.STORAGE }
@@ -259,7 +259,7 @@ pipeline {
                         }
                     }
                 }
-                
+
                 stage('Destroy Foundation Infrastructure') {
                     when {
                         expression { params.FOUNDATION }
@@ -282,7 +282,7 @@ pipeline {
             }
         }
     }
-    
+
     post {
         always {
             sh '''
@@ -299,4 +299,4 @@ pipeline {
             echo "Pipeline failed!"
         }
     }
-} 
+}

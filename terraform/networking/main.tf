@@ -1,7 +1,3 @@
-locals {
-  azs = ["us-west-2a", "us-west-2b", "us-west-2c"]
-}
-
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
@@ -23,10 +19,10 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name                                            = "eks-gpu-public-${var.environment}-${var.availability_zones[count.index]}"
-    Environment                                     = var.environment
+    Name                                               = "eks-gpu-public-${var.environment}-${var.availability_zones[count.index]}"
+    Environment                                        = var.environment
     "kubernetes.io/cluster/eks-gpu-${var.environment}" = "shared"
-    "kubernetes.io/role/elb"                        = "1"
+    "kubernetes.io/role/elb"                           = "1"
   }
 }
 
@@ -38,10 +34,10 @@ resource "aws_subnet" "private" {
   availability_zone = var.availability_zones[count.index]
 
   tags = {
-    Name                                            = "eks-gpu-private-${var.environment}-${var.availability_zones[count.index]}"
-    Environment                                     = var.environment
+    Name                                               = "eks-gpu-private-${var.environment}-${var.availability_zones[count.index]}"
+    Environment                                        = var.environment
     "kubernetes.io/cluster/eks-gpu-${var.environment}" = "shared"
-    "kubernetes.io/role/internal-elb"               = "1"
+    "kubernetes.io/role/internal-elb"                  = "1"
   }
 }
 
@@ -57,7 +53,7 @@ resource "aws_internet_gateway" "main" {
 
 # EIP for NAT Gateway
 resource "aws_eip" "nat" {
-  count = length(var.public_subnet_cidrs)
+  count  = length(var.public_subnet_cidrs)
   domain = "vpc"
 
   tags = {
@@ -186,21 +182,21 @@ resource "aws_security_group" "argocd" {
 # Update cluster security group rules
 resource "aws_security_group_rule" "nginx_ingress" {
   type                     = "ingress"
-  from_port               = 30080
-  to_port                 = 30080
-  protocol                = "tcp"
+  from_port                = 30080
+  to_port                  = 30080
+  protocol                 = "tcp"
   source_security_group_id = aws_security_group.argocd.id
-  security_group_id       = aws_security_group.cluster.id
-  description             = "Allow ALB to NGINX Ingress"
+  security_group_id        = aws_security_group.cluster.id
+  description              = "Allow ALB to NGINX Ingress"
 }
 
 # Allow internal traffic for NGINX (if not already defined elsewhere)
 resource "aws_security_group_rule" "cluster_internal" {
   type                     = "ingress"
-  from_port               = 0
-  to_port                 = 65535
-  protocol                = "tcp"
+  from_port                = 0
+  to_port                  = 65535
+  protocol                 = "tcp"
   source_security_group_id = aws_security_group.cluster.id
-  security_group_id       = aws_security_group.cluster.id
-  description             = "Allow internal cluster traffic"
+  security_group_id        = aws_security_group.cluster.id
+  description              = "Allow internal cluster traffic"
 }

@@ -1,17 +1,9 @@
-# variable "route53_zone_id" {
-#   description = "Route53 hosted zone ID for DNS validation"
-#   type        = string
-# } 
-
-variable "route53_zone_id_secret_arn" {
-  description = "ARN of the Route53 Zone ID secret"
-  type        = string
-}
 
 variable "environment" {
   description = "Environment name (dev or prod)"
   type        = string
 }
+
 
 variable "vpc_cidr" {
   description = "CIDR block for VPC"
@@ -38,8 +30,8 @@ variable "availability_zones" {
 }
 
 variable "alb_logs_bucket_arn" {
-  description = "ARN of the S3 bucket for ALB logs"
   type        = string
+  description = "ARN of the S3 bucket for ALB access logs"
 }
 
 # Removing unused variables:

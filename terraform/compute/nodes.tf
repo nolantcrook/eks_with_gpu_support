@@ -4,7 +4,7 @@ resource "aws_eks_node_group" "x86_spot" {
   node_role_arn   = aws_iam_role.node.arn
   subnet_ids      = local.private_subnet_ids
   capacity_type   = "SPOT"
-  
+
   instance_types = [
     "t3.medium",
     "t3.large",
@@ -39,14 +39,14 @@ resource "aws_eks_node_group" "x86_spot" {
   }
 
   labels = {
-    "lifecycle" = "Ec2Spot"
+    "lifecycle"                    = "Ec2Spot"
     "node.kubernetes.io/lifecycle" = "spot"
   }
 
   tags = {
-    Name        = "eks-x86-spot-${var.environment}"
-    Environment = var.environment
-    "k8s.io/cluster-autoscaler/enabled" = "true"
+    Name                                                      = "eks-x86-spot-${var.environment}"
+    Environment                                               = var.environment
+    "k8s.io/cluster-autoscaler/enabled"                       = "true"
     "k8s.io/cluster-autoscaler/node-template/label/lifecycle" = "Ec2Spot"
   }
 
@@ -63,7 +63,7 @@ resource "aws_eks_node_group" "x86_ondemand" {
   node_role_arn   = aws_iam_role.node.arn
   subnet_ids      = local.private_subnet_ids
   capacity_type   = "ON_DEMAND"
-  
+
   instance_types = [
     "t3.medium",
     "t3.large",
@@ -82,8 +82,8 @@ resource "aws_eks_node_group" "x86_ondemand" {
   }
 
   tags = {
-    Name        = "eks-x86-ondemand-${var.environment}"
-    Environment = var.environment
+    Name                                = "eks-x86-ondemand-${var.environment}"
+    Environment                         = var.environment
     "k8s.io/cluster-autoscaler/enabled" = "true"
   }
 

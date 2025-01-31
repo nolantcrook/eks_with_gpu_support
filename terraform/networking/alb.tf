@@ -42,7 +42,7 @@ resource "aws_wafv2_ip_set" "allowed_ips" {
   description        = "Allowed IP addresses"
   scope              = "REGIONAL"
   ip_address_version = "IPV4"
-  addresses          = ["76.129.127.17/32"]  # Your IP from the security group
+  addresses          = ["76.129.127.17/32"] # Your IP from the security group
 }
 
 # WAF WebACL
@@ -71,15 +71,15 @@ resource "aws_wafv2_web_acl" "argocd" {
 
     visibility_config {
       cloudwatch_metrics_enabled = true
-      metric_name               = "AllowedIPsMetric"
-      sampled_requests_enabled  = true
+      metric_name                = "AllowedIPsMetric"
+      sampled_requests_enabled   = true
     }
   }
 
   visibility_config {
     cloudwatch_metrics_enabled = true
-    metric_name               = "ArgocdWafMetric"
-    sampled_requests_enabled  = true
+    metric_name                = "ArgocdWafMetric"
+    sampled_requests_enabled   = true
   }
 }
 
@@ -89,7 +89,7 @@ resource "aws_lb" "argocd" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.argocd.id]
-  subnets           = aws_subnet.public[*].id
+  subnets            = aws_subnet.public[*].id
 
   access_logs {
     bucket  = split(":", var.alb_logs_bucket_arn)[5]
@@ -114,11 +114,11 @@ resource "aws_lb_target_group" "argocd" {
     enabled             = true
     healthy_threshold   = 2
     interval            = 15
-    matcher            = "200,302"
-    path               = "/healthz"
-    port               = "traffic-port"
-    protocol           = "HTTP"
-    timeout            = 5
+    matcher             = "200,302"
+    path                = "/healthz"
+    port                = "traffic-port"
+    protocol            = "HTTP"
+    timeout             = 5
     unhealthy_threshold = 2
   }
 

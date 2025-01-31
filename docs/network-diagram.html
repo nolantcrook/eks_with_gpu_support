@@ -13,23 +13,23 @@
                 EIP[Elastic IP]
                 ALB[Application Load Balancer]
                 WAF[WAF<br/>Allow specific IP]
-                
+
                 subgraph VPC[VPC: 10.0.0.0/16]
                     subgraph AZ_A[AZ: us-west-2a]
                         PublicA[Public Subnet<br/>10.0.1.0/24]
                         PrivateA[Private Subnet<br/>10.0.10.0/24<br/>EKS Nodes]
                     end
-                    
+
                     subgraph AZ_B[AZ: us-west-2b]
                         PublicB[Public Subnet<br/>10.0.2.0/24]
                         PrivateB[Private Subnet<br/>10.0.11.0/24<br/>EKS Nodes]
                     end
-                    
+
                     subgraph AZ_C[AZ: us-west-2c]
                         PublicC[Public Subnet<br/>10.0.3.0/24]
                         PrivateC[Private Subnet<br/>10.0.12.0/24<br/>EKS Nodes]
                     end
-                    
+
                     subgraph SecurityGroups[Security Groups]
                         ClusterSG[EKS Cluster SG<br/>Allow all internal<br/>Allow all outbound]
                         ArgoSG[ArgoCD ALB SG<br/>Allow 443 from anywhere<br/>Allow all outbound]
@@ -41,25 +41,25 @@
                     end
                 end
             end
-            
+
             Internet((Internet))
             Route53[Route53<br/>argocd.hello-world-domain.com]
-            
+
             Internet --> WAF
             WAF --> ALB
             ALB --> ArgoCD
             Route53 --> ALB
-            
+
             Internet <--> IGW
             IGW <--> PublicA & PublicB & PublicC
             NAT --> Internet
             EIP --> NAT
             PublicA & PublicB & PublicC --> NAT
             NAT --> PrivateA & PrivateB & PrivateC
-            
+
             PublicRT[Public Route Table<br/>0.0.0.0/0 → IGW]
             PrivateRT[Private Route Table<br/>0.0.0.0/0 → NAT]
-            
+
             PublicRT --> PublicA & PublicB & PublicC
             PrivateRT --> PrivateA & PrivateB & PrivateC
 
@@ -69,10 +69,10 @@
             style AZ_C fill:#dfd,stroke:#333
             style SecurityGroups fill:#fdd,stroke:#333
             style EKS fill:#ddf,stroke:#333
-            
+
             classDef devOnly fill:#f9f9f9,stroke-dasharray: 5 5;
             class AZ_B,AZ_C,PublicB,PublicC,PrivateB,PrivateC devOnly;
-            
+
             note[Development uses only us-west-2a<br/>Production uses all AZs]
             style note fill:#fff,stroke:#333,stroke-dasharray: 5 5
     </div>

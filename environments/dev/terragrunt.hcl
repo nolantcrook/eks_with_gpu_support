@@ -11,14 +11,14 @@ remote_state {
     encrypt        = true
     dynamodb_table = "terraform-state-lock"
 
-    
+
     # Add tags to the S3 bucket
     s3_bucket_tags = {
       Name        = "Terraform State Store"
       Environment = "dev"
       Terraform   = "true"
     }
-    
+
     # Add DynamoDB table settings for state locking
     dynamodb_table_tags = {
       Name        = "Terraform State Lock Table"
@@ -46,4 +46,4 @@ inputs = {
   desired_nodes = 1
   max_nodes = 2
   min_nodes = 1
-} 
+}
