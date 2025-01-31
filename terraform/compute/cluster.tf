@@ -25,6 +25,11 @@ resource "aws_eks_cluster" "eks_gpu" {
     "k8s.io/cluster-autoscaler/${var.environment}" = "owned"
   }
 
+  # This ensures the cluster waits for node groups to be destroyed
+  lifecycle {
+    create_before_destroy = true
+  }
+
   depends_on = [
     aws_iam_role_policy_attachment.cluster,
   ]
