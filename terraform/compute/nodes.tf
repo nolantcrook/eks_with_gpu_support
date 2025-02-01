@@ -50,6 +50,11 @@ resource "aws_eks_node_group" "x86_spot" {
     "k8s.io/cluster-autoscaler/node-template/label/lifecycle" = "Ec2Spot"
   }
 
+  launch_template {
+    id      = aws_launch_template.spot.id
+    version = aws_launch_template.spot.latest_version
+  }
+
   depends_on = [
     aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
@@ -63,7 +68,6 @@ resource "aws_eks_node_group" "x86_ondemand" {
   node_role_arn   = aws_iam_role.node.arn
   subnet_ids      = local.private_subnet_ids
   capacity_type   = "ON_DEMAND"
-
   instance_types = [
     "t3.medium",
     "t3.large",
@@ -81,6 +85,12 @@ resource "aws_eks_node_group" "x86_ondemand" {
     max_unavailable = 1
   }
 
+
+  launch_template {
+    id      = aws_launch_template.ondemand.id
+    version = aws_launch_template.ondemand.latest_version
+  }
+
   tags = {
     Name                                = "eks-x86-ondemand-${var.environment}"
     Environment                         = var.environment
@@ -92,6 +102,38 @@ resource "aws_eks_node_group" "x86_ondemand" {
     aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly
   ]
+}
+
+resource "aws_launch_template" "ondemand" {
+  name = "eks-node-group-ondemand-${var.environment}"
+
+  vpc_security_group_ids = [
+    local.cluster_security_group_id,
+    aws_eks_cluster.eks_gpu.vpc_config[0].cluster_security_group_id
+  ]
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "eks-node-group-ondemand-${var.environment}"
+    }
+  }
+}
+
+resource "aws_launch_template" "spot" {
+  name = "eks-node-group-spot-${var.environment}"
+
+  vpc_security_group_ids = [
+    local.cluster_security_group_id,
+    aws_eks_cluster.eks_gpu.vpc_config[0].cluster_security_group_id
+  ]
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "eks-node-group-spot-${var.environment}"
+    }
+  }
 }
 
 resource "aws_iam_role" "node" {
