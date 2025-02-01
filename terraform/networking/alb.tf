@@ -122,6 +122,10 @@ resource "aws_lb_target_group" "argocd" {
     unhealthy_threshold = 2
   }
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   tags = {
     Name        = "argocd-${var.environment}"
     Environment = var.environment
@@ -157,6 +161,10 @@ resource "aws_lb_listener" "argocd" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.argocd.arn
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # Route53 record for ArgoCD
@@ -178,7 +186,7 @@ resource "aws_wafv2_web_acl_association" "argocd" {
   web_acl_arn  = aws_wafv2_web_acl.argocd.arn
 }
 
-# Update listener rule
+# Listener rule
 resource "aws_lb_listener_rule" "argocd" {
   listener_arn = aws_lb_listener.argocd.arn
   priority     = 100
@@ -192,5 +200,9 @@ resource "aws_lb_listener_rule" "argocd" {
     host_header {
       values = ["argocd.hello-world-domain.com"]
     }
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
