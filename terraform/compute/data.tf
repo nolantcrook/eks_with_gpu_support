@@ -33,7 +33,32 @@ resource "aws_autoscaling_attachment" "eks_ondemand_asg_attachment" {
   lb_target_group_arn    = local.alb_target_group_arn
 }
 
-resource "aws_autoscaling_attachment" "eks_spot_asg_attachment" {
+resource "aws_lb_target_group" "argocd" {
+  name        = "argocd-${var.environment}"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = data.terraform_remote_state.networking.outputs.vpc_id
+  target_type = "instance"
+
+  health_check {
+    enabled             = true
+    healthy_threshold   = 2
+    interval            = 15
+    matcher             = "200"
+    path                = "/"
+    port                = "traffic-port"
+    protocol            = "HTTP"
+    timeout             = 5
+    unhealthy_threshold = 2
+  }
+}
+
+resource "aws_autoscaling_attachment" "eks_spot_asg_attachment_spot" {
   autoscaling_group_name = local.spot_asg_name
-  lb_target_group_arn    = local.alb_target_group_arn
+  lb_target_group_arn    = aws_lb_target_group.argocd.arn
+}
+
+resource "aws_autoscaling_attachment" "eks_spot_asg_attachment_ondemand" {
+  autoscaling_group_name = local.ondemand_asg_name
+  lb_target_group_arn    = aws_lb_target_group.argocd.arn
 }
