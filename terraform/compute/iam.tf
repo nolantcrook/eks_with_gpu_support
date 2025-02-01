@@ -38,7 +38,9 @@ resource "aws_iam_role_policy" "alb_controller" {
           "ec2:DescribeInstanceStatus",
           "ec2:DescribeSecurityGroups",
           "ec2:DescribeSubnets",
-          "ec2:DescribeVpcs"
+          "ec2:DescribeVpcs",
+          "ssm:GetParameter",
+          "ssm:GetParameters"
         ]
         Resource = "*"
       }
