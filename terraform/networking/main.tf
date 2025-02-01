@@ -121,27 +121,12 @@ resource "aws_route_table_association" "private" {
 
 # Security Groups
 resource "aws_security_group" "cluster" {
-  name_prefix = "eks-gpu-cluster-${var.environment}"
-  description = "EKS cluster security group"
+  name        = "eks-cluster-${var.environment}"
+  description = "Security group for EKS cluster nodes"
   vpc_id      = aws_vpc.main.id
 
-  ingress {
-    description = "Allow all internal traffic"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    self        = true
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   tags = {
-    Name        = "eks-gpu-cluster-${var.environment}"
+    Name        = "eks-cluster-${var.environment}"
     Environment = var.environment
   }
 }
@@ -152,7 +137,7 @@ resource "aws_security_group" "argocd" {
   description = "Security group for ArgoCD ALB"
   vpc_id      = aws_vpc.main.id
 
-  # HTTP ingress
+  # HTTP ingress for redirect
   ingress {
     from_port   = 80
     to_port     = 80
@@ -176,6 +161,7 @@ resource "aws_security_group" "argocd" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all outbound traffic"
   }
 
   tags = {

@@ -20,27 +20,6 @@ resource "aws_security_group_rule" "alb_to_cluster_egress" {
   description              = "Allow ALB to send traffic to cluster"
 }
 
-# ALB Ingress Rules (HTTP/HTTPS from internet)
-resource "aws_security_group_rule" "alb_http_ingress" {
-  type              = "ingress"
-  from_port         = 80
-  to_port           = 80
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.argocd.id
-  description       = "Allow HTTP traffic for redirect"
-}
-
-resource "aws_security_group_rule" "alb_https_ingress" {
-  type              = "ingress"
-  from_port         = 443
-  to_port           = 443
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.argocd.id
-  description       = "Allow HTTPS traffic"
-}
-
 # Cluster internal traffic
 resource "aws_security_group_rule" "cluster_internal" {
   type                     = "ingress"
