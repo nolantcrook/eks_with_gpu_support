@@ -69,7 +69,7 @@ pipeline {
         stage('Configure kubectl') {
             when {
                 allOf {
-                    expression { params.ACTION == 'destroy' }
+                    expression { params.ACTION == 'apply' }
                     expression { params.COMPUTE }
                 }
             }
