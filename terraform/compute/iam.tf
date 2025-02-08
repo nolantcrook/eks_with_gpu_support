@@ -38,9 +38,7 @@ resource "aws_iam_role_policy" "alb_controller" {
           "ec2:DescribeInstanceStatus",
           "ec2:DescribeSecurityGroups",
           "ec2:DescribeSubnets",
-          "ec2:DescribeVpcs",
-          "ssm:GetParameter",
-          "ssm:GetParameters"
+          "ec2:DescribeVpcs"
         ]
         Resource = "*"
       }
@@ -50,11 +48,20 @@ resource "aws_iam_role_policy" "alb_controller" {
 
 # Create service account for the ALB controller
 resource "kubernetes_service_account" "alb_controller" {
+  depends_on = [aws_eks_cluster.eks_gpu]
+
   metadata {
     name      = "aws-load-balancer-controller"
     namespace = "kube-system"
     annotations = {
       "eks.amazonaws.com/role-arn" = aws_iam_role.alb_controller.arn
     }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      metadata[0].annotations,
+      metadata[0].labels,
+    ]
   }
 }
