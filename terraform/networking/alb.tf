@@ -42,7 +42,11 @@ resource "aws_wafv2_ip_set" "allowed_ips" {
   description        = "Allowed IP addresses"
   scope              = "REGIONAL"
   ip_address_version = "IPV4"
-  addresses          = ["76.129.127.17/32", "136.36.32.17/32", "172.56.201.164/19"] # Your IP from the security group
+  addresses = [
+    "76.129.127.17/32",
+    "136.36.32.17/32",
+    "172.56.192.0/19" # Covers 172.56.201.164
+  ]
 }
 
 # WAF WebACL
