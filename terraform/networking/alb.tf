@@ -1,7 +1,8 @@
 # Certificate
 resource "aws_acm_certificate" "argocd" {
-  domain_name       = "*.hello-world-domain.com"
-  validation_method = "DNS"
+  domain_name               = "hello-world-domain.com"     # Apex domain
+  subject_alternative_names = ["*.hello-world-domain.com"] # Wildcard as SAN
+  validation_method         = "DNS"
 
   tags = {
     Name = "wildcard-cert"
