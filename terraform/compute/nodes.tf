@@ -136,6 +136,24 @@ resource "aws_launch_template" "spot" {
   }
 }
 
+resource "aws_launch_template" "gpu" {
+  name = "eks-gpu-node-group-${var.environment}"
+
+  vpc_security_group_ids = [
+    local.cluster_security_group_id,
+    aws_eks_cluster.eks_gpu.vpc_config[0].cluster_security_group_id
+  ]
+
+  instance_type = "g4dn.xlarge"
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "eks-gpu-node-group-${var.environment}"
+    }
+  }
+}
+
 resource "aws_iam_role" "node" {
   name = "eks-node-role-${var.environment}"
 
@@ -169,4 +187,44 @@ resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
 resource "aws_iam_role_policy_attachment" "node_secrets_access" {
   policy_arn = data.terraform_remote_state.foundation.outputs.secrets_access_policy_arn
   role       = aws_iam_role.node.name
+}
+
+
+resource "aws_eks_node_group" "gpu_nodes" {
+  cluster_name    = aws_eks_cluster.eks_gpu.name
+  node_group_name = "eks-gpu-nodes"
+  node_role_arn   = aws_iam_role.node.arn
+  subnet_ids      = local.private_subnet_ids
+  capacity_type   = "ON_DEMAND"
+
+  instance_types = [
+    "g4dn.xlarge", # Choose a small but cost-effective GPU instance
+    "g5.xlarge"
+  ]
+
+  scaling_config {
+    desired_size = 1 # Start with 1 GPU node
+    min_size     = 0 # Allow scaling down to zero to save cost
+    max_size     = 3 # Scale up to 3 nodes based on demand
+  }
+
+  update_config {
+    max_unavailable = 1
+  }
+  launch_template {
+    id      = aws_launch_template.gpu.id
+    version = aws_launch_template.gpu.latest_version
+  }
+
+  labels = {
+    "lifecycle"              = "on-demand"
+    "node.kubernetes.io/gpu" = "true"
+  }
+
+  tags = {
+    Name                                           = "eks-gpu-nodes-${var.environment}"
+    Environment                                    = var.environment
+    "k8s.io/cluster-autoscaler/enabled"            = "true"
+    "k8s.io/cluster-autoscaler/${var.environment}" = "owned"
+  }
 }
