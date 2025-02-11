@@ -69,6 +69,17 @@ resource "aws_security_group_rule" "alb_to_nodeport" {
   description              = "Allow ALB to NodePort"
 }
 
+# Add a rule for health checks
+resource "aws_security_group_rule" "alb_health_check" {
+  type                     = "ingress"
+  from_port                = 30080
+  to_port                  = 30080
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.argocd.id
+  security_group_id        = aws_security_group.cluster.id
+  description              = "Allow ALB health checks"
+}
+
 # Allow internal cluster communication
 resource "aws_security_group_rule" "cluster_internal" {
   type              = "ingress"
