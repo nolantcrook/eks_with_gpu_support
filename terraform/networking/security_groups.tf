@@ -45,6 +45,24 @@ resource "aws_security_group" "argocd" {
     description = "Allow HTTPS traffic"
   }
 
+  egress {
+    from_port       = 30080
+    to_port         = 30080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.cluster.id]
+    description     = "Allow outbound traffic to cluster on port 30080 only"
+  }
+
+  egress {
+    from_port       = 65535
+    to_port         = 65535
+    protocol        = "tcp"
+    security_groups = [aws_security_group.cluster.id]
+    description     = "Allow outbound traffic to cluster on port 30080 only"
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
   tags = {
     Name        = "argocd-${var.environment}"
     Environment = var.environment
