@@ -59,7 +59,7 @@ resource "aws_security_group" "cluster" {
   }
 
   tags = {
-    Name        = "eks-cluster-${var.environment}"
+    Name        = "eks-cluster-sg-${var.environment}"
     Environment = var.environment
   }
 }
