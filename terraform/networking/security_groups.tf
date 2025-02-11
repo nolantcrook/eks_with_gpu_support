@@ -1,6 +1,6 @@
 # ALB Security Group
 resource "aws_security_group" "argocd" {
-  name        = "argocd-${var.environment}"
+  name        = "argocd-alb-sg-${var.environment}"
   description = "Security group for ALB"
   vpc_id      = aws_vpc.main.id
 
@@ -32,7 +32,7 @@ resource "aws_security_group" "argocd" {
   }
 
   tags = {
-    Name        = "alb-${var.environment}"
+    Name        = "argocd-alb-sg-${var.environment}"
     Environment = var.environment
   }
 }
