@@ -144,7 +144,6 @@ resource "aws_launch_template" "gpu" {
     aws_eks_cluster.eks_gpu.vpc_config[0].cluster_security_group_id
   ]
 
-  instance_type = "g4dn.xlarge"
 
   tag_specifications {
     resource_type = "instance"
