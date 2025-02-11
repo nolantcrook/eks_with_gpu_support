@@ -248,37 +248,3 @@ resource "aws_lb_listener_rule" "game_2048" {
     create_before_destroy = true
   }
 }
-
-# Add Route53 record for InvokeAI
-resource "aws_route53_record" "invokeai" {
-  zone_id = local.route53_zone_id
-  name    = "invokeai.hello-world-domain.com"
-  type    = "A"
-
-  alias {
-    name                   = aws_lb.argocd.dns_name
-    zone_id                = aws_lb.argocd.zone_id
-    evaluate_target_health = true
-  }
-}
-
-# Add listener rule for InvokeAI
-resource "aws_lb_listener_rule" "invokeai" {
-  listener_arn = aws_lb_listener.argocd.arn
-  priority     = 300 # Higher priority number than existing rules
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.argocd.arn
-  }
-
-  condition {
-    host_header {
-      values = ["invokeai.hello-world-domain.com"]
-    }
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
