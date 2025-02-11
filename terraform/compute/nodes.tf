@@ -144,7 +144,7 @@ resource "aws_launch_template" "gpu" {
     aws_eks_cluster.eks_gpu.vpc_config[0].cluster_security_group_id
   ]
 
-
+  image_id = "ami-0c87233e00bd17f39"
   tag_specifications {
     resource_type = "instance"
     tags = {
@@ -225,5 +225,11 @@ resource "aws_eks_node_group" "gpu_nodes" {
     Environment                                    = var.environment
     "k8s.io/cluster-autoscaler/enabled"            = "true"
     "k8s.io/cluster-autoscaler/${var.environment}" = "owned"
+  }
+
+  taint {
+    key    = "nvidia.com/gpu"
+    value  = "true"
+    effect = "NO_SCHEDULE"
   }
 }
