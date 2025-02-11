@@ -203,7 +203,7 @@ resource "aws_eks_node_group" "gpu_nodes" {
 
   scaling_config {
     desired_size = 1 # Start with 1 GPU node
-    min_size     = 0 # Allow scaling down to zero to save cost
+    min_size     = 1 # Allow scaling down to zero to save cost
     max_size     = 3 # Scale up to 3 nodes based on demand
   }
 
