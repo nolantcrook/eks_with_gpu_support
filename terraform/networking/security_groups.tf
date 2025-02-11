@@ -32,7 +32,7 @@ resource "aws_security_group" "argocd" {
   }
 
   tags = {
-    Name        = "argocd-alb-sg-${var.environment}"
+    Name        = "alb-${var.environment}"
     Environment = var.environment
   }
 }
@@ -58,7 +58,7 @@ resource "aws_security_group" "cluster" {
   }
 }
 
-# Allow ALB to reach NodePort
+# Allow ALB to reach NodePort (includes health checks)
 resource "aws_security_group_rule" "alb_to_nodeport" {
   type                     = "ingress"
   from_port                = 30080
@@ -66,18 +66,7 @@ resource "aws_security_group_rule" "alb_to_nodeport" {
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.argocd.id
   security_group_id        = aws_security_group.cluster.id
-  description              = "Allow ALB to NodePort"
-}
-
-# Add a rule for health checks
-resource "aws_security_group_rule" "alb_health_check" {
-  type                     = "ingress"
-  from_port                = 30080
-  to_port                  = 30080
-  protocol                 = "tcp"
-  source_security_group_id = aws_security_group.argocd.id
-  security_group_id        = aws_security_group.cluster.id
-  description              = "Allow ALB health checks"
+  description              = "Allow ALB to NodePort and health checks"
 }
 
 # Allow internal cluster communication
