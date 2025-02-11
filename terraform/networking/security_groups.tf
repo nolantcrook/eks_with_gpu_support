@@ -1,8 +1,6 @@
-
-
 # Security Groups
 resource "aws_security_group" "argocd" {
-  name        = "argocd-${var.environment}"
+  name        = "argocd-alb-${var.environment}"
   description = "Security group for ArgoCD ALB"
   vpc_id      = aws_vpc.main.id
 
@@ -39,11 +37,20 @@ resource "aws_security_group" "argocd" {
     security_groups = [aws_security_group.cluster.id]
     description     = "Allow outbound traffic to cluster on port 65535 only"
   }
+
+  egress {
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow outbound ICMP traffic for ping"
+  }
+
   lifecycle {
     create_before_destroy = true
   }
   tags = {
-    Name        = "argocd-${var.environment}"
+    Name        = "argocd-alb-${var.environment}"
     Environment = var.environment
   }
 }
@@ -64,16 +71,16 @@ resource "aws_security_group" "cluster" {
   }
 }
 
-# # Cluster internal traffic
-# resource "aws_security_group_rule" "cluster_internal" {
-#   type                     = "ingress"
-#   from_port                = 0
-#   to_port                  = 65535
-#   protocol                 = "tcp"
-#   source_security_group_id = aws_security_group.cluster.id
-#   security_group_id        = aws_security_group.cluster.id
-#   description              = "Allow internal cluster traffic"
-# }
+# Cluster internal traffic
+resource "aws_security_group_rule" "cluster_internal" {
+  type                     = "ingress"
+  from_port                = 0
+  to_port                  = 65535
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.cluster.id
+  security_group_id        = aws_security_group.cluster.id
+  description              = "Allow internal cluster traffic"
+}
 
 # ALB to NodePort (for NGINX Ingress)
 resource "aws_security_group_rule" "alb_to_nginx" {
@@ -84,4 +91,15 @@ resource "aws_security_group_rule" "alb_to_nginx" {
   source_security_group_id = aws_security_group.argocd.id # ALB security group
   security_group_id        = aws_security_group.cluster.id
   description              = "Allow ALB to NGINX Ingress NodePort"
+}
+
+# ALB to NodePort (for NGINX Ingress)
+resource "aws_security_group_rule" "alb_to_nginx_icmp" {
+  type              = "ingress"
+  from_port         = -1 # NGINX NodePort
+  to_port           = -1
+  protocol          = "icmp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.cluster.id
+  description       = "Allow ALB to NGINX Ingress NodePort"
 }
