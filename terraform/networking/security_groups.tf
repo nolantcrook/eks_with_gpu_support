@@ -6,19 +6,25 @@ resource "aws_security_group" "argocd" {
 
   # HTTP ingress for redirect
   ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port = 80
+    to_port   = 80
+    protocol  = "tcp"
+    cidr_blocks = [
+      "76.129.127.17/32",
+      "136.36.32.17/32"
+    ]
     description = "Allow HTTP traffic for redirect"
   }
 
   # HTTPS ingress
   ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port = 443
+    to_port   = 443
+    protocol  = "tcp"
+    cidr_blocks = [
+      "76.129.127.17/32",
+      "136.36.32.17/32"
+    ]
     description = "Allow HTTPS traffic"
   }
 
