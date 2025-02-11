@@ -1,13 +1,13 @@
 # ALB to NodePort (for NGINX Ingress)
-resource "aws_security_group_rule" "alb_to_nginx" {
-  type                     = "ingress"
-  from_port                = 30080 # NGINX NodePort
-  to_port                  = 30080
-  protocol                 = "tcp"
-  source_security_group_id = aws_security_group.argocd.id # ALB security group
-  security_group_id        = aws_security_group.cluster.id
-  description              = "Allow ALB to NGINX Ingress NodePort"
-}
+# resource "aws_security_group_rule" "alb_to_nginx" {
+#   type                     = "ingress"
+#   from_port                = 30080 # NGINX NodePort
+#   to_port                  = 30080
+#   protocol                 = "tcp"
+#   source_security_group_id = aws_security_group.argocd.id # ALB security group
+#   security_group_id        = aws_security_group.cluster.id
+#   description              = "Allow ALB to NGINX Ingress NodePort"
+# }
 
 # Cluster internal traffic
 # resource "aws_security_group_rule" "cluster_internal" {
@@ -58,7 +58,7 @@ resource "aws_security_group" "argocd" {
     to_port         = 65535
     protocol        = "tcp"
     security_groups = [aws_security_group.cluster.id]
-    description     = "Allow outbound traffic to cluster on port 30080 only"
+    description     = "Allow outbound traffic to cluster on port 65535 only"
   }
   lifecycle {
     create_before_destroy = true
