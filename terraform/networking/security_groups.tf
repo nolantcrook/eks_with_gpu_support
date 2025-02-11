@@ -50,7 +50,7 @@ resource "aws_security_group" "argocd" {
 
 # Cluster Security Group
 resource "aws_security_group" "cluster" {
-  name        = "eks-cluster-${var.environment}"
+  name        = "eks-cluster-sg-${var.environment}"
   description = "Security group for EKS cluster nodes"
   vpc_id      = aws_vpc.main.id
 
