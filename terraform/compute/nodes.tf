@@ -189,47 +189,47 @@ resource "aws_iam_role_policy_attachment" "node_secrets_access" {
 }
 
 
-resource "aws_eks_node_group" "gpu_nodes" {
-  cluster_name    = aws_eks_cluster.eks_gpu.name
-  node_group_name = "eks-gpu-nodes"
-  node_role_arn   = aws_iam_role.node.arn
-  subnet_ids      = local.private_subnet_ids
-  capacity_type   = "ON_DEMAND"
+# resource "aws_eks_node_group" "gpu_nodes" {
+#   cluster_name    = aws_eks_cluster.eks_gpu.name
+#   node_group_name = "eks-gpu-nodes"
+#   node_role_arn   = aws_iam_role.node.arn
+#   subnet_ids      = local.private_subnet_ids
+#   capacity_type   = "ON_DEMAND"
 
-  instance_types = [
-    "g4ad.xlarge", # Choose a small but cost-effective GPU instance
-    "g4dn.xlarge"
-  ]
+#   instance_types = [
+#     "g4ad.xlarge", # Choose a small but cost-effective GPU instance
+#     "g4dn.xlarge"
+#   ]
 
-  scaling_config {
-    desired_size = 1 # Start with 1 GPU node
-    min_size     = 1 # Allow scaling down to zero to save cost
-    max_size     = 3 # Scale up to 3 nodes based on demand
-  }
+#   scaling_config {
+#     desired_size = 1 # Start with 1 GPU node
+#     min_size     = 1 # Allow scaling down to zero to save cost
+#     max_size     = 3 # Scale up to 3 nodes based on demand
+#   }
 
-  update_config {
-    max_unavailable = 1
-  }
-  launch_template {
-    id      = aws_launch_template.gpu.id
-    version = aws_launch_template.gpu.latest_version
-  }
+#   update_config {
+#     max_unavailable = 1
+#   }
+#   launch_template {
+#     id      = aws_launch_template.gpu.id
+#     version = aws_launch_template.gpu.latest_version
+#   }
 
-  # labels = {
-  #   "lifecycle"              = "spot"
-  #   "node.kubernetes.io/gpu" = "true"
-  # }
+#   # labels = {
+#   #   "lifecycle"              = "spot"
+#   #   "node.kubernetes.io/gpu" = "true"
+#   # }
 
-  # tags = {
-  #   Name                                           = "eks-gpu-nodes-${var.environment}"
-  #   Environment                                    = var.environment
-  #   "k8s.io/cluster-autoscaler/enabled"            = "true"
-  #   "k8s.io/cluster-autoscaler/${var.environment}" = "owned"
-  # }
+#   # tags = {
+#   #   Name                                           = "eks-gpu-nodes-${var.environment}"
+#   #   Environment                                    = var.environment
+#   #   "k8s.io/cluster-autoscaler/enabled"            = "true"
+#   #   "k8s.io/cluster-autoscaler/${var.environment}" = "owned"
+#   # }
 
-  # taint {
-  #   key    = "nvidia.com/gpu"
-  #   value  = "true"
-  #   effect = "NO_SCHEDULE"
-  # }
-}
+#   # taint {
+#   #   key    = "nvidia.com/gpu"
+#   #   value  = "true"
+#   #   effect = "NO_SCHEDULE"
+#   # }
+# }
