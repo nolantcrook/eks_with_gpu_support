@@ -188,6 +188,18 @@ resource "aws_route53_record" "argocd" {
   }
 }
 
+resource "aws_route53_record" "portfolio" {
+  zone_id = local.route53_zone_id
+  name    = "portfolio.hello-world-domain.com"
+  type    = "A"
+
+  alias {
+    name                   = aws_lb.argocd.dns_name
+    zone_id                = aws_lb.argocd.zone_id
+    evaluate_target_health = true
+  }
+}
+
 # WAF association with ALB
 resource "aws_wafv2_web_acl_association" "argocd" {
   resource_arn = aws_lb.argocd.arn
@@ -241,6 +253,26 @@ resource "aws_lb_listener_rule" "game_2048" {
   condition {
     host_header {
       values = ["2048.hello-world-domain.com"]
+    }
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_lb_listener_rule" "portfolio" {
+  listener_arn = aws_lb_listener.argocd.arn
+  priority     = 300
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.argocd.arn
+  }
+
+  condition {
+    host_header {
+      values = ["portfolio.hello-world-domain.com"]
     }
   }
 
