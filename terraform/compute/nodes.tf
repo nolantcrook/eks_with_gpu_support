@@ -58,7 +58,8 @@ resource "aws_eks_node_group" "x86_spot" {
   depends_on = [
     aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
-    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly
+    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
+    aws_iam_role_policy_attachment.AmazonEKSManagedScalingPolicy
   ]
 }
 
@@ -100,7 +101,8 @@ resource "aws_eks_node_group" "x86_ondemand" {
   depends_on = [
     aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
-    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly
+    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
+    aws_iam_role_policy_attachment.AmazonEKSManagedScalingPolicy
   ]
 }
 
@@ -185,6 +187,11 @@ resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
 
 resource "aws_iam_role_policy_attachment" "node_secrets_access" {
   policy_arn = data.terraform_remote_state.foundation.outputs.secrets_access_policy_arn
+  role       = aws_iam_role.node.name
+}
+
+resource "aws_iam_role_policy_attachment" "AmazonEKSManagedScalingPolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSManagedScalingPolicy"
   role       = aws_iam_role.node.name
 }
 
