@@ -1,67 +1,91 @@
-# # Create IAM role for the ALB controller
-# resource "aws_iam_role" "alb_controller" {
-#   name = "eks-alb-controller-role"
 
-#   assume_role_policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [{
-#       Effect = "Allow"
-#       Principal = {
-#         Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(aws_eks_cluster.eks_gpu.identity[0].oidc[0].issuer, "https://", "")}"
-#       }
-#       Action = "sts:AssumeRoleWithWebIdentity"
-#       Condition = {
-#         StringEquals = {
-#           "${replace(aws_eks_cluster.eks_gpu.identity[0].oidc[0].issuer, "https://", "")}:sub" : "system:serviceaccount:kube-system:aws-load-balancer-controller"
-#         }
-#       }
-#     }]
-#   })
-# }
 
-# # Create minimal policy for target registration
-# resource "aws_iam_role_policy" "alb_controller" {
-#   name = "eks-alb-controller-policy"
-#   role = aws_iam_role.alb_controller.id
+resource "aws_iam_policy" "cluster_autoscaler" {
+  name        = "ClusterAutoscalerPolicy"
+  description = "IAM policy for Kubernetes Cluster Autoscaler"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "autoscaling:DescribeAutoScalingGroups",
+          "autoscaling:DescribeAutoScalingInstances",
+          "autoscaling:DescribeLaunchConfigurations",
+          "autoscaling:DescribeTags",
+          "autoscaling:SetDesiredCapacity",
+          "autoscaling:TerminateInstanceInAutoScalingGroup",
+          "autoscaling:UpdateAutoScalingGroup"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeInstances",
+          "ec2:DescribeRegions",
+          "ec2:DescribeLaunchTemplateVersions"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "batch:ListJobs",
+          "batch:DescribeJobQueues",
+          "batch:DescribeJobs",
+          "policy:PodDisruptionBudgets",
+          "storage.k8s.io:csidrivers",
+          "storage.k8s.io:csinodes",
+          "storage.k8s.io:csistoragecapacities",
+          "storage.k8s.io:storageclasses"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
 
-#   policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [
-#       {
-#         Effect = "Allow"
-#         Action = [
-#           "elasticloadbalancing:RegisterTargets",
-#           "elasticloadbalancing:DeregisterTargets",
-#           "elasticloadbalancing:DescribeTargetHealth",
-#           "elasticloadbalancing:DescribeTargetGroups",
-#           "ec2:DescribeInstances",
-#           "ec2:DescribeInstanceStatus",
-#           "ec2:DescribeSecurityGroups",
-#           "ec2:DescribeSubnets",
-#           "ec2:DescribeVpcs"
-#         ]
-#         Resource = "*"
-#       }
-#     ]
-#   })
-# }
 
-# # # Create service account for the ALB controller
-# # resource "kubernetes_service_account" "alb_controller" {
-# #   depends_on = [aws_eks_cluster.eks_gpu]
+data "external" "oidc_provider" {
+  program = ["bash", "${path.module}/get_oidc_provider.sh", aws_eks_cluster.eks_gpu.name]
 
-# #   metadata {
-# #     name      = "aws-load-balancer-controller"
-# #     namespace = "kube-system"
-# #     annotations = {
-# #       "eks.amazonaws.com/role-arn" = aws_iam_role.alb_controller.arn
-# #     }
-# #   }
+  # Optional: Pass AWS credentials if needed
+  # environment = {
+  #   AWS_ACCESS_KEY_ID     = var.aws_access_key_id
+  #   AWS_SECRET_ACCESS_KEY = var.aws_secret_access_key
+  #   AWS_DEFAULT_REGION    = var.aws_region
+  # }
 
-# #   lifecycle {
-# #     ignore_changes = [
-# #       metadata[0].annotations,
-# #       metadata[0].labels,
-# #     ]
-# #   }
-# # }
+  depends_on = [aws_eks_cluster.eks_gpu]
+}
+
+
+output "oidc_provider_url" {
+  value = data.external.oidc_provider.result["oidc_url"]
+}
+
+resource "aws_iam_role" "cluster_autoscaler" {
+  name = "eks-cluster-autoscaler"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${data.external.oidc_provider.result["oidc_url"]}"
+      }
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        "StringEquals" = {
+          "${data.external.oidc_provider.result["oidc_url"]}:sub" = "system:serviceaccount:kube-system:cluster-autoscaler"
+        }
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "cluster_autoscaler_attach" {
+  role       = aws_iam_role.cluster_autoscaler.name
+  policy_arn = aws_iam_policy.cluster_autoscaler.arn
+}
