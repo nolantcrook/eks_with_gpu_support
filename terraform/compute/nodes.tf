@@ -191,7 +191,7 @@ resource "aws_iam_role_policy_attachment" "node_secrets_access" {
 }
 
 resource "aws_iam_role_policy_attachment" "AmazonEKSManagedScalingPolicy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSManagedScalingPolicy"
+  policy_arn = "arn:aws:iam::aws:policy/AutoScalingFullAccess"
   role       = aws_iam_role.node.name
 }
 
