@@ -37,7 +37,7 @@ resource "aws_iam_policy" "cluster_autoscaler" {
           "storage.k8s.io:csinodes",
           "storage.k8s.io:csistoragecapacities",
           "storage.k8s.io:storageclasses",
-          "sts:AssumeRole",
+          "sts:AssumeRole*",
           "sts:GetCallerIdentity"
         ]
         Resource = "*"
