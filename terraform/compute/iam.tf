@@ -80,7 +80,7 @@ resource "aws_iam_role" "cluster_autoscaler" {
       {
         "Effect" : "Allow",
         "Principal" : {
-          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${data.external.oidc_provider.result["oidc_url"]}"
+          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/https://${data.external.oidc_provider.result["oidc_url"]}"
         },
         "Action" : "sts:AssumeRoleWithWebIdentity",
         "Condition" : {
