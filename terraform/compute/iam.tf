@@ -20,10 +20,19 @@ resource "aws_iam_policy" "cluster_autoscaler" {
       {
         Effect = "Allow"
         Action = [
-          "ec2:DescribeInstanceTypes",
-          "ec2:DescribeInstances",
-          "ec2:DescribeRegions",
-          "ec2:DescribeLaunchTemplateVersions"
+          "ec2:Describe*"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "eks:Describe*",
+          "eks:List*",
+          "eks:Get*",
+          "eks:Tag*",
+          "eks:Untag*",
+          "eks:Update*"
         ]
         Resource = "*"
       },
