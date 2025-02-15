@@ -1,5 +1,3 @@
-
-
 resource "aws_iam_policy" "cluster_autoscaler" {
   name        = "ClusterAutoscalerPolicy"
   description = "IAM policy for Kubernetes Cluster Autoscaler"
@@ -58,6 +56,12 @@ data "external" "oidc_provider" {
   # }
 
   depends_on = [aws_eks_cluster.eks_gpu]
+}
+
+resource "aws_iam_openid_connect_provider" "eks_oidc" {
+  url             = data.external.oidc_provider.result["oidc_url"]
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.external.oidc_provider.result["thumbprint"]]
 }
 
 
