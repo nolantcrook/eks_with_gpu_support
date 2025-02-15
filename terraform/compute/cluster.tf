@@ -20,9 +20,9 @@ resource "aws_eks_cluster" "eks_gpu" {
 
   # Add tags for spot instance management
   tags = {
-    Environment                                    = var.environment
-    "k8s.io/cluster-autoscaler/enabled"            = "true"
-    "k8s.io/cluster-autoscaler/${var.environment}" = "owned"
+    Environment                                            = var.environment
+    "k8s.io/cluster-autoscaler/enabled"                    = "true"
+    "k8s.io/cluster-autoscaler/eks-gpu-${var.environment}" = "owned"
   }
 
   # This ensures the cluster waits for node groups to be destroyed
