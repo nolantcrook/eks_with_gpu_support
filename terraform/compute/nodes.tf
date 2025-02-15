@@ -48,7 +48,7 @@ resource "aws_eks_node_group" "x86_spot" {
     Environment                                               = var.environment
     "k8s.io/cluster-autoscaler/enabled"                       = "true"
     "k8s.io/cluster-autoscaler/node-template/label/lifecycle" = "Ec2Spot"
-    "k8s.io/cluster-autoscaler/ekus-gpu-${var.environment}"   = "owned"
+    "k8s.io/cluster-autoscaler/eku-gpu-${var.environment}"    = "owned"
   }
 
   launch_template {
