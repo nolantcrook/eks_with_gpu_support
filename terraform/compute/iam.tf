@@ -83,17 +83,33 @@ resource "aws_iam_role" "cluster_autoscaler" {
           Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${data.external.oidc_provider.result["oidc_url"]}"
         },
         "Action" : "sts:AssumeRoleWithWebIdentity",
-        "Condition" : {
-          "StringLike" : {
-            "$oidc_provider:aud" : "sts.amazonaws.com",
-            "$oidc_provider:sub" : "system:serviceaccount:kube-system:*"
-          }
-        }
       }
     ]
   })
 }
 
+# resource "aws_iam_role" "cluster_autoscaler" {
+#   name = "eks-cluster-autoscaler"
+
+#   assume_role_policy = jsonencode({
+#     "Version" : "2012-10-17",
+#     "Statement" : [
+#       {
+#         "Effect" : "Allow",
+#         "Principal" : {
+#           Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${data.external.oidc_provider.result["oidc_url"]}"
+#         },
+#         "Action" : "sts:AssumeRoleWithWebIdentity",
+#         "Condition" : {
+#           "StringLike" : {
+#             "$oidc_provider:aud" : "sts.amazonaws.com",
+#             "$oidc_provider:sub" : "system:serviceaccount:kube-system:*"
+#           }
+#         }
+#       }
+#     ]
+#   })
+# }
 
 
 resource "aws_iam_role_policy_attachment" "cluster_autoscaler_attach" {
