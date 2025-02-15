@@ -25,7 +25,11 @@ resource "aws_eks_node_group" "x86_spot" {
     "m6i.2xlarge",
     "m6a.large",
     "m6a.xlarge",
-    "m6a.2xlarge"
+    "m6a.2xlarge",
+    "r5.large",
+    "r5.xlarge",
+    "r5a.large",
+    "r5a.xlarge"
   ]
 
   scaling_config {
