@@ -20,6 +20,7 @@ resource "aws_iam_policy" "cluster_autoscaler" {
       {
         Effect = "Allow"
         Action = [
+          "ec2:DescribeInstanceTypes",
           "ec2:DescribeInstances",
           "ec2:DescribeRegions",
           "ec2:DescribeLaunchTemplateVersions"
@@ -80,7 +81,7 @@ resource "aws_iam_role" "cluster_autoscaler" {
       {
         "Effect" : "Allow",
         "Principal" : {
-          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${data.external.oidc_provider.result["oidc_url"]}"
+          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${aws_iam_openid_connect_provider.eks_oidc.url}"
         },
         "Action" : "sts:AssumeRoleWithWebIdentity",
       }
