@@ -16,15 +16,15 @@ resource "aws_cognito_user_pool" "invokeai" {
   name = "invokeai-user-pool"
 }
 
-# Create a Cognito App Client
+# Create a Cognito App Client with a Client Secret
 resource "aws_cognito_user_pool_client" "invokeai" {
   name                                 = "invokeai-app-client"
   user_pool_id                         = aws_cognito_user_pool.invokeai.id
-  generate_secret                      = true
+  generate_secret                      = true # Enable client secret generation
   allowed_oauth_flows_user_pool_client = true
   allowed_oauth_flows                  = ["code"]
   allowed_oauth_scopes                 = ["openid"]
-  callback_urls                        = ["https://invokeai.hello-world-domain.com/callback"]
+  callback_urls                        = ["https://invokeai.hello-world-domain.com/oauth2/idpresponse"]
   logout_urls                          = ["https://invokeai.hello-world-domain.com/logout"]
   supported_identity_providers         = ["COGNITO"]
 }
