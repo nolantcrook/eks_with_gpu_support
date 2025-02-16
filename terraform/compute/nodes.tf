@@ -6,17 +6,17 @@ resource "aws_eks_node_group" "x86_spot" {
   capacity_type   = "SPOT"
 
   instance_types = [
-    "t3.medium",
     "t3.large",
     "t3.xlarge",
     "t3.2xlarge",
-    "t3a.medium",
     "t3a.large",
     "t3a.xlarge",
     "t3a.2xlarge",
     "m5.large",
     "m5.xlarge",
     "m5.2xlarge",
+    "m5.4xlarge",
+    "m5.8xlarge",
     "m5a.large",
     "m5a.xlarge",
     "m5a.2xlarge",
@@ -28,8 +28,14 @@ resource "aws_eks_node_group" "x86_spot" {
     "m6a.2xlarge",
     "r5.large",
     "r5.xlarge",
+    "r5.2xlarge",
+    "r5.4xlarge",
+    "r5.8xlarge",
     "r5a.large",
-    "r5a.xlarge"
+    "r5a.xlarge",
+    "r5a.2xlarge",
+    "r5a.4xlarge",
+    "r5a.8xlarge"
   ]
 
   scaling_config {
