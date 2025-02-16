@@ -43,6 +43,9 @@ resource "aws_lb_listener_rule" "invokeai" {
       session_cookie_name = "AWSELBAuthSessionCookie"
       scope               = "openid"
       session_timeout     = 3600
+      authentication_request_extra_params = {
+        response_type = "code"
+      }
     }
   }
 
