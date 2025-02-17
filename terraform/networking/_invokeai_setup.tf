@@ -14,6 +14,24 @@ resource "aws_route53_record" "invokeai" {
 # Create a Cognito User Pool
 resource "aws_cognito_user_pool" "invokeai" {
   name = "invokeai-user-pool"
+
+  # Enable email as a required attribute
+  schema {
+    attribute_data_type = "String"
+    name                = "email"
+    required            = true
+    mutable             = false
+  }
+
+  # Configure email verification
+  auto_verified_attributes = ["email"]
+
+  # Optional: Customize the email verification message
+  verification_message_template {
+    default_email_option = "CONFIRM_WITH_CODE"
+    email_message        = "Your verification code is {####}"
+    email_subject        = "Verify your email for InvokeAI"
+  }
 }
 
 # Create a Cognito App Client with a Client Secret
