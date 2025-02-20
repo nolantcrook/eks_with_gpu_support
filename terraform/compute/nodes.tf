@@ -253,7 +253,7 @@ resource "aws_launch_template" "gpu" {
   # image_id = "ami-0c87233e00bd17f39"
 
   block_device_mappings {
-    device_name = "/dev/xvda"
+    device_name = "/var/lib/kubelet"
     ebs {
       volume_size = 50    # Size in GiB, adjust as needed
       volume_type = "gp2" # General Purpose SSD
