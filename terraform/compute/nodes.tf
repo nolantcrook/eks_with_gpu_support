@@ -250,7 +250,7 @@ resource "aws_launch_template" "gpu" {
     local.cluster_security_group_id,
     aws_eks_cluster.eks_gpu.vpc_config[0].cluster_security_group_id
   ]
-  image_id = "ami-0c87233e00bd17f39"
+  # image_id = "ami-0c87233e00bd17f39"
 
   block_device_mappings {
     device_name = "/dev/xvda"
