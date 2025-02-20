@@ -351,9 +351,9 @@ resource "aws_eks_node_group" "gpu_nodes" {
     "k8s.io/cluster-autoscaler/node-template/label/lifecycle" = "Ec2Spot"
   }
 
-  # taint {
-  #   key    = "nvidia.com/gpu"
-  #   value  = "true"
-  #   effect = "NO_SCHEDULE"
-  # }
+  taint {
+    key    = "nvidia.com/gpu"
+    value  = "true"
+    effect = "NO_SCHEDULE"
+  }
 }
