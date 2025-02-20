@@ -266,6 +266,7 @@ resource "aws_launch_template" "gpu" {
       Name                                                                  = "eks-gpu-node-group-${var.environment}"
       compute                                                               = "gpu"
       "k8s.io/cluster-autoscaler/node-template/resources/ephemeral-storage" = "53687091200" # 50 GiB in bytes
+      "k8s.io/cluster-autoscaler/node-template/resources/nvidia.com/gpu"    = "1"
     }
   }
 }
@@ -352,6 +353,7 @@ resource "aws_eks_node_group" "gpu_nodes" {
     "k8s.io/cluster-autoscaler/${var.environment}"                        = "owned"
     "k8s.io/cluster-autoscaler/node-template/label/lifecycle"             = "Ec2Spot"
     "k8s.io/cluster-autoscaler/node-template/resources/ephemeral-storage" = "53687091200"
+    "k8s.io/cluster-autoscaler/node-template/resources/nvidia.com/gpu"    = "1"
   }
 
   taint {
