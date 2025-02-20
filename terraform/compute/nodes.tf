@@ -314,7 +314,7 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSManagedScalingPolicy" {
 
 resource "aws_eks_node_group" "gpu_nodes" {
   cluster_name    = aws_eks_cluster.eks_gpu.name
-  node_group_name = "eks-gpu-nodes"
+  node_group_name = "eks-gpu-nodes-v2"
   node_role_arn   = aws_iam_role.node.arn
   subnet_ids      = local.private_subnet_ids
   capacity_type   = "SPOT"
