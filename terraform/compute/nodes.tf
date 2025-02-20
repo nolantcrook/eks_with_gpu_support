@@ -266,14 +266,6 @@ resource "aws_launch_template" "gpu" {
       Name = "eks-gpu-node-group-${var.environment}"
     }
   }
-
-  # Optionally, specify the AMI ID if you have a specific GPU-optimized AMI
-  # image_id = "ami-xxxxxxxxxxxxxxxxx"
-
-  # Optionally, specify instance market options for spot instances
-  instance_market_options {
-    market_type = "spot"
-  }
 }
 
 resource "aws_iam_role" "node" {
@@ -346,6 +338,7 @@ resource "aws_eks_node_group" "gpu_nodes" {
   labels = {
     "lifecycle"              = "spot"
     "node.kubernetes.io/gpu" = "true"
+    "compute"                = "gpu"
   }
 
   tags = {
