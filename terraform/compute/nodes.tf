@@ -263,8 +263,9 @@ resource "aws_launch_template" "gpu" {
   tag_specifications {
     resource_type = "instance"
     tags = {
-      Name    = "eks-gpu-node-group-${var.environment}"
-      compute = "gpu"
+      Name                                                                  = "eks-gpu-node-group-${var.environment}"
+      compute                                                               = "gpu"
+      "k8s.io/cluster-autoscaler/node-template/resources/ephemeral-storage" = "53687091200" # 50 GiB in bytes
     }
   }
 }
@@ -344,12 +345,13 @@ resource "aws_eks_node_group" "gpu_nodes" {
   }
 
   tags = {
-    Name                                                      = "eks-gpu-nodes-${var.environment}"
-    Environment                                               = var.environment
-    "node.kubernetes.io/gpu"                                  = "true"
-    "k8s.io/cluster-autoscaler/enabled"                       = "true"
-    "k8s.io/cluster-autoscaler/${var.environment}"            = "owned"
-    "k8s.io/cluster-autoscaler/node-template/label/lifecycle" = "Ec2Spot"
+    Name                                                                  = "eks-gpu-nodes-${var.environment}"
+    Environment                                                           = var.environment
+    "node.kubernetes.io/gpu"                                              = "true"
+    "k8s.io/cluster-autoscaler/enabled"                                   = "true"
+    "k8s.io/cluster-autoscaler/${var.environment}"                        = "owned"
+    "k8s.io/cluster-autoscaler/node-template/label/lifecycle"             = "Ec2Spot"
+    "k8s.io/cluster-autoscaler/node-template/resources/ephemeral-storage" = "53687091200"
   }
 
   taint {
