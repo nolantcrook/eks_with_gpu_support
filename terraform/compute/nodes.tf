@@ -263,7 +263,8 @@ resource "aws_launch_template" "gpu" {
   tag_specifications {
     resource_type = "instance"
     tags = {
-      Name = "eks-gpu-node-group-${var.environment}"
+      Name    = "eks-gpu-node-group-${var.environment}"
+      compute = "gpu"
     }
   }
 }
@@ -336,16 +337,18 @@ resource "aws_eks_node_group" "gpu_nodes" {
   }
 
   labels = {
-    "lifecycle"              = "spot"
-    "node.kubernetes.io/gpu" = "true"
-    "compute"                = "gpu"
+    "lifecycle"                    = "Ec2Spot"
+    "node.kubernetes.io/lifecycle" = "spot"
+    "node.kubernetes.io/gpu"       = "true"
+    "compute"                      = "gpu"
   }
 
   tags = {
-    Name                                           = "eks-gpu-nodes-${var.environment}"
-    Environment                                    = var.environment
-    "k8s.io/cluster-autoscaler/enabled"            = "true"
-    "k8s.io/cluster-autoscaler/${var.environment}" = "owned"
+    Name                                                      = "eks-gpu-nodes-${var.environment}"
+    Environment                                               = var.environment
+    "k8s.io/cluster-autoscaler/enabled"                       = "true"
+    "k8s.io/cluster-autoscaler/${var.environment}"            = "owned"
+    "k8s.io/cluster-autoscaler/node-template/label/lifecycle" = "Ec2Spot"
   }
 
   # taint {
