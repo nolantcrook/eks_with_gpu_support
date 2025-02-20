@@ -348,9 +348,9 @@ resource "aws_eks_node_group" "gpu_nodes" {
     "k8s.io/cluster-autoscaler/${var.environment}" = "owned"
   }
 
-  taint {
-    key    = "nvidia.com/gpu"
-    value  = "true"
-    effect = "NO_SCHEDULE"
-  }
+  # taint {
+  #   key    = "nvidia.com/gpu"
+  #   value  = "true"
+  #   effect = "NO_SCHEDULE"
+  # }
 }
