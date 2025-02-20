@@ -346,6 +346,7 @@ resource "aws_eks_node_group" "gpu_nodes" {
   tags = {
     Name                                                      = "eks-gpu-nodes-${var.environment}"
     Environment                                               = var.environment
+    "node.kubernetes.io/gpu"                                  = "true"
     "k8s.io/cluster-autoscaler/enabled"                       = "true"
     "k8s.io/cluster-autoscaler/${var.environment}"            = "owned"
     "k8s.io/cluster-autoscaler/node-template/label/lifecycle" = "Ec2Spot"
