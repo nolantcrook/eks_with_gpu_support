@@ -319,9 +319,10 @@ resource "aws_eks_node_group" "gpu_nodes" {
   subnet_ids      = local.private_subnet_ids
   capacity_type   = "SPOT"
 
-  instance_types = [
-    "g4ad.xlarge", # Choose a small but cost-effective GPU instance
-    "g4dn.xlarge"
+  instance_types = [ # Choose a small but cost-effective GPU instance
+    "g4dn.xlarge",
+    "g4dn.2xlarge",
+    "g5.xlarge"
   ]
 
   scaling_config {
