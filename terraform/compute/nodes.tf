@@ -272,6 +272,15 @@ sudo yum install -y amazon-ssm-agent
 sudo systemctl enable amazon-ssm-agent
 sudo systemctl start amazon-ssm-agent
 
+sudo yum install -y nvidia-container-toolkit
+sudo yum install -y nvidia-driver-latest-dkms
+sudo yum install -y nvidia-container-runtime
+sudo yum install -y nvidia-container-runtime-hook
+
+# Start the NVIDIA container toolkit
+sudo systemctl enable nvidia-container-toolkit
+sudo systemctl start nvidia-container-toolkit
+
 --==MYBOUNDARY==--
 EOF
   )
@@ -330,7 +339,7 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSManagedScalingPolicy" {
 
 resource "aws_eks_node_group" "gpu_nodes" {
   cluster_name    = aws_eks_cluster.eks_gpu.name
-  node_group_name = "eks-gpu-nodes-v4"
+  node_group_name = "eks-gpu-nodes-v5"
   node_role_arn   = aws_iam_role.node.arn
   subnet_ids      = local.private_subnet_ids
   capacity_type   = "SPOT"
