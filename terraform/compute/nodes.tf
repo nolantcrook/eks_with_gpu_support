@@ -261,17 +261,19 @@ resource "aws_launch_template" "gpu" {
   }
 
   user_data = base64encode(<<EOF
-    #!/bin/bash
-    sudo yum install -y amazon-ssm-agent
-    sudo systemctl enable amazon-ssm-agent
-    sudo systemctl start amazon-ssm-agent
-    sudo yum install -y nvidia-container-toolkit
-    sudo systemctl enable nvidia-container-toolkit
-    sudo systemctl start nvidia-container-toolkit
-    sudo yum install -y nvidia-driver-latest-dkms
-    sudo systemctl enable nvidia-driver-latest-dkms
-    sudo systemctl start nvidia-driver-latest-dkms
-  EOF
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="==MYBOUNDARY=="
+
+--==MYBOUNDARY==
+Content-Type: text/x-shellscript; charset="us-ascii"
+
+#!/bin/bash
+sudo yum install -y amazon-ssm-agent
+sudo systemctl enable amazon-ssm-agent
+sudo systemctl start amazon-ssm-agent
+
+--==MYBOUNDARY==--
+EOF
   )
 
   tag_specifications {
