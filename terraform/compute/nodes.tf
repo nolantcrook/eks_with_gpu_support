@@ -251,7 +251,7 @@ resource "aws_launch_template" "gpu" {
     aws_eks_cluster.eks_gpu.vpc_config[0].cluster_security_group_id
   ]
   # image_id = "ami-0c87233e00bd17f39"
-
+  key_name = local.ec2_ssh_key_pair_id
   block_device_mappings {
     device_name = "/dev/xvda"
     ebs {

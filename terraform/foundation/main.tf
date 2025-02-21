@@ -56,3 +56,15 @@ resource "aws_key_pair" "ec2_key_pair" {
   key_name   = "gpu_key_pair"
   public_key = tls_private_key.ssh_key.public_key_openssh
 }
+
+# Create AWS Secrets Manager secret for SSH private key
+resource "aws_secretsmanager_secret" "ssh_private_key" {
+  name        = "ssh/private-key"
+  description = "SSH private key for EC2 instances"
+}
+
+# Create initial secret version with the private key
+resource "aws_secretsmanager_secret_version" "ssh_private_key" {
+  secret_id     = aws_secretsmanager_secret.ssh_private_key.id
+  secret_string = tls_private_key.ssh_key.private_key_pem
+}

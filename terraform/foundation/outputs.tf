@@ -16,4 +16,10 @@ output "route53_zone_id_secret_arn" {
 output "ssh_private_key" {
   description = "The SSH private key"
   value       = tls_private_key.ssh_key.private_key_pem
+  sensitive   = true
+}
+
+output "ec2_ssh_key_pair_id" {
+  description = "The ID of the EC2 SSH key pair"
+  value       = aws_key_pair.ec2_key_pair.id
 }

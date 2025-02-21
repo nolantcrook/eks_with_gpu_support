@@ -20,7 +20,7 @@ locals {
   private_subnet_ids        = data.terraform_remote_state.networking.outputs.private_subnet_ids
   public_subnet_ids         = data.terraform_remote_state.networking.outputs.public_subnet_ids
   cluster_security_group_id = data.terraform_remote_state.networking.outputs.cluster_security_group_id
-
+  ec2_ssh_key_pair_id       = data.terraform_remote_state.foundation.outputs.ec2_ssh_key_pair_id
   # Get ASG names from both node groups
   ondemand_asg_name    = aws_eks_node_group.x86_ondemand.resources[0].autoscaling_groups[0].name
   spot_asg_name        = aws_eks_node_group.x86_spot.resources[0].autoscaling_groups[0].name
