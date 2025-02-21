@@ -118,3 +118,16 @@ resource "aws_security_group_rule" "alb_to_nginx_icmp" {
   security_group_id = aws_security_group.cluster.id
   description       = "Allow ALB to NGINX Ingress NodePort"
 }
+
+resource "aws_security_group_rule" "ssh_access" {
+  type      = "ingress"
+  from_port = 22
+  to_port   = 22
+  protocol  = "tcp"
+  cidr_blocks = [
+    "76.129.127.17/32",
+    "136.36.32.17/32"
+  ] // Replace with your actual IP address
+  security_group_id = aws_security_group.cluster.id
+  description       = "Allow SSH access from my IP"
+}
