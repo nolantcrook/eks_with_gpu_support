@@ -334,6 +334,9 @@ resource "aws_eks_node_group" "gpu_nodes" {
   node_role_arn   = aws_iam_role.node.arn
   subnet_ids      = local.private_subnet_ids
   capacity_type   = "SPOT"
+  lifecycle {
+    create_before_destroy = true
+  }
 
   instance_types = [ # Choose a small but cost-effective GPU instance
     "g4dn.xlarge",
