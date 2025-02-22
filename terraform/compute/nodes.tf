@@ -268,18 +268,35 @@ Content-Type: multipart/mixed; boundary="==MYBOUNDARY=="
 Content-Type: text/x-shellscript; charset="us-ascii"
 
 #!/bin/bash
-sudo yum install -y amazon-ssm-agent
-sudo systemctl enable amazon-ssm-agent
-sudo systemctl start amazon-ssm-agent
+set -ex
 
-sudo yum install -y nvidia-container-toolkit
-sudo yum install -y nvidia-driver-latest-dkms
-sudo yum install -y nvidia-container-runtime
-sudo yum install -y nvidia-container-runtime-hook
+# Ensure system packages are updated
+yum update -y || apt update -y
 
-# Start the NVIDIA container toolkit
-sudo systemctl enable nvidia-container-toolkit
-sudo systemctl start nvidia-container-toolkit
+# Install NVIDIA Container Runtime if missing
+if ! command -v nvidia-container-runtime &> /dev/null; then
+  echo "Installing NVIDIA Container Runtime..."
+  curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+  curl -fsSL https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo | sudo tee /etc/yum.repos.d/nvidia-container-toolkit.repo
+  yum install -y nvidia-container-toolkit || apt install -y nvidia-container-toolkit
+fi
+
+# Ensure NVIDIA runtime is set in containerd config
+if ! grep -q "nvidia-container-runtime" /etc/containerd/config.toml; then
+  sudo tee -a /etc/containerd/config.toml <<EOT
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia]
+  runtime_type = "io.containerd.runc.v2"
+  privileged_without_host_devices = false
+  pod_annotations = ["io.kubernetes.cri-o.Devices"]
+  [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia.options]
+    BinaryName = "/usr/bin/nvidia-container-runtime"
+EOT
+fi
+
+# Restart containerd and kubelet
+sudo systemctl restart containerd kubelet
+
+echo "NVIDIA container runtime setup completed!"
 
 --==MYBOUNDARY==--
 EOF
@@ -288,10 +305,11 @@ EOF
   tag_specifications {
     resource_type = "instance"
     tags = {
-      Name                                                                  = "eks-gpu-node-group-${var.environment}"
-      compute                                                               = "gpu"
-      "k8s.io/cluster-autoscaler/node-template/resources/ephemeral-storage" = "53687091200" # 50 GiB in bytes
-      "k8s.io/cluster-autoscaler/node-template/resources/nvidia.com/gpu"    = "1"
+      Name                                                                     = "eks-gpu-node-group-${var.environment}"
+      compute                                                                  = "gpu"
+      "k8s.io/cluster-autoscaler/node-template/resources/ephemeral-storage"    = "53687091200" # 50 GiB in bytes
+      "k8s.io/cluster-autoscaler/node-template/resources/nvidia.com/gpu"       = "1"
+      "k8s.io/cluster-autoscaler/node-template/resources/nvidia.com/gpu.count" = "1"
     }
   }
 }
