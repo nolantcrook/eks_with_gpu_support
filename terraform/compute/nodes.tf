@@ -357,14 +357,14 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSManagedScalingPolicy" {
 
 resource "aws_eks_node_group" "gpu_nodes" {
   cluster_name    = aws_eks_cluster.eks_gpu.name
-  node_group_name = "eks-gpu-nodes-v5"
+  node_group_name = "eks-gpu-nodes-v6"
   node_role_arn   = aws_iam_role.node.arn
   subnet_ids      = local.private_subnet_ids
   capacity_type   = "SPOT"
   lifecycle {
     create_before_destroy = true
   }
-
+  ami_type = "AL2023_x86_64_NVIDIA"
   instance_types = [ # Choose a small but cost-effective GPU instance
     "g4dn.xlarge",
     "g4dn.2xlarge",
