@@ -260,22 +260,6 @@ resource "aws_launch_template" "gpu" {
     }
   }
 
-  user_data = base64encode(<<EOF
---==BOUNDARY==
-Content-Type: text/x-shellscript; charset="us-ascii"
-
-#!/bin/bash
-set -ex
-echo "Updating yum"
-yum update -y
-echo "Adding nvidia container toolkit repo"
-curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
-curl -fsSL https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo | sudo tee /etc/yum.repos.d/nvidia-container-toolkit.repo
-echo "Installing nvidia container toolkit"
-sudo yum install -y nvidia-container-toolkit
-sudo systemctl restart containerd
-EOF
-  )
 
   tag_specifications {
     resource_type = "instance"
