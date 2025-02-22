@@ -261,44 +261,19 @@ resource "aws_launch_template" "gpu" {
   }
 
   user_data = base64encode(<<EOF
-MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="==MYBOUNDARY=="
-
---==MYBOUNDARY==
+--==BOUNDARY==
 Content-Type: text/x-shellscript; charset="us-ascii"
 
 #!/bin/bash
 set -ex
-
-# Ensure system packages are updated
-yum update -y || apt update -y
-
-# Install NVIDIA Container Runtime if missing
-if ! command -v nvidia-container-runtime &> /dev/null; then
-  echo "Installing NVIDIA Container Runtime..."
-  curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
-  curl -fsSL https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo | sudo tee /etc/yum.repos.d/nvidia-container-toolkit.repo
-  yum install -y nvidia-container-toolkit || apt install -y nvidia-container-toolkit
-fi
-
-# Ensure NVIDIA runtime is set in containerd config
-if ! grep -q "nvidia-container-runtime" /etc/containerd/config.toml; then
-  sudo tee -a /etc/containerd/config.toml <<EOT
-[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia]
-  runtime_type = "io.containerd.runc.v2"
-  privileged_without_host_devices = false
-  pod_annotations = ["io.kubernetes.cri-o.Devices"]
-  [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia.options]
-    BinaryName = "/usr/bin/nvidia-container-runtime"
-EOT
-fi
-
-# Restart containerd and kubelet
-sudo systemctl restart containerd kubelet
-
-echo "NVIDIA container runtime setup completed!"
-
---==MYBOUNDARY==--
+echo "Updating yum"
+yum update -y
+echo "Adding nvidia container toolkit repo"
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+curl -fsSL https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo | sudo tee /etc/yum.repos.d/nvidia-container-toolkit.repo
+echo "Installing nvidia container toolkit"
+sudo yum install -y nvidia-container-toolkit
+sudo systemctl restart containerd
 EOF
   )
 
@@ -313,6 +288,9 @@ EOF
     }
   }
 }
+
+
+
 
 resource "aws_iam_role" "node" {
   name = "eks-node-role-${var.environment}"
