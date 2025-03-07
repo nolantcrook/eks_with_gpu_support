@@ -192,8 +192,8 @@ pipeline {
                                             if aws eks describe-cluster --name eks-gpu-${params.ENV} --region ${AWS_REGION} >/dev/null 2>&1; then
                                                 echo "Cluster exists, attempting cleanup..."
                                                 aws eks update-kubeconfig --name eks-gpu-${params.ENV} --region ${AWS_REGION} || true
-                                                helm uninstall nginx-ingress -n ingress-nginx || true
-                                                kubectl delete namespace ingress-nginx || true
+                                                // helm uninstall nginx-ingress -n ingress-nginx || true
+                                                // kubectl delete namespace ingress-nginx || true
                                             else
                                                 echo "Cluster does not exist, skipping cleanup..."
                                             fi
