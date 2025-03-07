@@ -115,20 +115,3 @@ resource "aws_iam_role_policy_attachment" "efs_csi_driver_policy" {
   role       = aws_iam_role.efs_csi_driver.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy"
 }
-
-resource "helm_release" "efs_csi_driver" {
-  name       = "aws-efs-csi-driver"
-  repository = "https://kubernetes-sigs.github.io/aws-efs-csi-driver/"
-  chart      = "aws-efs-csi-driver"
-  version    = "2.2.0"
-
-  set {
-    name  = "controller.serviceAccount.create"
-    value = "false"
-  }
-
-  set {
-    name  = "controller.serviceAccount.name"
-    value = "efs-csi-controller-sa"
-  }
-}

@@ -32,3 +32,9 @@ resource "aws_eks_addon" "pod_identity" {
 # 1. ALB is managed by Terraform
 # 2. Traffic routes directly to NGINX ingress NodePort
 # 3. NGINX ingress handles internal service routing
+
+resource "aws_eks_addon" "efs_csi_driver" {
+  cluster_name  = aws_eks_cluster.eks_gpu.name
+  addon_name    = "efs-csi-driver"
+  addon_version = "v1.1.0-eksbuild.1"
+}
