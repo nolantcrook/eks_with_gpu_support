@@ -94,3 +94,35 @@ resource "aws_iam_role_policy_attachment" "efs_access_attach" {
   role       = aws_iam_role.cluster.name
   policy_arn = aws_iam_policy.efs_access.arn
 }
+
+resource "helm_release" "efs_csi_driver" {
+  name       = "aws-efs-csi-driver"
+  repository = "https://kubernetes-sigs.github.io/aws-efs-csi-driver/"
+  chart      = "aws-efs-csi-driver"
+  version    = "2.2.0" # Check for the latest version
+
+  set {
+    name  = "controller.replicas"
+    value = "2"
+  }
+
+  set {
+    name  = "node.tolerations[0].key"
+    value = "nvidia.com/gpu"
+  }
+
+  set {
+    name  = "node.tolerations[0].operator"
+    value = "Equal"
+  }
+
+  set {
+    name  = "node.tolerations[0].value"
+    value = "true"
+  }
+
+  set {
+    name  = "node.tolerations[0].effect"
+    value = "NoSchedule"
+  }
+}
