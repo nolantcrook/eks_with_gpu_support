@@ -36,5 +36,5 @@ resource "aws_eks_addon" "pod_identity" {
 resource "aws_eks_addon" "efs_csi_driver" {
   cluster_name  = aws_eks_cluster.eks_gpu.name
   addon_name    = "efs-csi-driver"
-  addon_version = "v2.1.6"
+  addon_version = "v2.1.6-eksbuild.1"
 }
