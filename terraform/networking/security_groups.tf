@@ -131,3 +131,37 @@ resource "aws_security_group_rule" "ssh_access" {
   security_group_id = aws_security_group.cluster.id
   description       = "Allow SSH access from my IP"
 }
+
+# EFS Security Group
+resource "aws_security_group" "efs" {
+  name        = "efs-sg-${var.environment}"
+  description = "Security group for EFS"
+  vpc_id      = aws_vpc.main.id
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = {
+    Name        = "efs-sg-${var.environment}"
+    Environment = var.environment
+  }
+}
+
+# Allow EKS Cluster to access EFS
+resource "aws_security_group_rule" "cluster_to_efs" {
+  type                     = "ingress"
+  from_port                = 2049
+  to_port                  = 2049
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.cluster.id
+  security_group_id        = aws_security_group.efs.id
+  description              = "Allow EKS Cluster to access EFS over NFS"
+}
+
+resource "aws_efs_mount_target" "example" {
+  for_each        = { for idx, subnet_id in aws_subnet.private : idx => subnet_id }
+  file_system_id  = local.efs_file_system_id
+  subnet_id       = each.value.id
+  security_groups = [aws_security_group.efs.id]
+}
