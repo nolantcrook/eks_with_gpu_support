@@ -95,34 +95,23 @@ resource "aws_iam_role_policy_attachment" "efs_access_attach" {
   policy_arn = aws_iam_policy.efs_access.arn
 }
 
-resource "helm_release" "efs_csi_driver" {
-  name       = "aws-efs-csi-driver"
-  repository = "https://kubernetes-sigs.github.io/aws-efs-csi-driver/"
-  chart      = "aws-efs-csi-driver"
-  version    = "2.2.0" # Check for the latest version
+resource "aws_iam_role" "efs_csi_driver" {
+  name = "eks-efs-csi-driver-role-${var.environment}"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "eks.amazonaws.com"
+        },
+        Action : "sts:AssumeRole"
+      }
+    ]
+  })
+}
 
-  set {
-    name  = "controller.replicas"
-    value = "2"
-  }
-
-  set {
-    name  = "node.tolerations[0].key"
-    value = "nvidia.com/gpu"
-  }
-
-  set {
-    name  = "node.tolerations[0].operator"
-    value = "Equal"
-  }
-
-  set {
-    name  = "node.tolerations[0].value"
-    value = "NoExecute"
-  }
-
-  set {
-    name  = "node.tolerations[0].effect"
-    value = "NoSchedule"
-  }
+resource "aws_iam_role_policy_attachment" "efs_csi_driver_policy" {
+  role       = aws_iam_role.efs_csi_driver.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy"
 }
