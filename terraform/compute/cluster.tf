@@ -118,7 +118,7 @@ resource "helm_release" "efs_csi_driver" {
 
   set {
     name  = "node.tolerations[0].value"
-    value = "true"
+    value = "NoExecute"
   }
 
   set {
