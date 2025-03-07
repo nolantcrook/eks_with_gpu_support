@@ -50,3 +50,13 @@ resource "aws_s3_bucket_public_access_block" "alb_logs" {
 # Data sources
 data "aws_caller_identity" "current" {}
 data "aws_elb_service_account" "main" {}
+
+# EFS File System
+resource "aws_efs_file_system" "example" {
+  creation_token = "example-efs-token"
+
+  tags = {
+    Name        = "invokeai-efs-${var.environment}"
+    Environment = var.environment
+  }
+}
