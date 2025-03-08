@@ -94,24 +94,3 @@ resource "aws_iam_role_policy_attachment" "efs_access_attach" {
   role       = aws_iam_role.cluster.name
   policy_arn = aws_iam_policy.efs_access.arn
 }
-
-resource "aws_iam_role" "efs_csi_driver" {
-  name = "eks-efs-csi-driver-role-${var.environment}"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Principal = {
-          Service = "eks.amazonaws.com"
-        },
-        Action : "sts:AssumeRole"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "efs_csi_driver_policy" {
-  role       = aws_iam_role.efs_csi_driver.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy"
-}
