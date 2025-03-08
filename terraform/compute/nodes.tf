@@ -33,9 +33,9 @@ resource "aws_eks_node_group" "x86_spot" {
   ]
 
   scaling_config {
-    desired_size = 1
+    desired_size = 2
     max_size     = 10
-    min_size     = 1
+    min_size     = 2
   }
 
   update_config {
