@@ -54,8 +54,8 @@ resource "aws_eks_node_group" "arm_spot" {
   }
 
   launch_template {
-    id      = aws_launch_template.spot.id
-    version = aws_launch_template.spot.latest_version
+    id      = aws_launch_template.spot_arm.id
+    version = aws_launch_template.spot_arm.latest_version
   }
 
   depends_on = [
