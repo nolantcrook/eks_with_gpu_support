@@ -4,7 +4,7 @@ resource "aws_eks_node_group" "arm_spot" {
   node_role_arn   = aws_iam_role.node.arn
   subnet_ids      = local.private_subnet_ids
   capacity_type   = "SPOT"
-
+  ami_type        = "AL2023_ARM_64_STANDARD"
   instance_types = [
     "a1.medium",
     "a1.large",
@@ -45,7 +45,7 @@ resource "aws_eks_node_group" "arm_spot" {
   }
 
   tags = {
-    Name                                                      = "eks-x86-spot-${var.environment}"
+    Name                                                      = "eks-arm-spot-${var.environment}"
     Environment                                               = var.environment
     "k8s.io/cluster-autoscaler/enabled"                       = "true"
     "k8s.io/cluster-autoscaler/node-template/label/lifecycle" = "Ec2Spot"
