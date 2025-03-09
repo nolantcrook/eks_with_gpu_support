@@ -15,7 +15,7 @@ resource "aws_route53_record" "invokeai-api" {
 
 resource "aws_lb_listener_rule" "invokeai-api" {
   listener_arn = aws_lb_listener.argocd.arn
-  priority     = 300
+  priority     = 500
 
   action {
     type             = "forward"
