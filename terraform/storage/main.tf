@@ -60,3 +60,15 @@ resource "aws_efs_file_system" "example" {
     Environment = var.environment
   }
 }
+
+# SQS Queue
+resource "aws_sqs_queue" "invokeai_api_queue" {
+  name                       = "invokeai-api-queue-${var.environment}"
+  message_retention_seconds  = 1800 # 30 minutes
+  visibility_timeout_seconds = 600  # 10 minutes
+
+  tags = {
+    Name        = "example-queue-${var.environment}"
+    Environment = var.environment
+  }
+}
