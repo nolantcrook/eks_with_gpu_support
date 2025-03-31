@@ -37,56 +37,56 @@ resource "aws_acm_certificate_validation" "argocd" {
   validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
 }
 
-# WAF IPSet for allowed IPs
-resource "aws_wafv2_ip_set" "allowed_ips" {
-  name               = "allowed-ips"
-  description        = "Allowed IP addresses"
-  scope              = "REGIONAL"
-  ip_address_version = "IPV4"
-  # addresses = [
-  #   "76.129.127.17/32",
-  #   "136.36.32.17/32"
-  # ]
-  addresses = ["0.0.0.0/0"]
-}
+# # WAF IPSet for allowed IPs
+# resource "aws_wafv2_ip_set" "allowed_ips" {
+#   name               = "allowed-ips"
+#   description        = "Allowed IP addresses"
+#   scope              = "REGIONAL"
+#   ip_address_version = "IPV4"
+#   # addresses = [
+#   #   "76.129.127.17/32",
+#   #   "136.36.32.17/32"
+#   # ]
+#   addresses = ["0.0.0.0/0"]
+# }
 
-# WAF WebACL
-resource "aws_wafv2_web_acl" "argocd" {
-  name        = "argocd-waf"
-  description = "WAF for ArgoCD ALB"
-  scope       = "REGIONAL"
+# # WAF WebACL
+# resource "aws_wafv2_web_acl" "argocd" {
+#   name        = "argocd-waf"
+#   description = "WAF for ArgoCD ALB"
+#   scope       = "REGIONAL"
 
-  default_action {
-    block {}
-  }
+#   default_action {
+#     block {}
+#   }
 
-  rule {
-    name     = "AllowedIPs"
-    priority = 1
+#   rule {
+#     name     = "AllowedIPs"
+#     priority = 1
 
-    action {
-      allow {}
-    }
+#     action {
+#       allow {}
+#     }
 
-    statement {
-      ip_set_reference_statement {
-        arn = aws_wafv2_ip_set.allowed_ips.arn
-      }
-    }
+#     statement {
+#       ip_set_reference_statement {
+#         arn = aws_wafv2_ip_set.allowed_ips.arn
+#       }
+#     }
 
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name                = "AllowedIPsMetric"
-      sampled_requests_enabled   = true
-    }
-  }
+#     visibility_config {
+#       cloudwatch_metrics_enabled = true
+#       metric_name                = "AllowedIPsMetric"
+#       sampled_requests_enabled   = true
+#     }
+#   }
 
-  visibility_config {
-    cloudwatch_metrics_enabled = true
-    metric_name                = "ArgocdWafMetric"
-    sampled_requests_enabled   = true
-  }
-}
+#   visibility_config {
+#     cloudwatch_metrics_enabled = true
+#     metric_name                = "ArgocdWafMetric"
+#     sampled_requests_enabled   = true
+#   }
+# }
 
 # ALB for ArgoCD
 resource "aws_lb" "argocd" {
@@ -179,7 +179,7 @@ resource "aws_lb_listener" "argocd" {
 
 
 # WAF association with ALB
-resource "aws_wafv2_web_acl_association" "argocd" {
-  resource_arn = aws_lb.argocd.arn
-  web_acl_arn  = aws_wafv2_web_acl.argocd.arn
-}
+# resource "aws_wafv2_web_acl_association" "argocd" {
+#   resource_arn = aws_lb.argocd.arn
+#   web_acl_arn  = aws_wafv2_web_acl.argocd.arn
+# }
