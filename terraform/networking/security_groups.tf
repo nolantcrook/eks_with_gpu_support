@@ -13,6 +13,7 @@ resource "aws_security_group" "argocd" {
     #   "76.129.127.17/32",
     #   "136.36.32.17/32"
     # ]
+    cidr_blocks = ["0.0.0.0/0"]
     description = "Allow HTTP traffic for redirect"
   }
 
@@ -25,6 +26,7 @@ resource "aws_security_group" "argocd" {
     #   "76.129.127.17/32",
     #   "136.36.32.17/32"
     # ]
+    cidr_blocks = ["0.0.0.0/0"]
     description = "Allow HTTPS traffic"
   }
 

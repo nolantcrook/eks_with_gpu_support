@@ -47,6 +47,7 @@ resource "aws_wafv2_ip_set" "allowed_ips" {
   #   "76.129.127.17/32",
   #   "136.36.32.17/32"
   # ]
+  addresses = ["0.0.0.0/0"]
 }
 
 # WAF WebACL
