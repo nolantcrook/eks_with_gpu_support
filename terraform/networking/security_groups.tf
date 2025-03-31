@@ -9,10 +9,10 @@ resource "aws_security_group" "argocd" {
     from_port = 80
     to_port   = 80
     protocol  = "tcp"
-    cidr_blocks = [
-      "76.129.127.17/32",
-      "136.36.32.17/32"
-    ]
+    # cidr_blocks = [
+    #   "76.129.127.17/32",
+    #   "136.36.32.17/32"
+    # ]
     description = "Allow HTTP traffic for redirect"
   }
 
@@ -21,10 +21,10 @@ resource "aws_security_group" "argocd" {
     from_port = 443
     to_port   = 443
     protocol  = "tcp"
-    cidr_blocks = [
-      "76.129.127.17/32",
-      "136.36.32.17/32"
-    ]
+    # cidr_blocks = [
+    #   "76.129.127.17/32",
+    #   "136.36.32.17/32"
+    # ]
     description = "Allow HTTPS traffic"
   }
 
