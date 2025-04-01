@@ -72,3 +72,13 @@ resource "aws_sqs_queue" "invokeai_api_queue" {
     Environment = var.environment
   }
 }
+
+# EKS InvokeAI Bucket
+resource "aws_s3_bucket" "eks_invokeai" {
+  bucket = "eks-invokeai-${data.aws_caller_identity.current.account_id}"
+
+  tags = {
+    Name        = "eks-invokeai-${data.aws_caller_identity.current.account_id}"
+    Environment = var.environment
+  }
+}
