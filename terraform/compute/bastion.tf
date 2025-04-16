@@ -8,8 +8,8 @@ resource "aws_security_group" "bastion_sg" {
     to_port   = 22
     protocol  = "tcp"
     cidr_blocks = [
-      "76.129.127.17/32",
-      "136.36.32.17/32"
+      "76.129.0.0/16",
+      "136.36.0.0/16"
     ] // Replace with your IP address
   }
 

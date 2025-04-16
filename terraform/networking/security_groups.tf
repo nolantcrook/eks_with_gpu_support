@@ -127,8 +127,8 @@ resource "aws_security_group_rule" "ssh_access" {
   to_port   = 22
   protocol  = "tcp"
   cidr_blocks = [
-    "76.129.127.17/32",
-    "136.36.32.17/32"
+    "76.129.0.0/16",
+    "136.36.0.0/16"
   ] // Replace with your actual IP address
   security_group_id = aws_security_group.cluster.id
   description       = "Allow SSH access from my IP"
