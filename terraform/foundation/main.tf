@@ -59,7 +59,7 @@ resource "aws_key_pair" "ec2_key_pair" {
 
 # Create AWS Secrets Manager secret for SSH private key
 resource "aws_secretsmanager_secret" "ssh_private_key" {
-  name        = "ssh/private-key"
+  name        = "ssh/key-pair-private-key"
   description = "SSH private key for EC2 instances"
 }
 
