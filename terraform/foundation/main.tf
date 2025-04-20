@@ -1,6 +1,6 @@
 # Create AWS Secrets Manager secret for GitHub credentials
 resource "aws_secretsmanager_secret" "github_credentials" {
-  name        = "github/stable-diff-gitops-secret"
+  name        = "github/argocd-gitops-secret"
   description = "GitHub credentials for ArgoCD"
 }
 
@@ -53,7 +53,7 @@ resource "tls_private_key" "ssh_key" {
 }
 
 resource "aws_key_pair" "ec2_key_pair" {
-  key_name   = "gpu_key_pair"
+  key_name   = "key_pair"
   public_key = tls_private_key.ssh_key.public_key_openssh
 }
 
