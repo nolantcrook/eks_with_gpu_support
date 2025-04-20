@@ -1,9 +1,9 @@
 # ALB Logs Bucket
 resource "aws_s3_bucket" "alb_logs" {
-  bucket = "argocd-alb-logs-${data.aws_caller_identity.current.account_id}"
+  bucket = "alb-logs-${data.aws_caller_identity.current.account_id}"
 
   tags = {
-    Name        = "argocd-alb-logs-${var.environment}"
+    Name        = "alb-logs-${var.environment}"
     Environment = var.environment
   }
 }
@@ -47,38 +47,34 @@ resource "aws_s3_bucket_public_access_block" "alb_logs" {
   restrict_public_buckets = true
 }
 
-# Data sources
-data "aws_caller_identity" "current" {}
-data "aws_elb_service_account" "main" {}
-
 # EFS File System
-resource "aws_efs_file_system" "example" {
+resource "aws_efs_file_system" "eks-efs" {
   creation_token = "example-efs-token"
 
   tags = {
-    Name        = "invokeai-efs-${var.environment}"
+    Name        = "eks-efs-${var.environment}"
     Environment = var.environment
   }
 }
 
 # SQS Queue
-resource "aws_sqs_queue" "invokeai_api_queue" {
-  name                       = "invokeai-api-queue-${var.environment}"
+resource "aws_sqs_queue" "api_queue" {
+  name                       = "api-queue-${var.environment}"
   message_retention_seconds  = 1800 # 30 minutes
   visibility_timeout_seconds = 600  # 10 minutes
 
   tags = {
-    Name        = "example-queue-${var.environment}"
+    Name        = "api-queue-${var.environment}"
     Environment = var.environment
   }
 }
 
-# EKS InvokeAI Bucket
-resource "aws_s3_bucket" "eks_invokeai" {
-  bucket = "eks-invokeai-${data.aws_caller_identity.current.account_id}"
+# EKS Bucket
+resource "aws_s3_bucket" "eks_bucket" {
+  bucket = "eks-bucket-${data.aws_caller_identity.current.account_id}"
 
   tags = {
-    Name        = "eks-invokeai-${data.aws_caller_identity.current.account_id}"
+    Name        = "eks-bucket-${data.aws_caller_identity.current.account_id}"
     Environment = var.environment
   }
 }

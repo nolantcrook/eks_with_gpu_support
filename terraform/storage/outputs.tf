@@ -10,5 +10,5 @@ output "alb_logs_bucket_name" {
 
 output "efs_file_system_id" {
   description = "ID of the EFS file system"
-  value       = aws_efs_file_system.example.id
+  value       = aws_efs_file_system.eks-efs.id
 }
