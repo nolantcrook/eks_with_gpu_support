@@ -8,7 +8,7 @@ resource "aws_lb" "eks_alb" {
   subnets            = aws_subnet.public[*].id
 
   access_logs {
-    bucket  = split(":", var.alb_logs_bucket_arn)[5]
+    bucket  = split(":", local.alb_logs_bucket_arn)[5]
     enabled = true
   }
 

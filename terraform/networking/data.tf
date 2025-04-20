@@ -39,4 +39,5 @@ data "aws_route53_zone" "hosted_zone" {
 locals {
   route53_zone_id   = jsondecode(data.aws_secretsmanager_secret_version.route53_zone_id.secret_string).zone_id
   route53_zone_name = data.aws_route53_zone.hosted_zone.name
+  alb_logs_bucket_arn = data.terraform_remote_state.storage.outputs.alb_logs_bucket_arn
 }

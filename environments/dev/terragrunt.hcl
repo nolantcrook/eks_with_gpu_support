@@ -5,7 +5,7 @@ remote_state {
     if_exists = "overwrite_terragrunt"
   }
   config = {
-    bucket         = "eks-stable-diffusion-terraform-state"
+    bucket         = inputs.state_bucket
     key            = "${get_env("ENV", "dev")}/terraform/${basename(get_terragrunt_dir())}/terraform.tfstate"
     region         = "us-west-2"
     encrypt        = true
@@ -43,6 +43,7 @@ inputs = {
   environment = "dev"
   cluster_name = "eks-gpu-dev"
   instance_types = ["m6g.medium", "m6g.large"]
+  state_bucket = "eks-stable-diffusion-terraform-state"
   desired_nodes = 1
   max_nodes = 2
   min_nodes = 1

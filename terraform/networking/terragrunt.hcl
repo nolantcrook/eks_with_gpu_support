@@ -7,7 +7,8 @@ include "state_bucket" {
 }
 
 inputs = {
-  environment = get_env("ENV", "dev")
+  environment = env
+  state_bucket = state_bucket
   vpc_cidr = "10.0.0.0/16"
   public_subnet_cidrs = [
     "10.0.1.0/24",

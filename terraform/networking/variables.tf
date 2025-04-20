@@ -33,10 +33,6 @@ variable "availability_zones" {
   default     = ["us-west-2a", "us-west-2b"]
 }
 
-variable "alb_logs_bucket_arn" {
-  type        = string
-  description = "ARN of the S3 bucket for ALB access logs"
-}
 
 # Removing unused variables:
 # - single_az_dev
