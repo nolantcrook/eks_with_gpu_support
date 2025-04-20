@@ -1,99 +1,10 @@
-# Certificate
-resource "aws_acm_certificate" "argocd" {
-  domain_name               = "hello-world-domain.com"     # Apex domain
-  subject_alternative_names = ["*.hello-world-domain.com"] # Wildcard as SAN
-  validation_method         = "DNS"
 
-  tags = {
-    Name = "wildcard-cert"
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-# DNS validation record
-resource "aws_route53_record" "cert_validation" {
-  for_each = {
-    for dvo in aws_acm_certificate.argocd.domain_validation_options : dvo.domain_name => {
-      name   = dvo.resource_record_name
-      record = dvo.resource_record_value
-      type   = dvo.resource_record_type
-    }
-  }
-
-  allow_overwrite = true
-  name            = each.value.name
-  records         = [each.value.record]
-  ttl             = 60
-  type            = each.value.type
-  zone_id         = local.route53_zone_id
-}
-
-# Certificate validation
-resource "aws_acm_certificate_validation" "argocd" {
-  certificate_arn         = aws_acm_certificate.argocd.arn
-  validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
-}
-
-# # WAF IPSet for allowed IPs
-# resource "aws_wafv2_ip_set" "allowed_ips" {
-#   name               = "allowed-ips"
-#   description        = "Allowed IP addresses"
-#   scope              = "REGIONAL"
-#   ip_address_version = "IPV4"
-#   # addresses = [
-#   #   "76.129.127.17/32",
-#   #   "136.36.32.17/32"
-#   # ]
-#   addresses = ["0.0.0.0/0"]
-# }
-
-# # WAF WebACL
-# resource "aws_wafv2_web_acl" "argocd" {
-#   name        = "argocd-waf"
-#   description = "WAF for ArgoCD ALB"
-#   scope       = "REGIONAL"
-
-#   default_action {
-#     block {}
-#   }
-
-#   rule {
-#     name     = "AllowedIPs"
-#     priority = 1
-
-#     action {
-#       allow {}
-#     }
-
-#     statement {
-#       ip_set_reference_statement {
-#         arn = aws_wafv2_ip_set.allowed_ips.arn
-#       }
-#     }
-
-#     visibility_config {
-#       cloudwatch_metrics_enabled = true
-#       metric_name                = "AllowedIPsMetric"
-#       sampled_requests_enabled   = true
-#     }
-#   }
-
-#   visibility_config {
-#     cloudwatch_metrics_enabled = true
-#     metric_name                = "ArgocdWafMetric"
-#     sampled_requests_enabled   = true
-#   }
-# }
-
-# ALB for ArgoCD
-resource "aws_lb" "argocd" {
-  name               = "argocd-${var.environment}"
+# ALB
+resource "aws_lb" "eks_alb" {
+  name               = "eks-alb-${var.environment}"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.argocd.id]
+  security_groups    = [aws_security_group.alb_security_group.id]
   subnets            = aws_subnet.public[*].id
 
   access_logs {
@@ -102,14 +13,14 @@ resource "aws_lb" "argocd" {
   }
 
   tags = {
-    Name        = "argocd-${var.environment}"
+    Name        = "eks-alb-${var.environment}"
     Environment = var.environment
   }
 }
 
 # Target group for ArgoCD
-resource "aws_lb_target_group" "argocd" {
-  name        = "argocd-${var.environment}"
+resource "aws_lb_target_group" "eks_alb" {
+  name        = "eks-alb-${var.environment}"
   port        = 30080
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
@@ -132,15 +43,15 @@ resource "aws_lb_target_group" "argocd" {
   }
 
   tags = {
-    Name        = "argocd-${var.environment}"
+    Name        = "eks-alb-${var.environment}"
     Environment = var.environment
   }
 }
 
 
 # HTTP Listener (redirects to HTTPS)
-resource "aws_lb_listener" "argocd_http" {
-  load_balancer_arn = aws_lb.argocd.arn
+resource "aws_lb_listener" "eks_alb_http" {
+  load_balancer_arn = aws_lb.eks_alb.arn
   port              = "80"
   protocol          = "HTTP"
 
@@ -156,30 +67,23 @@ resource "aws_lb_listener" "argocd_http" {
 }
 
 # HTTPS Listener
-resource "aws_lb_listener" "argocd" {
-  load_balancer_arn = aws_lb.argocd.arn
+resource "aws_lb_listener" "eks_alb" {
+  load_balancer_arn = aws_lb.eks_alb.arn
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
-  certificate_arn   = aws_acm_certificate_validation.argocd.certificate_arn
+  certificate_arn   = aws_acm_certificate.hosted_zone_acm_certificate.arn
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.argocd.arn
+    target_group_arn = aws_lb_target_group.eks_alb.arn
   }
 
   depends_on = [
-    aws_acm_certificate_validation.argocd
+    aws_acm_certificate_validation.hosted_zone_acm_certificate_validation
   ]
 
   lifecycle {
     create_before_destroy = true
   }
 }
-
-
-# WAF association with ALB
-# resource "aws_wafv2_web_acl_association" "argocd" {
-#   resource_arn = aws_lb.argocd.arn
-#   web_acl_arn  = aws_wafv2_web_acl.argocd.arn
-# }

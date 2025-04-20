@@ -4,7 +4,7 @@ resource "aws_vpc" "main" {
   enable_dns_support   = true
 
   tags = {
-    Name        = "eks-gpu-${var.environment}"
+    Name        = "eks-cluster-vpc-${var.environment}"
     Environment = var.environment
   }
 }
@@ -19,7 +19,7 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name                                               = "eks-gpu-public-${var.environment}-${var.availability_zones[count.index]}"
+    Name                                               = "eks-public-subnet-${var.environment}-${var.availability_zones[count.index]}"
     Environment                                        = var.environment
     "kubernetes.io/cluster/eks-gpu-${var.environment}" = "shared"
     "kubernetes.io/role/elb"                           = "1"
@@ -34,7 +34,7 @@ resource "aws_subnet" "private" {
   availability_zone = var.availability_zones[count.index]
 
   tags = {
-    Name                                               = "eks-gpu-private-${var.environment}-${var.availability_zones[count.index]}"
+    Name                                               = "eks-private-subnet-${var.environment}-${var.availability_zones[count.index]}"
     Environment                                        = var.environment
     "kubernetes.io/cluster/eks-gpu-${var.environment}" = "shared"
     "kubernetes.io/role/internal-elb"                  = "1"
@@ -46,7 +46,7 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name        = "eks-gpu-${var.environment}"
+    Name        = "eks-ig-${var.environment}"
     Environment = var.environment
   }
 }
@@ -57,7 +57,7 @@ resource "aws_eip" "nat" {
   domain = "vpc"
 
   tags = {
-    Name        = "eks-gpu-nat-${var.environment}-${var.availability_zones[count.index]}"
+    Name        = "eks-nat-${var.environment}-${var.availability_zones[count.index]}"
     Environment = var.environment
   }
 }
@@ -69,7 +69,7 @@ resource "aws_nat_gateway" "main" {
   allocation_id = aws_eip.nat[count.index].id
 
   tags = {
-    Name        = "eks-gpu-${var.environment}-${var.availability_zones[count.index]}"
+    Name        = "eks-nat-${var.environment}-${var.availability_zones[count.index]}"
     Environment = var.environment
   }
 
@@ -86,7 +86,7 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name        = "eks-gpu-public-${var.environment}"
+    Name        = "eks-public-rt-${var.environment}"
     Environment = var.environment
   }
 }
@@ -101,7 +101,7 @@ resource "aws_route_table" "private" {
   }
 
   tags = {
-    Name        = "eks-gpu-private-${var.environment}-${var.availability_zones[count.index]}"
+    Name        = "eks-private-rt-${var.environment}-${var.availability_zones[count.index]}"
     Environment = var.environment
   }
 }

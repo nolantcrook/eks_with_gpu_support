@@ -1,31 +1,23 @@
 # Security Groups
-resource "aws_security_group" "argocd" {
-  name        = "argocd-alb-${var.environment}"
-  description = "Security group for ArgoCD ALB"
+resource "aws_security_group" "alb_security_group" {
+  name        = "alb-security-group-${var.environment}"
+  description = "Security group for ALB"
   vpc_id      = aws_vpc.main.id
 
   # HTTP ingress for redirect
   ingress {
-    from_port = 80
-    to_port   = 80
-    protocol  = "tcp"
-    # cidr_blocks = [
-    #   "76.129.127.17/32",
-    #   "136.36.32.17/32"
-    # ]
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
     description = "Allow HTTP traffic for redirect"
   }
 
   # HTTPS ingress
   ingress {
-    from_port = 443
-    to_port   = 443
-    protocol  = "tcp"
-    # cidr_blocks = [
-    #   "76.129.127.17/32",
-    #   "136.36.32.17/32"
-    # ]
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
     description = "Allow HTTPS traffic"
   }
@@ -63,11 +55,8 @@ resource "aws_security_group" "argocd" {
     description = "Allow outbound ICMP traffic for ping"
   }
 
-  lifecycle {
-    create_before_destroy = true
-  }
   tags = {
-    Name        = "argocd-alb-${var.environment}"
+    Name        = "eks-alb-${var.environment}"
     Environment = var.environment
   }
 }
@@ -77,10 +66,6 @@ resource "aws_security_group" "cluster" {
   name        = "eks-cluster-sg-${var.environment}"
   description = "Security group for EKS cluster nodes"
   vpc_id      = aws_vpc.main.id
-
-  lifecycle {
-    create_before_destroy = true
-  }
 
   tags = {
     Name        = "eks-cluster-sg-${var.environment}"
@@ -105,7 +90,7 @@ resource "aws_security_group_rule" "alb_to_nginx" {
   from_port                = 30080 # NGINX NodePort
   to_port                  = 30080
   protocol                 = "tcp"
-  source_security_group_id = aws_security_group.argocd.id # ALB security group
+  source_security_group_id = aws_security_group.alb_security_group.id # ALB security group
   security_group_id        = aws_security_group.cluster.id
   description              = "Allow ALB to NGINX Ingress NodePort"
 }
@@ -121,28 +106,24 @@ resource "aws_security_group_rule" "alb_to_nginx_icmp" {
   description       = "Allow ALB to NGINX Ingress NodePort"
 }
 
-resource "aws_security_group_rule" "ssh_access" {
-  type      = "ingress"
-  from_port = 22
-  to_port   = 22
-  protocol  = "tcp"
-  cidr_blocks = [
-    "76.129.0.0/16",
-    "136.36.0.0/16"
-  ] // Replace with your actual IP address
-  security_group_id = aws_security_group.cluster.id
-  description       = "Allow SSH access from my IP"
-}
+# resource "aws_security_group_rule" "ssh_access" {
+#   type      = "ingress"
+#   from_port = 22
+#   to_port   = 22
+#   protocol  = "tcp"
+#   cidr_blocks = [
+#     "76.129.0.0/16",
+#     "136.36.0.0/16"
+#   ] // Replace with your actual IP address
+#   security_group_id = aws_security_group.cluster.id
+#   description       = "Allow SSH access from my IP"
+# }
 
 # EFS Security Group
 resource "aws_security_group" "efs" {
   name        = "efs-sg-${var.environment}"
   description = "Security group for EFS"
   vpc_id      = aws_vpc.main.id
-
-  lifecycle {
-    create_before_destroy = true
-  }
 
   tags = {
     Name        = "efs-sg-${var.environment}"

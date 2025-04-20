@@ -4,11 +4,10 @@ variable "environment" {
   type        = string
 }
 
-variable "route53_zone_id_secret_arn" {
-  description = "Route53 hosted zone ID for DNS validation"
+variable "state_bucket" {
+  description = "State bucket name"
   type        = string
 }
-
 
 variable "vpc_cidr" {
   description = "CIDR block for VPC"

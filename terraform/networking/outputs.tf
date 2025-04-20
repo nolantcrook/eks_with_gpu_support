@@ -18,52 +18,32 @@ output "cluster_security_group_id" {
   value       = aws_security_group.cluster.id
 }
 
-output "argocd_security_group_id" {
-  description = "Security group ID for ArgoCD"
-  value       = aws_security_group.argocd.id
+output "alb_security_group_id" {
+  description = "Security group ID for alb"
+  value       = aws_security_group.alb_security_group.id
 }
 
-output "argocd_alb_dns_name" {
-  description = "DNS name of the ArgoCD ALB"
-  value       = aws_lb.argocd.dns_name
+output "eks_alb_dns_name" {
+  description = "DNS name of the EKS ALB"
+  value       = aws_lb.eks_alb.dns_name
 }
 
 output "certificate_arn" {
   description = "ARN of the ACM certificate"
-  value       = aws_acm_certificate.argocd.arn
-}
-
-# output "waf_acl_arn" {
-#   description = "ARN of the WAF ACL"
-#   value       = aws_wafv2_web_acl.argocd.arn
-# }
-
-output "alb_security_group_id" {
-  description = "ID of the ALB security group"
-  value       = aws_security_group.argocd.id
+  value       = aws_acm_certificate.hosted_zone_acm_certificate.arn
 }
 
 output "alb_target_group_arn" {
   description = "ARN of the ALB target group"
-  value       = aws_lb_target_group.argocd.arn
+  value       = aws_lb_target_group.eks_alb.arn
 }
 
 output "alb_arn" {
   description = "ARN of the Application Load Balancer"
-  value       = aws_lb.argocd.arn
+  value       = aws_lb.eks_alb.arn
 }
 
 output "alb_dns_name" {
   description = "DNS name of the Application Load Balancer"
-  value       = aws_lb.argocd.dns_name
-}
-
-resource "aws_ssm_parameter" "argocd_ingress_params" {
-  name = "/eks/${var.environment}/argocd/ingress"
-  type = "SecureString"
-  value = jsonencode({
-    certificate_arn       = aws_acm_certificate.argocd.arn
-    waf_acl_arn           = ""
-    alb_security_group_id = aws_security_group.argocd.id
-  })
+  value       = aws_lb.eks_alb.dns_name
 }
