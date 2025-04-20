@@ -1,4 +1,4 @@
-include "env" {
+include "environment" {
   path = "${get_repo_root()}/environments/${get_env("ENV", "dev")}/terragrunt.hcl"
 }
 
@@ -7,7 +7,7 @@ include "state_bucket" {
 }
 
 inputs = {
-  environment = env
+  environment = environment
   state_bucket = state_bucket
   vpc_cidr = "10.0.0.0/16"
   public_subnet_cidrs = [
