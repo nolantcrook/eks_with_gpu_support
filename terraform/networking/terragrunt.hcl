@@ -1,3 +1,8 @@
+include {
+  path = find_in_parent_folders()
+}
+
+
 include "environment" {
   path = "${get_repo_root()}/environments/${get_env("ENV", "dev")}/terragrunt.hcl"
 }
