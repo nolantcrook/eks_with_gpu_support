@@ -77,7 +77,7 @@ pipeline {
                 script {
                     sh """
                         mkdir -p /root/.kube
-                        aws eks update-kubeconfig --name eks-gpu-${params.ENV} --region ${AWS_REGION}
+                        aws eks update-kubeconfig --name eks-gpu-${params.ENV} --region ${AWS_REGION} || true
                     """
                 }
             }
