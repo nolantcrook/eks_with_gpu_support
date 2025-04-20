@@ -1,19 +1,12 @@
-include {
-  path = find_in_parent_folders()
-}
-
-
-include "environment" {
+include "global_variables" {
   path = "${get_repo_root()}/environments/${get_env("ENV", "dev")}/terragrunt.hcl"
 }
 
-include "state_bucket" {
-  path = "${get_repo_root()}/environments/${get_env("ENV", "dev")}/terragrunt.hcl"
-}
+
 
 inputs = {
-  environment = environment
-  state_bucket = state_bucket
+  environment = include.global_variables.inputs.environment
+  state_bucket = include.global_variables.inputs.state_bucket
   vpc_cidr = "10.0.0.0/16"
   public_subnet_cidrs = [
     "10.0.1.0/24",
