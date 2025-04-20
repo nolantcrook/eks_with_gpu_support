@@ -36,7 +36,7 @@ resource "aws_iam_policy" "secrets_access" {
 
 # Create AWS Secrets Manager secret for Route53 Zone ID
 resource "aws_secretsmanager_secret" "route53_zone_id" {
-  name        = "route53/zone-id-hello-world-domain"
+  name        = "route53/zone-id-website-domain"
   description = "Route53 Zone ID for DNS management"
 }
 
