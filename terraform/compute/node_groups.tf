@@ -28,7 +28,8 @@ module "gpu_nodes" {
   }
 
   security_group_ids = [
-    local.cluster_security_group_id
+    local.cluster_security_group_id,
+    module.cluster.cluster_security_group_id
   ]
 
   block_device_mappings = {
@@ -44,43 +45,43 @@ module "gpu_nodes" {
   ]
 }
 
-# ARM Spot Nodes
-module "arm_spot_nodes" {
-  source = "./nodes_module"
+# # ARM Spot Nodes
+# module "arm_spot_nodes" {
+#   source = "./nodes_module"
 
-  name          = "arm-spot"
-  cluster_name  = module.cluster.cluster_name
-  environment   = var.environment
-  node_role_arn = aws_iam_role.node.arn
-  subnet_ids    = local.private_subnet_ids
+#   name          = "arm-spot"
+#   cluster_name  = module.cluster.cluster_name
+#   environment   = var.environment
+#   node_role_arn = aws_iam_role.node.arn
+#   subnet_ids    = local.private_subnet_ids
 
-  capacity_type = "SPOT"
-  ami_type      = "AL2023_ARM_64_STANDARD"
-  instance_types = [
-    "a1.medium", "a1.large", "a1.xlarge", "a1.2xlarge", "a1.4xlarge",
-    "m6g.medium", "m6g.large", "m6g.xlarge", "m6g.2xlarge", "m6g.4xlarge",
-    "c6g.medium", "c6g.large", "c6g.xlarge", "c6g.2xlarge", "c6g.4xlarge",
-    "r6g.medium", "r6g.large", "r6g.xlarge", "r6g.2xlarge", "r6g.4xlarge"
-  ]
+#   capacity_type = "SPOT"
+#   ami_type      = "AL2023_ARM_64_STANDARD"
+#   instance_types = [
+#     "a1.medium", "a1.large", "a1.xlarge", "a1.2xlarge", "a1.4xlarge",
+#     "m6g.medium", "m6g.large", "m6g.xlarge", "m6g.2xlarge", "m6g.4xlarge",
+#     "c6g.medium", "c6g.large", "c6g.xlarge", "c6g.2xlarge", "c6g.4xlarge",
+#     "r6g.medium", "r6g.large", "r6g.xlarge", "r6g.2xlarge", "r6g.4xlarge"
+#   ]
 
-  desired_size = 1
-  min_size     = 1
-  max_size     = 10
+#   desired_size = 1
+#   min_size     = 1
+#   max_size     = 10
 
-  taints = [{
-    key    = "arch"
-    value  = "arm64"
-    effect = "NO_SCHEDULE"
-  }]
+#   taints = [{
+#     key    = "arch"
+#     value  = "arm64"
+#     effect = "NO_SCHEDULE"
+#   }]
 
-  additional_labels = {
-    "arch" = "arm64"
-  }
+#   additional_labels = {
+#     "arch" = "arm64"
+#   }
 
-  security_group_ids = [
-    local.cluster_security_group_id
-  ]
-}
+#   security_group_ids = [
+#     local.cluster_security_group_id
+#   ]
+# }
 
 # On-Demand x86 Nodes
 module "x86_ondemand_nodes" {
@@ -102,7 +103,8 @@ module "x86_ondemand_nodes" {
   max_size     = 5
 
   security_group_ids = [
-    local.cluster_security_group_id
+    local.cluster_security_group_id,
+    module.cluster.cluster_security_group_id
   ]
 }
 
@@ -132,6 +134,7 @@ module "x86_spot_nodes" {
   max_size     = 10
 
   security_group_ids = [
-    local.cluster_security_group_id
+    local.cluster_security_group_id,
+    module.cluster.cluster_security_group_id
   ]
 }

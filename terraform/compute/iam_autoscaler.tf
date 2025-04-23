@@ -1,3 +1,5 @@
+
+
 resource "aws_iam_policy" "cluster_autoscaler" {
   name        = "ClusterAutoscalerPolicy"
   description = "IAM policy for Kubernetes Cluster Autoscaler"
