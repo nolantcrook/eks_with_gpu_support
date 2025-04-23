@@ -84,8 +84,8 @@ module "arm_spot_nodes" {
 
 # On-Demand x86 Nodes
 module "x86_ondemand_nodes" {
-  source = "./nodes_module"
-
+  source        = "./nodes_module"
+  ami_type      = "AL2023_x86_64_STANDARD"
   name          = "x86-ondemand"
   cluster_name  = module.cluster.cluster_name
   environment   = var.environment
@@ -108,8 +108,8 @@ module "x86_ondemand_nodes" {
 
 # Regular x86 Spot Nodes
 module "x86_spot_nodes" {
-  source = "./nodes_module"
-
+  source        = "./nodes_module"
+  ami_type      = "AL2023_x86_64_STANDARD"
   name          = "x86-spot"
   cluster_name  = module.cluster.cluster_name
   environment   = var.environment
