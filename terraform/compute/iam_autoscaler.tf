@@ -58,7 +58,7 @@ resource "aws_iam_policy" "cluster_autoscaler" {
 
 
 data "external" "oidc_provider" {
-  program = ["bash", "${path.module}/get_oidc_provider.sh", aws_eks_cluster.eks_gpu.name]
+  program = ["bash", "${path.module}/get_oidc_provider.sh", module.cluster.cluster_name]
 
   # Optional: Pass AWS credentials if needed
   # environment = {
@@ -67,7 +67,7 @@ data "external" "oidc_provider" {
   #   AWS_DEFAULT_REGION    = var.aws_region
   # }
 
-  depends_on = [aws_eks_cluster.eks_gpu]
+  depends_on = [module.cluster]
 }
 
 resource "aws_iam_openid_connect_provider" "eks_oidc" {

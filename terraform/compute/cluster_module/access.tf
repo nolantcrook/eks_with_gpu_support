@@ -2,7 +2,7 @@ data "aws_caller_identity" "current" {}
 
 locals {
   account_id   = data.aws_caller_identity.current.account_id
-  sandbox_user = "arn:aws:iam::${local.account_id}:user/nolan"
+  sandbox_user = "arn:aws:iam::${local.account_id}:user/${var.sandbox_user}"
 }
 
 resource "aws_eks_access_entry" "eks_gpu_workshop" {
