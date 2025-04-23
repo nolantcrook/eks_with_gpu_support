@@ -2,7 +2,7 @@
 # Add new Route53 record for 2048
 resource "aws_route53_record" "website" {
   zone_id = var.route53_zone_id
-  name    = "${var.website_name}.${var.website_domain}"
+  name    = "${var.subdomain}.${var.website_domain}"
   type    = "A"
 
   alias {

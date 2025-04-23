@@ -15,16 +15,19 @@ module "argocd_setup" {
 locals {
   website_setups = {
     game_2048 = {
-      source   = "./website_setup"
-      priority = 200
+      subdomain = "2048"
+      source    = "./website_setup"
+      priority  = 200
     }
     portfolio = {
-      source   = "./website_setup"
-      priority = 300
+      subdomain = "portfolio"
+      source    = "./website_setup"
+      priority  = 300
     }
     flask_api = {
-      source   = "./website_setup"
-      priority = 500
+      subdomain = "flask_api"
+      source    = "./website_setup"
+      priority  = 500
     }
   }
 }
@@ -32,8 +35,8 @@ locals {
 module "website_setups" {
   for_each             = local.website_setups
   source               = "./website_setup"
-  environment          = var.environment
   website_name         = each.key
+  subdomain            = each.value.subdomain
   website_domain       = local.route53_zone_name
   route53_zone_id      = local.route53_zone_id
   priority             = each.value.priority

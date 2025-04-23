@@ -1,7 +1,3 @@
-variable "environment" {
-  description = "The environment to deploy to"
-  type        = string
-}
 
 
 variable "website_name" {
@@ -43,5 +39,10 @@ variable "alb_zone_id" {
 
 variable "listener_arn" {
   description = "The ARN of the listener"
+  type        = string
+}
+
+variable "subdomain" {
+  description = "The subdomain of the website"
   type        = string
 }
