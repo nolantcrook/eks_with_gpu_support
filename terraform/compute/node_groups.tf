@@ -129,8 +129,8 @@ module "x86_spot_nodes" {
     "r5.large", "r5.xlarge", "r5a.large", "r5a.xlarge"
   ]
 
-  desired_size = 1
-  min_size     = 1
+  desired_size = 2
+  min_size     = 2
   max_size     = 10
 
   security_group_ids = [
