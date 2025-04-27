@@ -58,7 +58,7 @@ resource "aws_iam_role" "deepseek_headless_role" {
         "Action" : "sts:AssumeRoleWithWebIdentity",
         "Condition" : {
           "StringLike" : {
-            "${aws_iam_openid_connect_provider.eks_oidc.url}:sub" : "system:serviceaccount:deepseek-api:deepseek-api-sa"
+            "${aws_iam_openid_connect_provider.eks_oidc.url}:sub" : "system:serviceaccount:deepseek:deepseek-api-sa"
           }
         }
       }
