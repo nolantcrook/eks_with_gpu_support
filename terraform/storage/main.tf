@@ -57,6 +57,12 @@ resource "aws_efs_file_system" "eks-efs" {
   }
 }
 
+resource "aws_ssm_parameter" "efs_id" {
+  name  = "/eks/efs-id"
+  type  = "String"
+  value = aws_efs_file_system.eks-efs.id
+}
+
 # SQS Queue
 resource "aws_sqs_queue" "api_queue" {
   name                       = "api-queue-${var.environment}"
