@@ -68,3 +68,17 @@ resource "aws_secretsmanager_secret_version" "ssh_private_key" {
   secret_id     = aws_secretsmanager_secret.ssh_private_key.id
   secret_string = tls_private_key.ssh_key.private_key_pem
 }
+
+resource "aws_secretsmanager_secret" "HF_TOKEN" {
+  name        = "huggingface/token"
+  description = "Huggingface token"
+}
+
+# Create initial secret version with placeholder values
+# You'll need to update these values manually through AWS Console or CLI
+resource "aws_secretsmanager_secret_version" "HF_TOKEN" {
+  secret_id = aws_secretsmanager_secret.HF_TOKEN.id
+  secret_string = jsonencode({
+    token = "placeholder-token"
+  })
+}
