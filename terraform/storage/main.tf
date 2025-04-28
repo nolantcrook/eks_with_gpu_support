@@ -57,10 +57,39 @@ resource "aws_efs_file_system" "eks-efs" {
   }
 }
 
+resource "aws_efs_access_point" "eks-efs-ap" {
+  file_system_id = aws_efs_file_system.eks-efs.id
+
+  posix_user {
+    gid = 1000
+    uid = 1000
+  }
+
+  root_directory {
+    path = "/deepseek"
+    creation_info {
+      owner_gid   = 1000
+      owner_uid   = 1000
+      permissions = 700
+    }
+  }
+
+  tags = {
+    Name        = "eks-efs-ap-${var.environment}"
+    Environment = var.environment
+  }
+}
+
 resource "aws_ssm_parameter" "efs_id" {
   name  = "/eks/efs-id"
   type  = "String"
   value = aws_efs_file_system.eks-efs.id
+}
+
+resource "aws_ssm_parameter" "efs_ap_id" {
+  name  = "/eks/efs-ap-id"
+  type  = "String"
+  value = aws_efs_access_point.eks-efs-ap.id
 }
 
 # SQS Queue
