@@ -22,6 +22,12 @@ module "gpu_nodes" {
     effect = "NO_SCHEDULE"
   }]
 
+  additional_tags = {
+    "k8s.io/cluster-autoscaler/node-template/resources/ephemeral-storage" = "53687091200"
+    "k8s.io/cluster-autoscaler/node-template/resources/nvidia.com/gpu"    = "1"
+    "node.kubernetes.io/gpu"                                              = "true"
+  }
+
   additional_labels = {
     "node.kubernetes.io/gpu" = "true"
     "compute"                = "gpu"
