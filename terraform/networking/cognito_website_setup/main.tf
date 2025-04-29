@@ -34,7 +34,6 @@ resource "aws_cognito_user_pool" "website" {
     email_sending_account = "COGNITO_DEFAULT"
   }
 }
-
 resource "aws_cognito_user_pool_client" "website" {
   name                                 = "${var.website_name}-app-client"
   user_pool_id                         = aws_cognito_user_pool.website.id
@@ -46,11 +45,25 @@ resource "aws_cognito_user_pool_client" "website" {
   logout_urls                          = ["https://${var.website_name}.${var.website_domain}/logout"]
   supported_identity_providers         = ["COGNITO"]
 
+  # Explicitly set token validity durations
+  access_token_validity  = 60 # 60 minutes
+  id_token_validity      = 60 # 60 minutes
+  refresh_token_validity = 30 # 30 days
+
+  token_validity_units {
+    access_token  = "minutes"
+    id_token      = "minutes"
+    refresh_token = "days"
+  }
+
+  # Specify allowed authentication flows
   explicit_auth_flows = [
     "ALLOW_USER_PASSWORD_AUTH",
-    "ALLOW_REFRESH_TOKEN_AUTH"
+    "ALLOW_REFRESH_TOKEN_AUTH",
+    "ALLOW_CUSTOM_AUTH"
   ]
 }
+
 
 # Create a Cognito User Pool Domain
 resource "aws_cognito_user_pool_domain" "website" {
