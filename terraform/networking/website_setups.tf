@@ -12,18 +12,6 @@ module "argocd_setup" {
 }
 
 
-module "deepseek_setup" {
-  source               = "./cognito_website_setup"
-  website_name         = "deepseek"
-  website_domain       = local.route53_zone_name
-  route53_zone_id      = local.route53_zone_id
-  priority             = 600
-  alb_target_group_arn = aws_lb_target_group.eks_alb.arn
-  alb_dns_name         = aws_lb.eks_alb.dns_name
-  alb_zone_id          = aws_lb.eks_alb.zone_id
-  listener_arn         = aws_lb_listener.eks_alb.arn
-}
-
 locals {
   website_setups = {
     game_2048 = {
@@ -40,6 +28,11 @@ locals {
       subdomain = "flask_api"
       source    = "./website_setup"
       priority  = 500
+    }
+    deepseek = {
+      subdomain = "deepseek"
+      source    = "./website_setup"
+      priority  = 600
     }
   }
 }
