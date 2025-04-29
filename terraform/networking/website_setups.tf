@@ -32,7 +32,7 @@ locals {
     deepseek = {
       subdomain = "deepseek"
       source    = "./website_setup"
-      priority  = 600
+      priority  = 700
     }
   }
 }
