@@ -1,7 +1,3 @@
-variable "environment" {
-  description = "The environment to deploy to"
-  type        = string
-}
 
 
 variable "website_name" {

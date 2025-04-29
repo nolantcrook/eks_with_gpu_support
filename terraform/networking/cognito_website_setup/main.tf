@@ -35,7 +35,6 @@ resource "aws_cognito_user_pool" "website" {
   }
 }
 
-# Create a Cognito App Client with a Client Secret
 resource "aws_cognito_user_pool_client" "website" {
   name                                 = "${var.website_name}-app-client"
   user_pool_id                         = aws_cognito_user_pool.website.id
@@ -46,6 +45,11 @@ resource "aws_cognito_user_pool_client" "website" {
   callback_urls                        = ["https://${var.website_name}.${var.website_domain}/oauth2/idpresponse"]
   logout_urls                          = ["https://${var.website_name}.${var.website_domain}/logout"]
   supported_identity_providers         = ["COGNITO"]
+
+  explicit_auth_flows = [
+    "ALLOW_USER_PASSWORD_AUTH",
+    "ALLOW_REFRESH_TOKEN_AUTH"
+  ]
 }
 
 # Create a Cognito User Pool Domain

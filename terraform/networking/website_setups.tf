@@ -1,7 +1,6 @@
 
 module "argocd_setup" {
   source               = "./cognito_website_setup"
-  environment          = var.environment
   website_name         = "argocd"
   website_domain       = local.route53_zone_name
   route53_zone_id      = local.route53_zone_id
@@ -15,7 +14,6 @@ module "argocd_setup" {
 
 module "deepseek_setup" {
   source               = "./cognito_website_setup"
-  environment          = var.environment
   website_name         = "deepseek"
   website_domain       = local.route53_zone_name
   route53_zone_id      = local.route53_zone_id
