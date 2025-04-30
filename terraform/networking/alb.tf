@@ -87,3 +87,8 @@ resource "aws_lb_listener" "eks_alb" {
     create_before_destroy = true
   }
 }
+
+resource "aws_lb_listener_certificate" "additional_cert" {
+  listener_arn    = aws_lb_listener.eks_alb.arn
+  certificate_arn = aws_acm_certificate.hosted_zone_acm_certificate_pic.arn
+}
