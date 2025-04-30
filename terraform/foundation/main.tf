@@ -47,6 +47,20 @@ resource "aws_secretsmanager_secret_version" "route53_zone_id" {
   })
 }
 
+# Create AWS Secrets Manager secret for Route53 Zone ID
+resource "aws_secretsmanager_secret" "route53_zone_id_pic" {
+  name        = "route53/zone-id-pic-domain"
+  description = "Route53 Zone ID for DNS management"
+}
+
+resource "aws_secretsmanager_secret_version" "route53_zone_id_pic" {
+  secret_id = aws_secretsmanager_secret.route53_zone_id_pic.id
+  secret_string = jsonencode({
+    zone_id = "add zone here"
+  })
+}
+
+
 resource "tls_private_key" "ssh_key" {
   algorithm = "RSA"
   rsa_bits  = 4096
