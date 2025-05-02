@@ -22,9 +22,10 @@ locals {
   cluster_security_group_id = data.terraform_remote_state.networking.outputs.cluster_security_group_id
   # ec2_ssh_key_pair_id       = data.terraform_remote_state.foundation.outputs.ec2_ssh_key_pair_id
   # Get ASG names from both node groups
-  ondemand_asg_name    = module.x86_ondemand_nodes.asg_name
-  spot_asg_name        = module.x86_spot_nodes.asg_name
-  alb_target_group_arn = data.terraform_remote_state.networking.outputs.alb_target_group_arn
+  ondemand_asg_name              = module.x86_ondemand_nodes.asg_name
+  spot_asg_name                  = module.x86_spot_nodes.asg_name
+  alb_target_group_arn           = data.terraform_remote_state.networking.outputs.alb_target_group_arn
+  alb_target_group_websocket_arn = data.terraform_remote_state.networking.outputs.alb_target_group_websocket_arn
 }
 
 # Create attachments for both ASGs
@@ -33,10 +34,19 @@ resource "aws_autoscaling_attachment" "eks_ondemand_asg_attachment" {
   lb_target_group_arn    = local.alb_target_group_arn
 }
 
+resource "aws_autoscaling_attachment" "eks_ondemand_asg_attachment_websocket" {
+  autoscaling_group_name = local.ondemand_asg_name
+  lb_target_group_arn    = local.alb_target_group_websocket_arn
+}
 
 resource "aws_autoscaling_attachment" "eks_spot_asg_attachment_spot" {
   autoscaling_group_name = local.spot_asg_name
   lb_target_group_arn    = local.alb_target_group_arn
+}
+
+resource "aws_autoscaling_attachment" "eks_spot_asg_attachment_websocket" {
+  autoscaling_group_name = local.spot_asg_name
+  lb_target_group_arn    = local.alb_target_group_websocket_arn
 }
 
 data "aws_caller_identity" "current" {}
