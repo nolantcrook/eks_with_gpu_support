@@ -34,6 +34,11 @@ locals {
       source    = "./website_setup"
       priority  = 700
     }
+    dino_runner = {
+      subdomain = "dino-runner"
+      source    = "./website_setup"
+      priority  = 800
+    }
   }
 }
 
