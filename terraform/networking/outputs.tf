@@ -38,6 +38,11 @@ output "alb_target_group_arn" {
   value       = aws_lb_target_group.eks_alb.arn
 }
 
+output "alb_target_group_websocket_arn" {
+  description = "ARN of the ALB target group for WebSocket connections"
+  value       = aws_lb_target_group.eks_alb_websocket.arn
+}
+
 output "alb_arn" {
   description = "ARN of the Application Load Balancer"
   value       = aws_lb.eks_alb.arn
