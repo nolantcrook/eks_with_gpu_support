@@ -37,7 +37,7 @@ locals {
     dino_runner = {
       subdomain = "dino-runner"
       source    = "./website_setup"
-      priority  = 800
+      priority  = 900
     }
   }
 }
