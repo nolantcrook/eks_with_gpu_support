@@ -1,4 +1,3 @@
-
 # ALB
 resource "aws_lb" "eks_alb" {
   name               = "eks-alb-${var.environment}"
@@ -11,6 +10,9 @@ resource "aws_lb" "eks_alb" {
     bucket  = split(":", local.alb_logs_bucket_arn)[5]
     enabled = true
   }
+
+  idle_timeout = 60
+  enable_http2 = true
 
   tags = {
     Name        = "eks-alb-${var.environment}"
@@ -26,16 +28,21 @@ resource "aws_lb_target_group" "eks_alb" {
   vpc_id      = aws_vpc.main.id
   target_type = "instance"
 
+  stickiness {
+    type            = "lb_cookie"
+    cookie_duration = 86400
+    enabled         = true
+  }
+
   health_check {
     enabled             = true
-    healthy_threshold   = 2
-    interval            = 15
-    matcher             = "200,302"
-    path                = "/healthz"
+    interval            = 30
+    path                = "/health"
     port                = "traffic-port"
-    protocol            = "HTTP"
+    healthy_threshold   = 3
+    unhealthy_threshold = 3
     timeout             = 5
-    unhealthy_threshold = 2
+    matcher             = "200"
   }
 
   lifecycle {
@@ -48,6 +55,30 @@ resource "aws_lb_target_group" "eks_alb" {
   }
 }
 
+# Add a dedicated target group for WebSocket connections
+resource "aws_lb_target_group" "eks_alb_websocket" {
+  name     = "eks-websocket-${var.environment}"
+  port     = 30080
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.main.id
+
+  stickiness {
+    type            = "lb_cookie"
+    cookie_duration = 86400 # 1 day
+    enabled         = true
+  }
+
+  health_check {
+    enabled             = true
+    interval            = 30
+    path                = "/health"
+    port                = "traffic-port"
+    healthy_threshold   = 3
+    unhealthy_threshold = 3
+    timeout             = 5
+    matcher             = "200"
+  }
+}
 
 # HTTP Listener (redirects to HTTPS)
 resource "aws_lb_listener" "eks_alb_http" {
@@ -91,4 +122,28 @@ resource "aws_lb_listener" "eks_alb" {
 resource "aws_lb_listener_certificate" "additional_cert" {
   listener_arn    = aws_lb_listener.eks_alb.arn
   certificate_arn = aws_acm_certificate.hosted_zone_acm_certificate_pic.arn
+}
+
+# Create a listener rule specifically for the WebSocket path
+resource "aws_lb_listener_rule" "websocket_rule" {
+  listener_arn = aws_lb_listener.eks_alb.arn
+  priority     = 950 # Make sure this is unique and higher priority than the main rule
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.eks_alb_websocket.arn
+  }
+
+  condition {
+    host_header {
+      values = ["dino-api.nolancrook.com"]
+    }
+  }
+
+  # Match WebSocket paths
+  condition {
+    path_pattern {
+      values = ["/socket.io/*", "/simple-ws*"]
+    }
+  }
 }
