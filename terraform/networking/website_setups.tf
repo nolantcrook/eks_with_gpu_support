@@ -15,34 +15,40 @@ module "argocd_setup" {
 locals {
   website_setups = {
     game_2048 = {
-      subdomain = "2048"
-      source    = "./website_setup"
-      priority  = 200
+      subdomain        = "2048"
+      source           = "./website_setup"
+      priority         = 200
+      target_group_arn = aws_lb_target_group.eks_alb.arn
     }
     portfolio = {
-      subdomain = "portfolio"
-      source    = "./website_setup"
-      priority  = 300
+      subdomain        = "portfolio"
+      source           = "./website_setup"
+      priority         = 300
+      target_group_arn = aws_lb_target_group.eks_alb.arn
     }
     flask_api = {
-      subdomain = "flask_api"
-      source    = "./website_setup"
-      priority  = 500
+      subdomain        = "flask_api"
+      source           = "./website_setup"
+      priority         = 500
+      target_group_arn = aws_lb_target_group.eks_alb.arn
     }
     deepseek = {
-      subdomain = "deepseek"
-      source    = "./website_setup"
-      priority  = 700
+      subdomain        = "deepseek"
+      source           = "./website_setup"
+      priority         = 700
+      target_group_arn = aws_lb_target_group.eks_alb.arn
     }
     dino_runner = {
-      subdomain = "dino-runner"
-      source    = "./website_setup"
-      priority  = 900
+      subdomain        = "dino-runner"
+      source           = "./website_setup"
+      priority         = 900
+      target_group_arn = aws_lb_target_group.eks_alb.arn
     }
     dino_api = {
-      subdomain = "dino-api"
-      source    = "./website_setup"
-      priority  = 1000
+      subdomain        = "dino-api"
+      source           = "./website_setup"
+      priority         = 1000
+      target_group_arn = aws_lb_target_group.eks_alb_websocket.arn
     }
   }
 }
@@ -66,9 +72,10 @@ module "website_setups" {
 locals {
   pic_website_setups = {
     pic = {
-      subdomain = "pic"
-      source    = "./website_setup"
-      priority  = 800
+      subdomain        = "pic"
+      source           = "./website_setup"
+      priority         = 800
+      target_group_arn = aws_lb_target_group.eks_alb.arn
     }
   }
 }
@@ -81,7 +88,7 @@ module "website_setups_pic" {
   website_domain       = local.route53_zone_name_pic
   route53_zone_id      = local.route53_zone_id_pic
   priority             = each.value.priority
-  alb_target_group_arn = aws_lb_target_group.eks_alb.arn
+  alb_target_group_arn = each.value.target_group_arn
   alb_dns_name         = aws_lb.eks_alb.dns_name
   alb_zone_id          = aws_lb.eks_alb.zone_id
   listener_arn         = aws_lb_listener.eks_alb.arn
