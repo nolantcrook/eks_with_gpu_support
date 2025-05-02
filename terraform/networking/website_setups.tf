@@ -39,6 +39,11 @@ locals {
       source    = "./website_setup"
       priority  = 900
     }
+    dino_api = {
+      subdomain = "dino-api"
+      source    = "./website_setup"
+      priority  = 1000
+    }
   }
 }
 
