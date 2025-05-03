@@ -11,7 +11,7 @@ resource "aws_lb" "eks_alb" {
     enabled = true
   }
 
-  idle_timeout = 60
+  idle_timeout = 300
   enable_http2 = true
 
   tags = {
@@ -78,6 +78,8 @@ resource "aws_lb_target_group" "eks_alb_websocket" {
     timeout             = 5
     matcher             = "200"
   }
+
+  deregistration_delay = 60
 }
 
 # HTTP Listener (redirects to HTTPS)
