@@ -46,13 +46,18 @@ pipeline {
             defaultValue: false,
             description: 'Include Compute stage'
         )
+        booleanParam(
+            name: 'RAG',
+            defaultValue: false,
+            description: 'Include RAG stage'
+        )
     }
 
     stages {
         stage('Validate Parameters') {
             steps {
                 script {
-                    if (!params.FOUNDATION && !params.STORAGE && !params.NETWORKING && !params.COMPUTE) {
+                    if (!params.FOUNDATION && !params.STORAGE && !params.NETWORKING && !params.COMPUTE && !params.RAG) {
                         error "At least one stage must be selected!"
                     }
                 }
@@ -168,6 +173,26 @@ pipeline {
                         }
                     }
                 }
+
+                stage('RAG Infrastructure') {
+                    when {
+                        expression { params.RAG }
+                    }
+                    steps {
+                        dir('terraform/rag') {
+                            withEnv(["ENV=${params.ENV}"]) {
+                                script {
+                                    sh 'terragrunt init --terragrunt-non-interactive'
+                                    sh 'terragrunt plan -out=tfplan'
+                                    if (!params.AUTO_APPROVE) {
+                                        input message: 'Do you want to apply the RAG changes?'
+                                    }
+                                    sh 'terragrunt apply -auto-approve tfplan'
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -212,6 +237,26 @@ pipeline {
                                         input message: 'Do you want to destroy the Compute infrastructure?'
                                     }
 
+                                    sh 'terragrunt apply -auto-approve tfplan'
+                                }
+                            }
+                        }
+                    }
+                }
+
+                stage('Destroy RAG Infrastructure') {
+                    when {
+                        expression { params.RAG }
+                    }
+                    steps {
+                        dir('terraform/rag') {
+                            withEnv(["ENV=${params.ENV}"]) {
+                                script {
+                                    sh 'terragrunt init --terragrunt-non-interactive'
+                                    sh 'terragrunt plan -destroy -out=tfplan'
+                                    if (!params.AUTO_APPROVE) {
+                                        input message: 'Do you want to destroy the RAG infrastructure?'
+                                    }
                                     sh 'terragrunt apply -auto-approve tfplan'
                                 }
                             }
@@ -289,6 +334,7 @@ pipeline {
                 rm -f terraform/storage/tfplan
                 rm -f terraform/networking/tfplan
                 rm -f terraform/compute/tfplan
+                rm -f terraform/rag/tfplan
             '''
         }
         success {
