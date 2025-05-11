@@ -1,13 +1,13 @@
 
-output "neptune_endpoint" {
-  description = "Neptune cluster endpoint"
-  value       = aws_neptune_cluster.main.endpoint
-}
+# output "neptune_endpoint" {
+#   description = "Neptune cluster endpoint"
+#   value       = aws_neptune_cluster.main.endpoint
+# }
 
-output "neptune_reader_endpoint" {
-  description = "Neptune cluster reader endpoint"
-  value       = aws_neptune_cluster.main.reader_endpoint
-}
+# output "neptune_reader_endpoint" {
+#   description = "Neptune cluster reader endpoint"
+#   value       = aws_neptune_cluster.main.reader_endpoint
+# }
 
 output "opensearch_endpoint" {
   description = "OpenSearch domain endpoint"
