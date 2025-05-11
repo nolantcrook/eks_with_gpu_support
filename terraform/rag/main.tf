@@ -1,34 +1,34 @@
 
 
-# Neptune Cluster
-resource "aws_neptune_cluster" "main" {
-  cluster_identifier                  = "rag-cluster"
-  engine                              = "neptune"
-  engine_version                      = var.neptune_engine_version
-  backup_retention_period             = 7
-  preferred_backup_window             = "03:00-04:00"
-  skip_final_snapshot                 = true
-  iam_database_authentication_enabled = true
-  vpc_security_group_ids              = [local.neptune_security_group_id]
-  tags                                = var.tags
-  neptune_subnet_group_name           = aws_db_subnet_group.neptune.name
-}
+# # Neptune Cluster
+# resource "aws_neptune_cluster" "main" {
+#   cluster_identifier                  = "rag-cluster"
+#   engine                              = "neptune"
+#   engine_version                      = var.neptune_engine_version
+#   backup_retention_period             = 7
+#   preferred_backup_window             = "03:00-04:00"
+#   skip_final_snapshot                 = true
+#   iam_database_authentication_enabled = true
+#   vpc_security_group_ids              = [local.neptune_security_group_id]
+#   tags                                = var.tags
+#   neptune_subnet_group_name           = aws_db_subnet_group.neptune.name
+# }
 
-resource "aws_neptune_cluster_instance" "cluster_instances" {
-  count              = var.neptune_cluster_size
-  cluster_identifier = aws_neptune_cluster.main.id
-  engine             = "neptune"
-  instance_class     = var.neptune_instance_class
+# resource "aws_neptune_cluster_instance" "cluster_instances" {
+#   count              = var.neptune_cluster_size
+#   cluster_identifier = aws_neptune_cluster.main.id
+#   engine             = "neptune"
+#   instance_class     = var.neptune_instance_class
 
-  tags = var.tags
-}
+#   tags = var.tags
+# }
 
-resource "aws_db_subnet_group" "neptune" {
-  name       = "rag-neptune-subnet-group"
-  subnet_ids = local.private_subnet_ids
+# resource "aws_db_subnet_group" "neptune" {
+#   name       = "rag-neptune-subnet-group"
+#   subnet_ids = local.private_subnet_ids
 
-  tags = var.tags
-}
+#   tags = var.tags
+# }
 
 # OpenSearch Domain
 resource "aws_opensearch_domain" "main" {
