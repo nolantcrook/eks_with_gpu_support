@@ -11,6 +11,7 @@ resource "aws_neptune_cluster" "main" {
   iam_database_authentication_enabled = true
   vpc_security_group_ids              = [local.neptune_security_group_id]
   tags                                = var.tags
+  neptune_subnet_group_name           = aws_db_subnet_group.neptune.name
 }
 
 resource "aws_neptune_cluster_instance" "cluster_instances" {
