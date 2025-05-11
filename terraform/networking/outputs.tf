@@ -52,3 +52,13 @@ output "alb_dns_name" {
   description = "DNS name of the Application Load Balancer"
   value       = aws_lb.eks_alb.dns_name
 }
+
+output "neptune_security_group_id" {
+  description = "Security group ID for Neptune"
+  value       = aws_security_group.neptune.id
+}
+
+output "opensearch_security_group_id" {
+  description = "Security group ID for OpenSearch"
+  value       = aws_security_group.opensearch.id
+}
