@@ -22,3 +22,8 @@ output "ec2_ssh_key_pair_id" {
   description = "The ID of the EC2 SSH key pair"
   value       = aws_key_pair.ec2_key_pair.id
 }
+
+output "ssh_private_key_secret_id" {
+  description = "ID of the SSH private key secret"
+  value       = aws_secretsmanager_secret.ssh_private_key.id
+}

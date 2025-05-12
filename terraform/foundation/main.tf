@@ -96,3 +96,18 @@ resource "aws_secretsmanager_secret_version" "HF_TOKEN" {
     token = "placeholder-token"
   })
 }
+# Create AWS Secrets Manager secret for bastion host CIDR ranges
+resource "aws_secretsmanager_secret" "bastion_cidr_ranges" {
+  name        = "bastion/allowed-cidr-ranges"
+  description = "CIDR ranges allowed to access the bastion host"
+}
+
+# Create initial secret version with placeholder CIDR ranges
+resource "aws_secretsmanager_secret_version" "bastion_cidr_ranges" {
+  secret_id = aws_secretsmanager_secret.bastion_cidr_ranges.id
+  secret_string = jsonencode({
+    cidr_ranges = [
+      "0.0.0.0/0" # Additional IP if needed
+    ]
+  })
+}

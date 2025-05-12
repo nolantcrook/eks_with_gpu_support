@@ -10,6 +10,15 @@ resource "aws_security_group" "neptune" {
     cidr_blocks = [aws_vpc.main.cidr_block]
   }
 
+  ingress {
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = [aws_vpc.main.cidr_block]
+    description = "Allow ICMP/ping from within the VPC"
+  }
+
+
   tags = ({
     Name = "rag-neptune-sg"
   })
@@ -25,6 +34,14 @@ resource "aws_security_group" "opensearch" {
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = [aws_vpc.main.cidr_block]
+  }
+
+  ingress {
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = [aws_vpc.main.cidr_block]
+    description = "Allow ICMP/ping from within the VPC"
   }
 
   tags = ({
