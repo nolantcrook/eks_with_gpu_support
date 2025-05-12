@@ -30,7 +30,7 @@ data "aws_ami" "amazon_linux_2" {
 
 resource "aws_instance" "bastion" {
   ami                    = data.aws_ami.amazon_linux_2.id
-  instance_type          = "t2.micro"
+  instance_type          = "t2.medium"
   subnet_id              = data.terraform_remote_state.networking.outputs.public_subnet_ids[0]
   vpc_security_group_ids = [aws_security_group.bastion_sg.id]
   key_name               = local.key_pair_id // Add your SSH key name here
