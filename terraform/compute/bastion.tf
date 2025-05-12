@@ -33,7 +33,7 @@ resource "aws_instance" "bastion" {
   instance_type          = "t2.micro"
   subnet_id              = data.terraform_remote_state.networking.outputs.public_subnet_ids[0]
   vpc_security_group_ids = [aws_security_group.bastion_sg.id]
-  key_name               = local.ssh_private_key_secret_id // Add your SSH key name here
+  key_name               = local.key_pair_id // Add your SSH key name here
 
   tags = {
     Name = "BastionHost"
