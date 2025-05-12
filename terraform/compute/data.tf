@@ -60,5 +60,5 @@ data "aws_secretsmanager_secret_version" "bastion_cidr_ranges" {
 }
 
 locals {
-  bastion_cidr_ranges = jsondecode(data.aws_secretsmanager_secret_version.bastion_cidr_ranges.secret_string)
+  bastion_cidr_ranges = jsondecode(data.aws_secretsmanager_secret_version.bastion_cidr_ranges.secret_string)["cidr_ranges"]
 }
