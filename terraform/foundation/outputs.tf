@@ -27,3 +27,18 @@ output "ssh_private_key_secret_id" {
   description = "ID of the SSH private key secret"
   value       = aws_secretsmanager_secret.ssh_private_key.id
 }
+
+output "openai_api_key_secret_id" {
+  description = "ID of the OpenAI API key secret"
+  value       = aws_secretsmanager_secret.openai_api_key.id
+}
+
+output "kaggle_username_secret_id" {
+  description = "ID of the Kaggle username secret"
+  value       = aws_secretsmanager_secret.kaggle_username.id
+}
+
+output "kaggle_key_secret_id" {
+  description = "ID of the Kaggle key secret"
+  value       = aws_secretsmanager_secret.kaggle_key.id
+}
