@@ -111,3 +111,45 @@ resource "aws_secretsmanager_secret_version" "bastion_cidr_ranges" {
     ]
   })
 }
+
+# Create AWS Secrets Manager secret for OpenAI API key
+resource "aws_secretsmanager_secret" "openai_api_key" {
+  name        = "langchain/openai-api-key"
+  description = "OpenAI API key for LangChain applications"
+}
+
+# Create initial secret version with placeholder value
+resource "aws_secretsmanager_secret_version" "openai_api_key" {
+  secret_id = aws_secretsmanager_secret.openai_api_key.id
+  secret_string = jsonencode({
+    key = "placeholder-openai-api-key"
+  })
+}
+
+# Create AWS Secrets Manager secret for Kaggle username
+resource "aws_secretsmanager_secret" "kaggle_username" {
+  name        = "langchain/kaggle-username"
+  description = "Kaggle username for dataset access"
+}
+
+# Create initial secret version with placeholder value
+resource "aws_secretsmanager_secret_version" "kaggle_username" {
+  secret_id = aws_secretsmanager_secret.kaggle_username.id
+  secret_string = jsonencode({
+    username = "placeholder-kaggle-username"
+  })
+}
+
+# Create AWS Secrets Manager secret for Kaggle key
+resource "aws_secretsmanager_secret" "kaggle_key" {
+  name        = "langchain/kaggle-key"
+  description = "Kaggle API key for dataset access"
+}
+
+# Create initial secret version with placeholder value
+resource "aws_secretsmanager_secret_version" "kaggle_key" {
+  secret_id = aws_secretsmanager_secret.kaggle_key.id
+  secret_string = jsonencode({
+    key = "placeholder-kaggle-key"
+  })
+}
