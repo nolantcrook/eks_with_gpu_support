@@ -15,7 +15,7 @@ module "argocd_setup" {
 
 module "agent_demo_setup" {
   source               = "./cognito_website_setup"
-  website_name         = "agent_demo"
+  website_name         = "agent-demo"
   website_domain       = local.route53_zone_name
   route53_zone_id      = local.route53_zone_id
   priority             = 450
