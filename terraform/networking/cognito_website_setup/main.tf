@@ -1,4 +1,3 @@
-
 # Add new Route53 record for 2048
 resource "aws_route53_record" "website" {
   zone_id = var.route53_zone_id
@@ -96,6 +95,34 @@ resource "aws_lb_listener_rule" "website" {
   condition {
     host_header {
       values = ["${var.website_name}.${var.website_domain}"]
+    }
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# Add a separate rule for API routes without authentication
+resource "aws_lb_listener_rule" "website_api" {
+  listener_arn = var.listener_arn
+  priority     = var.priority - 1 # Higher priority (lower number) than main rule
+
+  action {
+    type             = "forward"
+    target_group_arn = var.alb_target_group_arn
+  }
+
+  condition {
+    host_header {
+      values = ["${var.website_name}.${var.website_domain}"]
+    }
+  }
+
+  # Only match API routes
+  condition {
+    path_pattern {
+      values = ["/api/*", "/backend-api/*"]
     }
   }
 
