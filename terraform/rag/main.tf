@@ -1,11 +1,7 @@
-
-
 # S3 Bucket for Knowledge Base Data Sources
 resource "aws_s3_bucket" "knowledge_base_data" {
   bucket = "rag-knowledge-base-data-${data.aws_caller_identity.current.account_id}"
   tags   = var.tags
-
-
 }
 
 resource "aws_s3_bucket_versioning" "knowledge_base_data" {
@@ -14,7 +10,6 @@ resource "aws_s3_bucket_versioning" "knowledge_base_data" {
     status = "Enabled"
   }
 }
-
 
 # OpenSearch Serverless Collection
 resource "aws_opensearchserverless_collection" "knowledge_base" {
@@ -101,6 +96,11 @@ resource "aws_opensearchserverless_access_policy" "knowledge_base" {
       ]
     }
   ])
+
+  depends_on = [
+    aws_opensearchserverless_collection.knowledge_base,
+    aws_iam_role.bedrock_knowledge_base_role
+  ]
 }
 
 # Bedrock Knowledge Base
