@@ -137,7 +137,9 @@ resource "aws_bedrockagent_knowledge_base" "main" {
 
   depends_on = [
     aws_opensearchserverless_collection.knowledge_base,
-    aws_opensearchserverless_access_policy.knowledge_base
+    aws_opensearchserverless_access_policy.knowledge_base,
+    aws_opensearchserverless_security_policy.knowledge_base_encryption,
+    aws_opensearchserverless_security_policy.knowledge_base_network
   ]
 }
 
