@@ -61,6 +61,25 @@ resource "aws_opensearchserverless_collection" "knowledge_base" {
   ]
 }
 
+resource "opensearch_index" "bedrock_knowledge_base_default_index" {
+  name = "bedrock-knowledge-base-default-index"
+
+  mappings = jsonencode({
+    properties = {
+      "bedrock-knowledge-base-default-vector" = {
+        type      = "knn_vector",
+        dimension = 1024
+      },
+      "AMAZON_BEDROCK_TEXT" = {
+        type = "text"
+      },
+      "AMAZON_BEDROCK_METADATA" = {
+        type = "text"
+      }
+    }
+  })
+}
+
 # OpenSearch Serverless Access Policy (depends on collection and IAM role)
 resource "aws_opensearchserverless_access_policy" "knowledge_base" {
   name = "rag-knowledge-base-access-policy"

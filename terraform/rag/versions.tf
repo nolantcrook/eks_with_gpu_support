@@ -22,6 +22,6 @@ provider "aws" {
 }
 
 provider "opensearch" {
-  url        = aws_opensearchserverless_collection.knowledge_base.url
+  url        = aws_opensearchserverless_collection.knowledge_base.collection_endpoint
   aws_region = var.aws_region
 }
