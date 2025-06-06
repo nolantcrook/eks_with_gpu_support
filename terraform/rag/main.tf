@@ -61,26 +61,6 @@ resource "aws_opensearchserverless_collection" "knowledge_base" {
   ]
 }
 
-resource "opensearch_index" "bedrock_knowledge_base_default_index" {
-  name     = "bedrock-knowledge-base-default-index"
-  provider = opensearch
-
-  mappings = jsonencode({
-    properties = {
-      "bedrock-knowledge-base-default-vector" = {
-        type      = "knn_vector",
-        dimension = 1024
-      },
-      "AMAZON_BEDROCK_TEXT" = {
-        type = "text"
-      },
-      "AMAZON_BEDROCK_METADATA" = {
-        type = "text"
-      }
-    }
-  })
-}
-
 # OpenSearch Serverless Access Policy (depends on collection and IAM role)
 resource "aws_opensearchserverless_access_policy" "knowledge_base" {
   name = "rag-knowledge-base-access-policy"
@@ -117,8 +97,7 @@ resource "aws_opensearchserverless_access_policy" "knowledge_base" {
         }
       ]
       Principal = [
-        aws_iam_role.bedrock_knowledge_base_role.arn,
-        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        aws_iam_role.bedrock_knowledge_base_role.arn
       ]
     }
   ])
@@ -157,7 +136,6 @@ resource "aws_bedrockagent_knowledge_base" "main" {
       }
     }
     type = "OPENSEARCH_SERVERLESS"
-
   }
 
   tags = var.tags
