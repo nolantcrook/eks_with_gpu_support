@@ -95,7 +95,7 @@ resource "aws_opensearchserverless_access_policy" "knowledge_base" {
       Rules = [
         {
           Resource = [
-            "*"
+            "collection/${aws_opensearchserverless_collection.knowledge_base.name}"
           ]
           Permission = [
             "aoss:CreateCollectionItems",
@@ -107,7 +107,7 @@ resource "aws_opensearchserverless_access_policy" "knowledge_base" {
         },
         {
           Resource = [
-            "*"
+            "index/${aws_opensearchserverless_collection.knowledge_base.name}/*"
           ]
           Permission = [
             "aoss:CreateIndex",
@@ -121,9 +121,7 @@ resource "aws_opensearchserverless_access_policy" "knowledge_base" {
         }
       ]
       Principal = [
-        aws_iam_role.bedrock_knowledge_base_role.arn,
-        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
-        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/bedrock-agent"
+        "*"
       ]
     }
   ])
