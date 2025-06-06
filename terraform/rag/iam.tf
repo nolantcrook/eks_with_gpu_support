@@ -43,7 +43,7 @@ resource "aws_iam_role_policy" "bedrock_knowledge_base_policy" {
           "aoss:APIAccessAll"
         ]
         Resource = [
-          "arn:aws:aoss:${var.aws_region}:*:collection/*"
+          aws_opensearchserverless_collection.knowledge_base.arn
         ]
       },
       {
