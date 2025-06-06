@@ -62,7 +62,8 @@ resource "aws_opensearchserverless_collection" "knowledge_base" {
 }
 
 resource "opensearch_index" "bedrock_knowledge_base_default_index" {
-  name = "bedrock-knowledge-base-default-index"
+  name     = "bedrock-knowledge-base-default-index"
+  provider = opensearch
 
   mappings = jsonencode({
     properties = {
