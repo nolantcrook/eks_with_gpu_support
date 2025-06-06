@@ -11,15 +11,7 @@ resource "aws_s3_bucket_versioning" "knowledge_base_data" {
   }
 }
 
-# OpenSearch Serverless Collection
-resource "aws_opensearchserverless_collection" "knowledge_base" {
-  name = "rag-knowledge-base-collection"
-  type = "VECTORSEARCH"
-
-  tags = var.tags
-}
-
-# OpenSearch Serverless Security Policy
+# OpenSearch Serverless Security Policies (must be created before collection)
 resource "aws_opensearchserverless_security_policy" "knowledge_base_encryption" {
   name = "rag-knowledge-base-enc-policy"
   type = "encryption"
@@ -56,7 +48,20 @@ resource "aws_opensearchserverless_security_policy" "knowledge_base_network" {
   ])
 }
 
-# OpenSearch Serverless Access Policy
+# OpenSearch Serverless Collection (depends on security policies)
+resource "aws_opensearchserverless_collection" "knowledge_base" {
+  name = "rag-knowledge-base-collection"
+  type = "VECTORSEARCH"
+
+  tags = var.tags
+
+  depends_on = [
+    aws_opensearchserverless_security_policy.knowledge_base_encryption,
+    aws_opensearchserverless_security_policy.knowledge_base_network
+  ]
+}
+
+# OpenSearch Serverless Access Policy (depends on collection and IAM role)
 resource "aws_opensearchserverless_access_policy" "knowledge_base" {
   name = "rag-knowledge-base-access-policy"
   type = "data"
