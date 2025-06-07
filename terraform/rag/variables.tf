@@ -10,6 +10,11 @@ variable "aws_region" {
 #   default     = "dev"
 # }
 
+variable "knowledge_base_name" {
+  description = "Name of the Bedrock knowledge base"
+  type        = string
+  default     = "rag-knowledge-base-v3"
+}
 
 # Tags
 variable "tags" {
