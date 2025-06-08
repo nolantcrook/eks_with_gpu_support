@@ -42,3 +42,13 @@ output "kaggle_key_secret_id" {
   description = "ID of the Kaggle key secret"
   value       = aws_secretsmanager_secret.kaggle_key.id
 }
+
+output "ses_email_secret_id" {
+  description = "ID of the SES email secret"
+  value       = aws_secretsmanager_secret.ses_email.id
+}
+
+output "ses_domain_secret_id" {
+  description = "ID of the SES domain secret"
+  value       = aws_secretsmanager_secret.ses_domain.id
+}

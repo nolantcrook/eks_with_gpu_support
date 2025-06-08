@@ -41,3 +41,9 @@ variable "environment" {
   description = "Environment name (dev or prod)"
   type        = string
 }
+
+variable "project_name" {
+  description = "Name of the project for resource naming"
+  type        = string
+  default     = "rag-project"
+}

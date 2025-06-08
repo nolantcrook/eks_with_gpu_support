@@ -17,3 +17,8 @@ output "rag_s3_bucket_arn" {
   description = "Arn of the S3 bucket for knowledge base data"
   value       = aws_s3_bucket.knowledge_base_data.arn
 }
+
+output "rag_s3_bucket_name" {
+  description = "Name of the S3 bucket for knowledge base data"
+  value       = aws_s3_bucket.knowledge_base_data.bucket
+}

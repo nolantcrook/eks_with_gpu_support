@@ -153,3 +153,31 @@ resource "aws_secretsmanager_secret_version" "kaggle_key" {
     key = "placeholder-kaggle-key"
   })
 }
+
+# Create AWS Secrets Manager secret for SES email address
+resource "aws_secretsmanager_secret" "ses_email" {
+  name        = "ses/email-address"
+  description = "SES verified email address for sending emails"
+}
+
+# Create initial secret version with placeholder value
+resource "aws_secretsmanager_secret_version" "ses_email" {
+  secret_id = aws_secretsmanager_secret.ses_email.id
+  secret_string = jsonencode({
+    email = "placeholder@example.com"
+  })
+}
+
+# Create AWS Secrets Manager secret for SES domain
+resource "aws_secretsmanager_secret" "ses_domain" {
+  name        = "ses/domain"
+  description = "SES verified domain for sending emails"
+}
+
+# Create initial secret version with placeholder value
+resource "aws_secretsmanager_secret_version" "ses_domain" {
+  secret_id = aws_secretsmanager_secret.ses_domain.id
+  secret_string = jsonencode({
+    domain = "example.com"
+  })
+}
