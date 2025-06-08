@@ -59,8 +59,8 @@ resource "aws_iam_role_policy" "bedrock_knowledge_base_policy" {
           "s3:ListBucket"
         ]
         Resource = [
-          local.rag_s3_bucket_name,
-          "${local.rag_s3_bucket_name}/*",
+          local.rag_s3_bucket_arn,
+          "${local.rag_s3_bucket_arn}/*",
           "arn:aws:s3:::rag-uploads-${data.aws_caller_identity.current.account_id}",
           "arn:aws:s3:::rag-uploads-${data.aws_caller_identity.current.account_id}/*"
         ]

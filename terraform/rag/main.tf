@@ -42,7 +42,7 @@ resource "aws_bedrockagent_data_source" "s3_data_source" {
   data_deletion_policy = "RETAIN"
   data_source_configuration {
     s3_configuration {
-      bucket_arn         = local.rag_s3_bucket_name
+      bucket_arn         = local.rag_s3_bucket_arn
       inclusion_prefixes = ["knowledgebase-demo"]
     }
     type = "S3"

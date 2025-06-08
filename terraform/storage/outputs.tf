@@ -13,7 +13,7 @@ output "efs_file_system_id" {
   value       = aws_efs_file_system.eks-efs.id
 }
 
-output "rag_s3_bucket_name" {
-  description = "Name of the S3 bucket for knowledge base data"
-  value       = aws_s3_bucket.knowledge_base_data.bucket
+output "rag_s3_bucket_arn" {
+  description = "Arn of the S3 bucket for knowledge base data"
+  value       = aws_s3_bucket.knowledge_base_data.arn
 }

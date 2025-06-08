@@ -19,7 +19,7 @@ data "terraform_remote_state" "storage" {
 data "aws_caller_identity" "current" {}
 
 locals {
-  rag_s3_bucket_name = data.terraform_remote_state.storage.outputs.rag_s3_bucket_name
+  rag_s3_bucket_arn = data.terraform_remote_state.storage.outputs.rag_s3_bucket_arn
 }
 
 # locals {
