@@ -2,9 +2,10 @@ include "env" {
   path = "${get_repo_root()}/environments/${get_env("ENV", "dev")}/terragrunt.hcl"
 }
 
-include "root" {
-  path = find_in_parent_folders()
+inputs = {
+  environment = get_env("ENV", "dev")
 }
+
 
 # Example configuration for auto-ingestion
 inputs = {
