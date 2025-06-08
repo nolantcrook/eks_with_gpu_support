@@ -2,13 +2,10 @@ include "env" {
   path = "${get_repo_root()}/environments/${get_env("ENV", "dev")}/terragrunt.hcl"
 }
 
-inputs = {
-  environment = get_env("ENV", "dev")
-}
-
 
 # Example configuration for auto-ingestion
 inputs = {
+  environment = get_env("ENV", "dev")
   # Enable auto-ingestion (default: true)
   auto_start_ingestion = true
 
@@ -20,7 +17,7 @@ inputs = {
 
   # Additional tags
   tags = {
-    Environment = "dev"
+    Environment = get_env("ENV", "dev")
     Project     = "graphrag"
     Owner       = "data-team"
   }
