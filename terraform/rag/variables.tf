@@ -16,6 +16,18 @@ variable "knowledge_base_name" {
   default     = "rag-knowledge-base-v3"
 }
 
+variable "auto_start_ingestion" {
+  description = "Whether to automatically start ingestion after knowledge base creation"
+  type        = bool
+  default     = true
+}
+
+variable "ingestion_timeout_minutes" {
+  description = "Timeout for automatic ingestion in minutes"
+  type        = number
+  default     = 30
+}
+
 # Tags
 variable "tags" {
   description = "Tags to apply to all resources"
@@ -24,4 +36,8 @@ variable "tags" {
     Environment = "dev"
     Project     = "graphrag"
   }
+}
+variable "environment" {
+  description = "Environment name (dev or prod)"
+  type        = string
 }

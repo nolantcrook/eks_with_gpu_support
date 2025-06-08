@@ -95,3 +95,32 @@ resource "aws_opensearchserverless_access_policy" "knowledge_base" {
   ])
 
 }
+
+################################################################################
+# Create OpenSearch Index with proper mapping for Bedrock Knowledge Base
+################################################################################
+
+resource "null_resource" "create_opensearch_index" {
+  provisioner "local-exec" {
+    command     = <<-EOT
+      # Install required Python packages
+      pip3 install opensearch-py aws-requests-auth boto3
+
+      # Wait for collection to be ready
+      sleep 30
+
+      # Create index using Python script
+      python3 create_index.py "${aws_opensearchserverless_collection.knowledge_base.collection_endpoint}" "bedrock-knowledge-base-v3-index"
+    EOT
+    working_dir = path.module
+  }
+
+  depends_on = [
+    aws_opensearchserverless_collection.knowledge_base,
+    aws_opensearchserverless_access_policy.knowledge_base
+  ]
+
+  triggers = {
+    collection_endpoint = aws_opensearchserverless_collection.knowledge_base.collection_endpoint
+  }
+}
