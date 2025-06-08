@@ -1,18 +1,18 @@
 # SES Email Identity
 resource "aws_ses_email_identity" "example" {
-  email = data.aws_secretsmanager_secret_version.ses_email.secret_string
+  email = jsondecode(data.aws_secretsmanager_secret_version.ses_email.secret_string)["email"]
 }
 
 # SES Domain Identity (optional)
 resource "aws_ses_domain_identity" "example" {
-  count  = data.aws_secretsmanager_secret_version.ses_domain.secret_string != "" ? 1 : 0
-  domain = data.aws_secretsmanager_secret_version.ses_domain.secret_string
+  count  = try(jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"], "") != "" ? 1 : 0
+  domain = jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"]
 }
 
 
 # SES Domain DKIM
 resource "aws_ses_domain_dkim" "example" {
-  count  = data.aws_secretsmanager_secret_version.ses_domain.secret_string != "" ? 1 : 0
+  count  = try(jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"], "") != "" ? 1 : 0
   domain = aws_ses_domain_identity.example[0].domain
 }
 
@@ -118,7 +118,7 @@ output "ses_email_identity_arn" {
 
 output "ses_domain_identity_arn" {
   description = "ARN of the SES domain identity"
-  value       = data.aws_secretsmanager_secret_version.ses_domain.secret_string != "" ? aws_ses_domain_identity.example[0].arn : null
+  value       = try(jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"], "") != "" ? aws_ses_domain_identity.example[0].arn : null
 }
 
 output "ses_configuration_set_name" {
@@ -133,5 +133,5 @@ output "ses_iam_role_arn" {
 
 output "ses_dkim_tokens" {
   description = "DKIM tokens for domain verification"
-  value       = data.aws_secretsmanager_secret_version.ses_domain.secret_string != "" ? aws_ses_domain_dkim.example[0].dkim_tokens : []
+  value       = try(jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"], "") != "" ? aws_ses_domain_dkim.example[0].dkim_tokens : []
 }
