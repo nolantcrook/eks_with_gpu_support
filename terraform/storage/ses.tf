@@ -16,6 +16,52 @@ resource "aws_ses_domain_dkim" "example" {
   domain = aws_ses_domain_identity.example[0].domain
 }
 
+# Route53 Records for Domain Verification and Email Authentication
+data "aws_route53_zone" "domain" {
+  count = try(jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"], "") != "" ? 1 : 0
+  name  = jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"]
+}
+
+# SES Domain Verification TXT Record
+resource "aws_route53_record" "ses_domain_verification" {
+  count   = try(jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"], "") != "" ? 1 : 0
+  zone_id = data.aws_route53_zone.domain[0].zone_id
+  name    = "_amazonses.${jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"]}"
+  type    = "TXT"
+  ttl     = 300
+  records = [aws_ses_domain_identity.example[0].verification_token]
+}
+
+# DKIM CNAME Records
+resource "aws_route53_record" "ses_dkim_records" {
+  count   = try(jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"], "") != "" ? 3 : 0
+  zone_id = data.aws_route53_zone.domain[0].zone_id
+  name    = "${aws_ses_domain_dkim.example[0].dkim_tokens[count.index]}._domainkey.${jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"]}"
+  type    = "CNAME"
+  ttl     = 300
+  records = ["${aws_ses_domain_dkim.example[0].dkim_tokens[count.index]}.dkim.amazonses.com"]
+}
+
+# SPF Record
+resource "aws_route53_record" "spf" {
+  count   = try(jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"], "") != "" ? 1 : 0
+  zone_id = data.aws_route53_zone.domain[0].zone_id
+  name    = jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"]
+  type    = "TXT"
+  ttl     = 300
+  records = ["v=spf1 include:amazonses.com ~all"]
+}
+
+# DMARC Record
+resource "aws_route53_record" "dmarc" {
+  count   = try(jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"], "") != "" ? 1 : 0
+  zone_id = data.aws_route53_zone.domain[0].zone_id
+  name    = "_dmarc.${jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"]}"
+  type    = "TXT"
+  ttl     = 300
+  records = ["v=DMARC1; p=quarantine; rua=mailto:dmarc-reports@${jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"]}; ruf=mailto:dmarc-failures@${jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"]}; fo=1"]
+}
+
 # SES Configuration Set
 resource "aws_ses_configuration_set" "example" {
   name = "${var.project_name}-ses-config-set"
@@ -134,4 +180,28 @@ output "ses_iam_role_arn" {
 output "ses_dkim_tokens" {
   description = "DKIM tokens for domain verification"
   value       = try(jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"], "") != "" ? aws_ses_domain_dkim.example[0].dkim_tokens : []
+}
+
+# Additional DNS-related outputs
+output "ses_domain_verification_token" {
+  description = "Domain verification token for SES"
+  value       = try(jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"], "") != "" ? aws_ses_domain_identity.example[0].verification_token : null
+}
+
+output "route53_zone_id" {
+  description = "Route53 hosted zone ID for the domain"
+  value       = try(jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"], "") != "" ? data.aws_route53_zone.domain[0].zone_id : null
+}
+
+output "dns_records_created" {
+  description = "Summary of DNS records created for SES"
+  value = try(jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"], "") != "" ? {
+    domain_verification = "_amazonses.${jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"]}"
+    dkim_records = [
+      for token in aws_ses_domain_dkim.example[0].dkim_tokens :
+      "${token}._domainkey.${jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"]}"
+    ]
+    spf_record   = jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"]
+    dmarc_record = "_dmarc.${jsondecode(data.aws_secretsmanager_secret_version.ses_domain.secret_string)["domain"]}"
+  } : null
 }
