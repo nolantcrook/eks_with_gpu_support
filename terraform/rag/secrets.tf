@@ -5,7 +5,7 @@ data "aws_secretsmanager_secret" "knowledge_base_id" {
 
 # Update the secret with the actual knowledge base ID
 resource "aws_secretsmanager_secret_version" "knowledge_base_id" {
-  secret_id     = data.aws_secretsmanager_secret.knowledge_base_id.id
+  secret_id     = data.aws_secretsmanager_secret.knowledge_base_id.arn
   secret_string = var.knowledge_base_name
 }
 
