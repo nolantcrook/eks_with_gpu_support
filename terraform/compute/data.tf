@@ -30,6 +30,7 @@ locals {
   spot_asg_name                  = module.x86_spot_nodes.asg_name
   alb_target_group_arn           = data.terraform_remote_state.networking.outputs.alb_target_group_arn
   alb_target_group_websocket_arn = data.terraform_remote_state.networking.outputs.alb_target_group_websocket_arn
+  knowledge_base_id_secret_id    = data.terraform_remote_state.foundation.outputs.knowledge_base_id_secret_id
 }
 
 # Create attachments for both ASGs

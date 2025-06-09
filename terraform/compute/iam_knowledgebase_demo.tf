@@ -20,7 +20,8 @@ resource "aws_iam_policy" "demo_knowledgebase_secrets_access" {
         Resource = [
           local.openai_api_key_secret_id,
           local.kaggle_username_secret_id,
-          local.kaggle_key_secret_id
+          local.kaggle_key_secret_id,
+          local.knowledge_base_id_secret_id
         ]
       },
       {
@@ -52,6 +53,23 @@ resource "aws_iam_policy" "demo_knowledgebase_secrets_access" {
           "arn:aws:bedrock:*::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0",
           "arn:aws:bedrock:*::foundation-model/anthropic.claude-*"
         ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ses:SendEmail",
+          "ses:SendRawEmail",
+          "ses:SendTemplatedEmail",
+          "ses:SendBulkTemplatedEmail",
+          "ses:GetSendQuota",
+          "ses:GetSendStatistics",
+          "ses:ListIdentities",
+          "ses:GetIdentityVerificationAttributes",
+          "ses:GetIdentityDkimAttributes",
+          "ses:DescribeConfigurationSet",
+          "ses:ListConfigurationSets"
+        ]
+        Resource = "*"
       }
     ]
   })

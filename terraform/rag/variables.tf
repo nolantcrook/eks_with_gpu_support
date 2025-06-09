@@ -42,8 +42,8 @@ variable "environment" {
   type        = string
 }
 
-variable "project_name" {
-  description = "Name of the project for resource naming"
-  type        = string
-  default     = "rag-project"
-}
+# variable "project_name" {
+#   description = "Name of the project for resource naming"
+#   type        = string
+#   default     = "rag-project"
+# }

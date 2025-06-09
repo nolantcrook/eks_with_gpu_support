@@ -52,3 +52,8 @@ output "ses_domain_secret_id" {
   description = "ID of the SES domain secret"
   value       = aws_secretsmanager_secret.ses_domain.id
 }
+
+output "knowledge_base_id_secret_id" {
+  description = "ID of the knowledge base ID secret"
+  value       = aws_secretsmanager_secret.knowledge_base_id.id
+}

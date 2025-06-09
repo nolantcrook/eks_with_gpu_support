@@ -181,3 +181,9 @@ resource "aws_secretsmanager_secret_version" "ses_domain" {
     domain = "example.com"
   })
 }
+
+# Create a secret for the knowledge base ID
+resource "aws_secretsmanager_secret" "knowledge_base_id" {
+  name        = "rag-project-knowledge-base-id"
+  description = "Secret containing the knowledge base ID for RAG application"
+}
