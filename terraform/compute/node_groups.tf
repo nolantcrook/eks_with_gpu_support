@@ -106,7 +106,7 @@ module "x86_ondemand_nodes" {
 
   desired_size = 0
   min_size     = 0
-  max_size     = 0
+  max_size     = 1
 
   security_group_ids = [
     local.cluster_security_group_id,
