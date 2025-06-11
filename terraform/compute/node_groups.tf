@@ -2,7 +2,7 @@
 module "gpu_nodes" {
   source = "./nodes_module"
 
-  name          = "gpu-v2"
+  name          = "gpu-v3"
   cluster_name  = module.cluster.cluster_name
   environment   = var.environment
   node_role_arn = aws_iam_role.node.arn
@@ -93,7 +93,7 @@ module "gpu_nodes" {
 module "x86_ondemand_nodes" {
   source        = "./nodes_module"
   ami_type      = "AL2023_x86_64_STANDARD"
-  name          = "x86-ondemand-v2"
+  name          = "x86-ondemand-v3"
   cluster_name  = module.cluster.cluster_name
   environment   = var.environment
   node_role_arn = aws_iam_role.node.arn
@@ -101,7 +101,7 @@ module "x86_ondemand_nodes" {
 
   capacity_type = "ON_DEMAND"
   instance_types = [
-    "t3.micro"
+    "t3.medium"
   ]
 
   desired_size = 0
@@ -118,15 +118,14 @@ module "x86_ondemand_nodes" {
 module "x86_spot_nodes" {
   source        = "./nodes_module"
   ami_type      = "AL2023_x86_64_STANDARD"
-  name          = "x86-spot-v2"
+  name          = "x86-spot-v3"
   cluster_name  = module.cluster.cluster_name
   environment   = var.environment
   node_role_arn = aws_iam_role.node.arn
   subnet_ids    = local.private_subnet_ids
 
   capacity_type = "SPOT"
-  instance_types = [
-    "t3.micro", "t3.medium", "t3.large", "t3.xlarge", "t3.2xlarge"
+  instance_types = ["t3.medium", "t3.large", "t3.xlarge", "t3.2xlarge"
   ]
 
   desired_size = 2
