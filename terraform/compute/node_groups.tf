@@ -106,7 +106,7 @@ module "x86_ondemand_nodes" {
 
   desired_size = 0
   min_size     = 0
-  max_size     = 5
+  max_size     = 0
 
   security_group_ids = [
     local.cluster_security_group_id,
@@ -126,13 +126,7 @@ module "x86_spot_nodes" {
 
   capacity_type = "SPOT"
   instance_types = [
-    "t3.medium", "t3.large", "t3.xlarge", "t3.2xlarge",
-    "t3a.medium", "t3a.large", "t3a.xlarge", "t3a.2xlarge",
-    "m5.large", "m5.xlarge", "m5.2xlarge",
-    "m5a.large", "m5a.xlarge", "m5a.2xlarge",
-    "m6i.large", "m6i.xlarge", "m6i.2xlarge",
-    "m6a.large", "m6a.xlarge", "m6a.2xlarge",
-    "r5.large", "r5.xlarge", "r5a.large", "r5a.xlarge"
+    "t3.micro", "t3.medium", "t3.large", "t3.xlarge", "t3.2xlarge"
   ]
 
   desired_size = 2
