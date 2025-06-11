@@ -2,7 +2,7 @@
 module "gpu_nodes" {
   source = "./nodes_module"
 
-  name          = "gpu"
+  name          = "gpu-v2"
   cluster_name  = module.cluster.cluster_name
   environment   = var.environment
   node_role_arn = aws_iam_role.node.arn
@@ -44,11 +44,11 @@ module "gpu_nodes" {
     volume_type = "gp2"
   }
 
-  node_group_depends_on = [
-    aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
-    aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
-    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly
-  ]
+  # node_group_depends_on = [
+  #   aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
+  #   aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
+  #   aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly
+  # ]
 }
 
 # # ARM Spot Nodes
@@ -93,7 +93,7 @@ module "gpu_nodes" {
 module "x86_ondemand_nodes" {
   source        = "./nodes_module"
   ami_type      = "AL2023_x86_64_STANDARD"
-  name          = "x86-ondemand"
+  name          = "x86-ondemand-v2"
   cluster_name  = module.cluster.cluster_name
   environment   = var.environment
   node_role_arn = aws_iam_role.node.arn
@@ -118,7 +118,7 @@ module "x86_ondemand_nodes" {
 module "x86_spot_nodes" {
   source        = "./nodes_module"
   ami_type      = "AL2023_x86_64_STANDARD"
-  name          = "x86-spot"
+  name          = "x86-spot-v2"
   cluster_name  = module.cluster.cluster_name
   environment   = var.environment
   node_role_arn = aws_iam_role.node.arn
