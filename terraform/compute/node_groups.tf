@@ -101,7 +101,7 @@ module "x86_ondemand_nodes" {
 
   capacity_type = "ON_DEMAND"
   instance_types = [
-    "t3.medium", "t3.large", "t3.xlarge", "m5.large"
+    "t3.micro"
   ]
 
   desired_size = 0
