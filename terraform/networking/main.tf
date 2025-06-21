@@ -88,14 +88,18 @@ resource "aws_security_group" "nat" {
   }
 }
 
-# Data source for NAT AMI
 data "aws_ami" "nat" {
   most_recent = true
-  owners      = ["amazon"]
+  owners      = ["568608671756"]
 
   filter {
     name   = "name"
-    values = ["amzn-ami-vpc-nat-*"]
+    values = ["fck-nat-al2023-*-x86_64-ebs"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
   }
 
   filter {
@@ -103,6 +107,7 @@ data "aws_ami" "nat" {
     values = ["hvm"]
   }
 }
+
 
 # NAT Instance
 resource "aws_instance" "nat" {
