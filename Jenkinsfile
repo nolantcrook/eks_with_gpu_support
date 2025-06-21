@@ -203,7 +203,7 @@ pipeline {
                     when {
                         expression { params.CALL_CENTER }
                     }
-                                        steps {
+                    steps {
                         dir('terraform/call_center') {
                         withEnv(["ENV=${params.ENV}"]) {
                             script {
@@ -217,6 +217,7 @@ pipeline {
                         }
                     }
                 }
+            }
             }
         }
 
