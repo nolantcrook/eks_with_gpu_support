@@ -203,17 +203,16 @@ pipeline {
                     when {
                         expression { params.CALL_CENTER }
                     }
-                    steps {
+                                        steps {
                         dir('terraform/call_center') {
-                            withEnv(["ENV=${params.ENV}"]) {
-                                script {
-                                    sh 'terraform init'
-                                    sh 'terraform plan -out=tfplan'
-                                    if (!params.AUTO_APPROVE) {
-                                        input message: 'Do you want to apply the Call Center changes?'
-                                    }
-                                    sh 'terraform apply -auto-approve tfplan'
+                        withEnv(["ENV=${params.ENV}"]) {
+                            script {
+                                sh 'terragrunt init --terragrunt-non-interactive'
+                                sh 'terragrunt plan -out=tfplan'
+                                if (!params.AUTO_APPROVE) {
+                                    input message: 'Do you want to apply the Call Center changes?'
                                 }
+                                sh 'terragrunt apply -auto-approve tfplan'
                             }
                         }
                     }
