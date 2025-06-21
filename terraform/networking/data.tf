@@ -23,7 +23,9 @@ locals {
   efs_file_system_id             = data.terraform_remote_state.storage.outputs.efs_file_system_id
   website_dns_zone_id_secret_arn = data.terraform_remote_state.foundation.outputs.route53_zone_id_secret_arn
   pic_dns_zone_id_secret_arn     = data.terraform_remote_state.foundation.outputs.route53_zone_id_secret_arn_pic
+  ec2_ssh_key_pair_id            = data.terraform_remote_state.foundation.outputs.ec2_ssh_key_pair_id
 }
+
 
 data "aws_secretsmanager_secret" "route53_zone_id_arn" {
   arn = local.website_dns_zone_id_secret_arn

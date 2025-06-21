@@ -4,8 +4,7 @@ resource "aws_opensearchserverless_collection" "knowledge_base" {
   type = "VECTORSEARCH"
 
   standby_replicas = "DISABLED"
-
-  tags = var.tags
+  tags             = var.tags
 
 }
 

@@ -51,29 +51,80 @@ resource "aws_internet_gateway" "main" {
   }
 }
 
-# EIP for NAT Gateway
+# EIP for NAT Instance
 resource "aws_eip" "nat" {
-  count  = length(var.public_subnet_cidrs)
   domain = "vpc"
 
   tags = {
-    Name        = "eks-nat-${var.environment}-${var.availability_zones[count.index]}"
+    Name        = "eks-nat-${var.environment}"
     Environment = var.environment
   }
 }
 
-# NAT Gateway
-resource "aws_nat_gateway" "main" {
-  count         = length(var.public_subnet_cidrs)
-  subnet_id     = aws_subnet.public[count.index].id
-  allocation_id = aws_eip.nat[count.index].id
+# Security Group for NAT Instance
+resource "aws_security_group" "nat" {
+  name_prefix = "nat-${var.environment}"
+  vpc_id      = aws_vpc.main.id
+
+  # Allow outbound traffic to internet
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow inbound traffic from private subnets
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = var.private_subnet_cidrs
+  }
 
   tags = {
-    Name        = "eks-nat-${var.environment}-${var.availability_zones[count.index]}"
+    Name        = "nat-sg-${var.environment}"
+    Environment = var.environment
+  }
+}
+
+# Data source for NAT AMI
+data "aws_ami" "nat" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn-ami-vpc-nat-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+# NAT Instance
+resource "aws_instance" "nat" {
+  ami                    = data.aws_ami.nat.id
+  instance_type          = "t3.nano"               # Smallest instance type for cost savings
+  subnet_id              = aws_subnet.public[0].id # Place in first public subnet
+  vpc_security_group_ids = [aws_security_group.nat.id]
+  source_dest_check      = false # Required for NAT instances
+  key_name               = local.ec2_ssh_key_pair_id
+
+  tags = {
+    Name        = "eks-nat-${var.environment}"
     Environment = var.environment
   }
 
   depends_on = [aws_internet_gateway.main]
+}
+
+# Associate EIP with NAT Instance
+resource "aws_eip_association" "nat" {
+  instance_id   = aws_instance.nat.id
+  allocation_id = aws_eip.nat.id
 }
 
 # Route Tables
@@ -96,8 +147,8 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
   route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.main[count.index].id
+    cidr_block           = "0.0.0.0/0"
+    network_interface_id = aws_instance.nat.primary_network_interface_id
   }
 
   tags = {

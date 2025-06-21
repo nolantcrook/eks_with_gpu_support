@@ -1,4 +1,3 @@
-
 variable "environment" {
   description = "Environment name (dev or prod)"
   type        = string
@@ -33,7 +32,6 @@ variable "availability_zones" {
   type        = list(string)
   default     = ["us-west-2a", "us-west-2b"]
 }
-
 
 # Removing unused variables:
 # - single_az_dev
