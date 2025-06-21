@@ -51,13 +51,18 @@ pipeline {
             defaultValue: false,
             description: 'Include RAG stage'
         )
+        booleanParam(
+            name: 'CALL_CENTER',
+            defaultValue: false,
+            description: 'Include Call Center stage'
+        )
     }
 
     stages {
         stage('Validate Parameters') {
             steps {
                 script {
-                    if (!params.FOUNDATION && !params.STORAGE && !params.NETWORKING && !params.COMPUTE && !params.RAG) {
+                    if (!params.FOUNDATION && !params.STORAGE && !params.NETWORKING && !params.COMPUTE && !params.RAG && !params.CALL_CENTER) {
                         error "At least one stage must be selected!"
                     }
                 }
@@ -193,6 +198,26 @@ pipeline {
                         }
                     }
                 }
+
+                stage('Call Center Infrastructure') {
+                    when {
+                        expression { params.CALL_CENTER }
+                    }
+                    steps {
+                        dir('terraform/call_center') {
+                            withEnv(["ENV=${params.ENV}"]) {
+                                script {
+                                    sh 'terraform init'
+                                    sh 'terraform plan -out=tfplan'
+                                    if (!params.AUTO_APPROVE) {
+                                        input message: 'Do you want to apply the Call Center changes?'
+                                    }
+                                    sh 'terraform apply -auto-approve tfplan'
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -202,6 +227,26 @@ pipeline {
                 expression { params.ACTION == 'destroy' }
             }
             stages {
+                stage('Destroy Call Center Infrastructure') {
+                    when {
+                        expression { params.CALL_CENTER }
+                    }
+                    steps {
+                        dir('terraform/call_center') {
+                            withEnv(["ENV=${params.ENV}"]) {
+                                script {
+                                    sh 'terraform init'
+                                    sh 'terraform plan -destroy -out=tfplan'
+                                    if (!params.AUTO_APPROVE) {
+                                        input message: 'Do you want to destroy the Call Center infrastructure?'
+                                    }
+                                    sh 'terraform apply -auto-approve tfplan'
+                                }
+                            }
+                        }
+                    }
+                }
+
                 stage('Destroy Compute Infrastructure') {
                     when {
                         expression { params.COMPUTE }
@@ -335,6 +380,7 @@ pipeline {
                 rm -f terraform/networking/tfplan
                 rm -f terraform/compute/tfplan
                 rm -f terraform/rag/tfplan
+                rm -f terraform/call_center/tfplan
             '''
         }
         success {
