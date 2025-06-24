@@ -15,8 +15,8 @@ resource "aws_eks_cluster" "eks_gpu" {
     endpoint_public_access  = true
   }
 
-  # Enable managed node groups
-  enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+  # Enable managed node groups with configurable logging
+  enabled_cluster_log_types = var.enabled_cluster_log_types
 
   # Add tags for spot instance management
   tags = {
@@ -33,6 +33,18 @@ resource "aws_eks_cluster" "eks_gpu" {
   depends_on = [
     aws_iam_role_policy_attachment.cluster
   ]
+}
+
+# CloudWatch Log Group for EKS cluster with configurable retention
+resource "aws_cloudwatch_log_group" "eks_cluster_logs" {
+  name              = "/aws/eks/${var.cluster_name}-${var.environment}/cluster"
+  retention_in_days = var.cloudwatch_log_retention_days
+
+  tags = {
+    Environment = var.environment
+    Cluster     = "${var.cluster_name}-${var.environment}"
+    Purpose     = "eks-cluster-logs"
+  }
 }
 
 resource "aws_iam_role" "cluster" {

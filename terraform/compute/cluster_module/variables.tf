@@ -30,3 +30,26 @@ variable "sandbox_user" {
   type        = string
   default     = "nolan"
 }
+
+variable "enabled_cluster_log_types" {
+  description = "List of EKS cluster log types to enable. Options: api, audit, authenticator, controllerManager, scheduler"
+  type        = list(string)
+  default     = ["audit"]
+  validation {
+    condition = alltrue([
+      for log_type in var.enabled_cluster_log_types :
+      contains(["api", "audit", "authenticator", "controllerManager", "scheduler"], log_type)
+    ])
+    error_message = "Invalid log type. Must be one of: api, audit, authenticator, controllerManager, scheduler"
+  }
+}
+
+variable "cloudwatch_log_retention_days" {
+  description = "Number of days to retain CloudWatch logs for the EKS cluster"
+  type        = number
+  default     = 1
+  validation {
+    condition     = var.cloudwatch_log_retention_days >= 1 && var.cloudwatch_log_retention_days <= 3653
+    error_message = "Log retention must be between 1 and 3653 days"
+  }
+}
