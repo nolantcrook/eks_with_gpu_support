@@ -44,7 +44,7 @@ resource "aws_iam_role" "hauliday_role" {
         "Action" : "sts:AssumeRoleWithWebIdentity",
         "Condition" : {
           "StringLike" : {
-            "${replace(aws_iam_openid_connect_provider.eks_oidc.url, "https://", "")}:sub" : "system:serviceaccount:hauliday-backend:hauliday-backend-sa"
+            "${replace(aws_iam_openid_connect_provider.eks_oidc.url, "https://", "")}:sub" : "system:serviceaccount:hauliday:hauliday-backend-sa"
           }
         }
       }
