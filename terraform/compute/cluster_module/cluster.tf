@@ -36,16 +36,16 @@ resource "aws_eks_cluster" "eks_gpu" {
 }
 
 # CloudWatch Log Group for EKS cluster with configurable retention
-resource "aws_cloudwatch_log_group" "eks_cluster_logs" {
-  name              = "/aws/eks/${var.cluster_name}-${var.environment}/cluster"
-  retention_in_days = var.cloudwatch_log_retention_days
+# resource "aws_cloudwatch_log_group" "eks_cluster_logs" {
+#   name              = "/aws/eks/${var.cluster_name}-${var.environment}/cluster"
+#   retention_in_days = var.cloudwatch_log_retention_days
 
-  tags = {
-    Environment = var.environment
-    Cluster     = "${var.cluster_name}-${var.environment}"
-    Purpose     = "eks-cluster-logs"
-  }
-}
+#   tags = {
+#     Environment = var.environment
+#     Cluster     = "${var.cluster_name}-${var.environment}"
+#     Purpose     = "eks-cluster-logs"
+#   }
+# }
 
 resource "aws_iam_role" "cluster" {
   name = "${var.cluster_name}-cluster-role-${var.environment}"

@@ -44,12 +44,12 @@ variable "enabled_cluster_log_types" {
   }
 }
 
-variable "cloudwatch_log_retention_days" {
-  description = "Number of days to retain CloudWatch logs for the EKS cluster"
-  type        = number
-  default     = 1
-  validation {
-    condition     = var.cloudwatch_log_retention_days >= 1 && var.cloudwatch_log_retention_days <= 3653
-    error_message = "Log retention must be between 1 and 3653 days"
-  }
-}
+# variable "cloudwatch_log_retention_days" {
+#   description = "Number of days to retain CloudWatch logs for the EKS cluster"
+#   type        = number
+#   default     = 1
+#   validation {
+#     condition     = var.cloudwatch_log_retention_days >= 1 && var.cloudwatch_log_retention_days <= 3653
+#     error_message = "Log retention must be between 1 and 3653 days"
+#   }
+# }
