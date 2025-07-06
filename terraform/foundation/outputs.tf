@@ -23,6 +23,11 @@ output "route53_zone_id_secret_arn_stratis" {
   value       = aws_secretsmanager_secret.route53_zone_id_stratis.arn
 }
 
+output "route53_zone_id_secret_arn_hauliday" {
+  description = "ARN of the Route53 Zone ID secret"
+  value       = aws_secretsmanager_secret.route53_zone_id_hauliday.arn
+}
+
 output "ec2_ssh_key_pair_id" {
   description = "The ID of the EC2 SSH key pair"
   value       = aws_key_pair.ec2_key_pair.id

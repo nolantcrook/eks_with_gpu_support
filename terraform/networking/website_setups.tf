@@ -177,8 +177,8 @@ module "website_setups_hauliday" {
   source               = "./website_setup"
   website_name         = each.key
   subdomain            = each.value.subdomain
-  website_domain       = local.route53_zone_name_stratis
-  route53_zone_id      = local.route53_zone_id_stratis
+  website_domain       = local.route53_zone_name_hauliday
+  route53_zone_id      = local.route53_zone_id_hauliday
   priority             = each.value.priority
   alb_target_group_arn = each.value.target_group_arn
   alb_dns_name         = aws_lb.eks_alb.dns_name

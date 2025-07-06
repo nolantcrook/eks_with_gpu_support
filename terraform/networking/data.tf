@@ -20,11 +20,12 @@ data "terraform_remote_state" "foundation" {
 }
 
 locals {
-  efs_file_system_id             = data.terraform_remote_state.storage.outputs.efs_file_system_id
-  website_dns_zone_id_secret_arn = data.terraform_remote_state.foundation.outputs.route53_zone_id_secret_arn
-  pic_dns_zone_id_secret_arn     = data.terraform_remote_state.foundation.outputs.route53_zone_id_secret_arn_pic
-  stratis_dns_zone_id_secret_arn = data.terraform_remote_state.foundation.outputs.route53_zone_id_secret_arn_stratis
-  ec2_ssh_key_pair_id            = data.terraform_remote_state.foundation.outputs.ec2_ssh_key_pair_id
+  efs_file_system_id              = data.terraform_remote_state.storage.outputs.efs_file_system_id
+  website_dns_zone_id_secret_arn  = data.terraform_remote_state.foundation.outputs.route53_zone_id_secret_arn
+  pic_dns_zone_id_secret_arn      = data.terraform_remote_state.foundation.outputs.route53_zone_id_secret_arn_pic
+  stratis_dns_zone_id_secret_arn  = data.terraform_remote_state.foundation.outputs.route53_zone_id_secret_arn_stratis
+  hauliday_dns_zone_id_secret_arn = data.terraform_remote_state.foundation.outputs.route53_zone_id_secret_arn_hauliday
+  ec2_ssh_key_pair_id             = data.terraform_remote_state.foundation.outputs.ec2_ssh_key_pair_id
 }
 
 
@@ -65,12 +66,27 @@ data "aws_route53_zone" "hosted_zone_stratis" {
 }
 
 
+data "aws_secretsmanager_secret" "route53_zone_id_hauliday_arn" {
+  arn = local.hauliday_dns_zone_id_secret_arn
+}
+
+data "aws_secretsmanager_secret_version" "route53_zone_id_hauliday" {
+  secret_id = data.aws_secretsmanager_secret.route53_zone_id_hauliday_arn.id
+}
+
+data "aws_route53_zone" "hosted_zone_hauliday" {
+  zone_id = local.route53_zone_id_hauliday
+}
+
+
 locals {
-  route53_zone_id           = jsondecode(data.aws_secretsmanager_secret_version.route53_zone_id.secret_string).zone_id
-  route53_zone_name         = data.aws_route53_zone.hosted_zone.name
-  route53_zone_id_pic       = jsondecode(data.aws_secretsmanager_secret_version.route53_zone_id_pic.secret_string).zone_id
-  route53_zone_name_pic     = data.aws_route53_zone.hosted_zone_pic.name
-  route53_zone_id_stratis   = jsondecode(data.aws_secretsmanager_secret_version.route53_zone_id_stratis.secret_string).zone_id
-  route53_zone_name_stratis = data.aws_route53_zone.hosted_zone_stratis.name
-  alb_logs_bucket_arn       = data.terraform_remote_state.storage.outputs.alb_logs_bucket_arn
+  route53_zone_id            = jsondecode(data.aws_secretsmanager_secret_version.route53_zone_id.secret_string).zone_id
+  route53_zone_name          = data.aws_route53_zone.hosted_zone.name
+  route53_zone_id_pic        = jsondecode(data.aws_secretsmanager_secret_version.route53_zone_id_pic.secret_string).zone_id
+  route53_zone_name_pic      = data.aws_route53_zone.hosted_zone_pic.name
+  route53_zone_id_stratis    = jsondecode(data.aws_secretsmanager_secret_version.route53_zone_id_stratis.secret_string).zone_id
+  route53_zone_name_stratis  = data.aws_route53_zone.hosted_zone_stratis.name
+  route53_zone_id_hauliday   = jsondecode(data.aws_secretsmanager_secret_version.route53_zone_id_hauliday.secret_string).zone_id
+  route53_zone_name_hauliday = data.aws_route53_zone.hosted_zone_hauliday.name
+  alb_logs_bucket_arn        = data.terraform_remote_state.storage.outputs.alb_logs_bucket_arn
 }
