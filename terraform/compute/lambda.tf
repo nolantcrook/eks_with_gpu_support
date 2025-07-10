@@ -128,7 +128,7 @@ resource "aws_iam_policy" "hauliday_lambda_policy" {
           "dynamodb:GetShardIterator",
           "dynamodb:ListStreams"
         ]
-        Resource = data.aws_dynamodb_table.hauliday_reservations.stream_arn
+        Resource = local.hauliday_reservations_stream_arn
       }
     ]
   })
@@ -175,14 +175,9 @@ resource "aws_sqs_queue" "hauliday_lambda_dlq" {
   }
 }
 
-# Data source to get DynamoDB table stream ARN
-data "aws_dynamodb_table" "hauliday_reservations" {
-  name = local.hauliday_reservations_table_name
-}
-
 # DynamoDB Event Source Mapping for Lambda trigger
 resource "aws_lambda_event_source_mapping" "hauliday_reservations_stream" {
-  event_source_arn  = data.aws_dynamodb_table.hauliday_reservations.stream_arn
+  event_source_arn  = local.hauliday_reservations_stream_arn
   function_name     = aws_lambda_function.hauliday_notifications.arn
   starting_position = "LATEST"
 

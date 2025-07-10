@@ -26,6 +26,10 @@ resource "aws_dynamodb_table" "hauliday_reservations" {
   hash_key     = "reservation_id"
   range_key    = "start_date"
 
+  # Enable DynamoDB Streams
+  stream_enabled   = true
+  stream_view_type = "NEW_AND_OLD_IMAGES"
+
   attribute {
     name = "reservation_id"
     type = "S"

@@ -32,3 +32,8 @@ output "hauliday_reservations_table_name" {
   description = "Name of the DynamoDB table for hauliday reservations"
   value       = aws_dynamodb_table.hauliday_reservations.name
 }
+
+output "hauliday_reservations_stream_arn" {
+  description = "ARN of the Hauliday reservations DynamoDB stream"
+  value       = aws_dynamodb_table.hauliday_reservations.stream_arn
+}

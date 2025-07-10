@@ -42,6 +42,7 @@ locals {
   knowledge_base_id_secret_id    = data.terraform_remote_state.foundation.outputs.knowledge_base_id_secret_id
   # hauliday_reservations_table_arn  = data.terraform_remote_state.storage.outputs.hauliday_reservations_table_arn
   hauliday_reservations_table_name = data.terraform_remote_state.storage.outputs.hauliday_reservations_table_name
+  hauliday_reservations_stream_arn = data.terraform_remote_state.storage.outputs.hauliday_reservations_stream_arn
 }
 
 # Create attachments for both ASGs
