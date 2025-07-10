@@ -14,9 +14,11 @@ resource "aws_lambda_function" "hauliday_notifications" {
   # Environment variables
   environment {
     variables = {
-      ENVIRONMENT      = var.environment
-      SNS_TOPIC_ARN    = aws_sns_topic.hauliday_notifications.arn
-      SES_SOURCE_EMAIL = "nolan@haulidayrentals.com"
+      ENVIRONMENT            = var.environment
+      SNS_TOPIC_ARN          = aws_sns_topic.hauliday_notifications.arn
+      SES_SOURCE_EMAIL       = "nolan@haulidayrentals.com"
+      DYNAMODB_STREAM_MODE   = "enabled"
+      RESERVATION_TABLE_NAME = local.hauliday_reservations_table_name
     }
   }
 
@@ -116,6 +118,17 @@ resource "aws_iam_policy" "hauliday_lambda_policy" {
           "sqs:GetQueueAttributes"
         ]
         Resource = aws_sqs_queue.hauliday_lambda_dlq.arn
+      },
+      # DynamoDB Streams permissions
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:DescribeStream",
+          "dynamodb:GetRecords",
+          "dynamodb:GetShardIterator",
+          "dynamodb:ListStreams"
+        ]
+        Resource = data.aws_dynamodb_table.hauliday_reservations.stream_arn
       }
     ]
   })
@@ -162,6 +175,45 @@ resource "aws_sqs_queue" "hauliday_lambda_dlq" {
   }
 }
 
+# Data source to get DynamoDB table stream ARN
+data "aws_dynamodb_table" "hauliday_reservations" {
+  name = local.hauliday_reservations_table_name
+}
+
+# DynamoDB Event Source Mapping for Lambda trigger
+resource "aws_lambda_event_source_mapping" "hauliday_reservations_stream" {
+  event_source_arn  = data.aws_dynamodb_table.hauliday_reservations.stream_arn
+  function_name     = aws_lambda_function.hauliday_notifications.arn
+  starting_position = "LATEST"
+
+  # Filter to only trigger on INSERT events (new reservations)
+  filter_criteria {
+    filter {
+      pattern = jsonencode({
+        eventName = ["INSERT"]
+      })
+    }
+  }
+
+  # Error handling
+  maximum_batching_window_in_seconds = 5
+  batch_size                         = 10
+  parallelization_factor             = 1
+
+  # Dead letter queue for failed stream processing
+  destination_config {
+    on_failure {
+      destination_arn = aws_sqs_queue.hauliday_lambda_dlq.arn
+    }
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.hauliday_lambda_policy_attachment,
+    aws_lambda_function.hauliday_notifications
+  ]
+}
+
+
 
 
 # Outputs
@@ -178,4 +230,9 @@ output "hauliday_lambda_function_arn" {
 output "hauliday_sns_topic_arn" {
   description = "ARN of the Hauliday SNS topic"
   value       = aws_sns_topic.hauliday_notifications.arn
+}
+
+output "hauliday_event_source_mapping_uuid" {
+  description = "UUID of the DynamoDB event source mapping"
+  value       = aws_lambda_event_source_mapping.hauliday_reservations_stream.uuid
 }

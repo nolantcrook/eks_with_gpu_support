@@ -7,6 +7,15 @@ data "terraform_remote_state" "networking" {
   }
 }
 
+data "terraform_remote_state" "storage" {
+  backend = "s3"
+  config = {
+    bucket = "eks-stable-diffusion-terraform-state"
+    key    = "${var.environment}/terraform/storage/terraform.tfstate"
+    region = "us-west-2"
+  }
+}
+
 data "terraform_remote_state" "foundation" {
   backend = "s3"
   config = {
@@ -31,6 +40,8 @@ locals {
   alb_target_group_arn           = data.terraform_remote_state.networking.outputs.alb_target_group_arn
   alb_target_group_websocket_arn = data.terraform_remote_state.networking.outputs.alb_target_group_websocket_arn
   knowledge_base_id_secret_id    = data.terraform_remote_state.foundation.outputs.knowledge_base_id_secret_id
+  # hauliday_reservations_table_arn  = data.terraform_remote_state.storage.outputs.hauliday_reservations_table_arn
+  hauliday_reservations_table_name = data.terraform_remote_state.storage.outputs.hauliday_reservations_table_name
 }
 
 # Create attachments for both ASGs
