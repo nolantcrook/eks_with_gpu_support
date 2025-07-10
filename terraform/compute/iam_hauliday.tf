@@ -17,13 +17,20 @@ resource "aws_iam_policy" "hauliday_policy" {
       {
         Effect = "Allow"
         Action = [
+          "lambda:InvokeFunction"
+        ]
+        Resource = aws_lambda_function.hauliday_notifications.arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
           "dynamodb:GetItem",
           "dynamodb:PutItem",
           "dynamodb:Scan",
           "dynamodb:Query"
         ]
-        Resource = [                                                            # Replace with your DynamoDB table ARN
-          "arn:aws:dynamodb:us-west-2:891377073036:table/hauliday_reservations" # Replace with your DynamoDB table ARN
+        Resource = [                                                # Replace with your DynamoDB table ARN
+          "arn:aws:dynamodb:us-west-2:891377073036:table/hauliday*" # Replace with your DynamoDB table ARN
         ]
       }
     ]
