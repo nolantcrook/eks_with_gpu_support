@@ -15,7 +15,6 @@ resource "aws_lambda_function" "hauliday_notifications" {
   environment {
     variables = {
       ENVIRONMENT      = var.environment
-      AWS_REGION       = "us-west-2"
       SNS_TOPIC_ARN    = aws_sns_topic.hauliday_notifications.arn
       SES_SOURCE_EMAIL = "nolan@haulidayrentals.com"
     }
