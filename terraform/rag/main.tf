@@ -6,11 +6,6 @@ resource "aws_bedrockagent_knowledge_base" "main" {
   knowledge_base_configuration {
     vector_knowledge_base_configuration {
       embedding_model_arn = "arn:aws:bedrock:${var.aws_region}::foundation-model/amazon.titan-embed-text-v2:0"
-      embedding_model_configuration {
-        bedrock_embedding_model_configuration {
-          dimensions = 1024
-        }
-      }
     }
     type = "VECTOR"
   }
