@@ -70,6 +70,18 @@ resource "aws_iam_policy" "demo_knowledgebase_secrets_access" {
           "ses:ListConfigurationSets"
         ]
         Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:Get*",
+          "s3:List*",
+          "s3:Put*",
+        ]
+        Resource = [
+          local.knowledge_base_s3_bucket_arn,
+          "${local.knowledge_base_s3_bucket_arn}/*"
+        ]
       }
     ]
   })
