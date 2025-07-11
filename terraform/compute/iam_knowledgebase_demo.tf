@@ -79,8 +79,8 @@ resource "aws_iam_policy" "demo_knowledgebase_secrets_access" {
           "s3:Put*",
         ]
         Resource = [
-          local.knowledge_base_s3_bucket_arn,
-          "${local.knowledge_base_s3_bucket_arn}/*"
+          local.rag_s3_bucket_arn,
+          "${local.rag_s3_bucket_arn}/*"
         ]
       }
     ]
