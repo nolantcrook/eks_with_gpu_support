@@ -129,6 +129,16 @@ resource "aws_iam_policy" "hauliday_lambda_policy" {
           "dynamodb:ListStreams"
         ]
         Resource = local.hauliday_reservations_stream_arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:*Get*",
+          "ecr:*List*"
+        ]
+        Resource = [
+          "arn:aws:ecr:us-west-2:${data.aws_caller_identity.current.account_id}:repository/hauliday*"
+        ]
       }
     ]
   })
