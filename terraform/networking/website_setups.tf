@@ -56,7 +56,7 @@ module "umami_setup" {
   website_name         = "analytics"
   website_domain       = local.route53_zone_name
   route53_zone_id      = local.route53_zone_id
-  priority             = 1300
+  priority             = 1500
   alb_target_group_arn = aws_lb_target_group.eks_alb.arn
   alb_dns_name         = aws_lb.eks_alb.dns_name
   alb_zone_id          = aws_lb.eks_alb.zone_id
