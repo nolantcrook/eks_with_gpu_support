@@ -152,6 +152,63 @@ resource "aws_secretsmanager_secret_version" "openai_api_key" {
   })
 }
 
+# Create AWS Secrets Manager secret for OpenAI API key
+resource "aws_secretsmanager_secret" "umami_postgres_user" {
+  name        = "umami/postgres-user"
+  description = "Umami postgres user"
+}
+
+# Create initial secret version with placeholder value
+resource "aws_secretsmanager_secret_version" "umami_postgres_user" {
+  secret_id = aws_secretsmanager_secret.umami_postgres_user.id
+  secret_string = jsonencode({
+    user = "placeholder-umami-postgres-user"
+  })
+}
+
+# Create AWS Secrets Manager secret for OpenAI API key
+resource "aws_secretsmanager_secret" "umami_password" {
+  name        = "umami/password"
+  description = "Umami password"
+}
+
+# Create initial secret version with placeholder value
+resource "aws_secretsmanager_secret_version" "umami_password" {
+  secret_id = aws_secretsmanager_secret.umami_password.id
+  secret_string = jsonencode({
+    password = "placeholder-umami-password"
+  })
+}
+
+# Create AWS Secrets Manager secret for OpenAI API key
+resource "aws_secretsmanager_secret" "umami_postgres_password" {
+  name        = "umami/postgres-password"
+  description = "Umami postgres password"
+}
+
+# Create initial secret version with placeholder value
+resource "aws_secretsmanager_secret_version" "umami_postgres_password" {
+  secret_id = aws_secretsmanager_secret.umami_postgres_password.id
+  secret_string = jsonencode({
+    password = "placeholder-umami-postgres-password"
+  })
+}
+
+# Create AWS Secrets Manager secret for OpenAI API key
+resource "aws_secretsmanager_secret" "umami_app_secret" {
+  name        = "umami/app-secret"
+  description = "Umami app secret"
+}
+
+# Create initial secret version with placeholder value
+resource "aws_secretsmanager_secret_version" "umami_app_secret" {
+  secret_id = aws_secretsmanager_secret.umami_app_secret.id
+  secret_string = jsonencode({
+    secret = "placeholder-umami-app-secret"
+  })
+}
+
+
 # Create AWS Secrets Manager secret for Kaggle username
 resource "aws_secretsmanager_secret" "kaggle_username" {
   name        = "langchain/kaggle-username"
