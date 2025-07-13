@@ -10,6 +10,22 @@ resource "aws_iam_policy" "umami_policy" {
           "secretsmanager:GetSecretValue"
         ]
         Resource = "arn:aws:secretsmanager:us-west-2:891377073036:secret:umami/*" # Replace with your SQS queue ARN
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ec2:CreateVolume",
+          "ec2:AttachVolume",
+          "ec2:DetachVolume",
+          "ec2:ModifyVolume",
+          "ec2:DescribeVolumes",
+          "ec2:DescribeInstances",
+          "ec2:DescribeSnapshots",
+          "ec2:CreateSnapshot",
+          "ec2:CreateTags",
+          "ec2:DescribeAvailabilityZones"
+        ],
+        "Resource" : "*"
       }
     ]
   })
