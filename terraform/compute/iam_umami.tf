@@ -14,6 +14,14 @@ resource "aws_iam_policy" "umami_policy" {
       {
         "Effect" : "Allow",
         "Action" : [
+          "ssm:GetParameter",
+          "ssm:GetParameters"
+        ],
+        Resource = "arn:aws:ssm:us-west-2:${data.aws_caller_identity.current.account_id}:parameter/eks/efs-id"
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
           "ec2:CreateVolume",
           "ec2:AttachVolume",
           "ec2:DetachVolume",
