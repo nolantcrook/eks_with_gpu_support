@@ -167,3 +167,37 @@ resource "aws_lb_listener_rule" "websocket_rule" {
     }
   }
 }
+
+
+resource "aws_lb_listener_rule" "umami_public_assets" {
+  listener_arn = aws_lb_listener.eks_alb.arn
+  priority     = 1495 # Higher priority than Cognito rule (1500) to bypass authentication
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.eks_alb.arn
+  }
+
+  condition {
+    host_header {
+      values = ["analytics.nolancrook.com"]
+    }
+  }
+
+  # Match Umami public assets that need to bypass authentication
+  condition {
+    path_pattern {
+      values = [
+        "/script.js",   # Main Umami tracking script
+        "/umami.js",    # Alternative script name
+        "/favicon.ico", # Favicon
+        "/robots.txt",  # Robots file
+        "/static/*",    # Static assets
+      ]
+    }
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
