@@ -128,8 +128,8 @@ module "x86_spot_nodes" {
   instance_types = ["t3.medium", "t3.large", "t3.xlarge", "t3.2xlarge"
   ]
 
-  desired_size = 2
-  min_size     = 2
+  desired_size = 4
+  min_size     = 3
   max_size     = 10
 
   security_group_ids = [
