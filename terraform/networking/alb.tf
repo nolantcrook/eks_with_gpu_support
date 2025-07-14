@@ -191,7 +191,6 @@ resource "aws_lb_listener_rule" "umami_public_assets" {
         "/script.js",   # Main Umami tracking script
         "/umami.js",    # Alternative script name
         "/favicon.ico", # Favicon
-        "/robots.txt",  # Robots file
         "/static/*",    # Static assets
       ]
     }
