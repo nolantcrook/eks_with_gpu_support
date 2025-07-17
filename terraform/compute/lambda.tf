@@ -130,14 +130,23 @@ resource "aws_iam_policy" "hauliday_lambda_policy" {
         ]
         Resource = local.hauliday_reservations_stream_arn
       },
+      # ECR permissions for Lambda container image
       {
         Effect = "Allow"
         Action = [
-          "ecr:*Get*",
-          "ecr:*List*"
+          "ecr:GetAuthorizationToken"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage"
         ]
         Resource = [
-          "arn:aws:ecr:us-west-2:${data.aws_caller_identity.current.account_id}:repository/hauliday*"
+          "arn:aws:ecr:us-west-2:${data.aws_caller_identity.current.account_id}:repository/lambda_hauliday"
         ]
       }
     ]
