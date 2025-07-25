@@ -144,6 +144,15 @@ resource "aws_lb_listener_certificate" "hauliday_cert" {
   ]
 }
 
+resource "aws_lb_listener_certificate" "tolby_cert" {
+  listener_arn    = aws_lb_listener.eks_alb.arn
+  certificate_arn = aws_acm_certificate.hosted_zone_acm_certificate_tolby.arn
+
+  depends_on = [
+    aws_acm_certificate_validation.hosted_zone_acm_certificate_validation_tolby
+  ]
+}
+
 # Create a listener rule specifically for the WebSocket path
 resource "aws_lb_listener_rule" "websocket_rule" {
   listener_arn = aws_lb_listener.eks_alb.arn

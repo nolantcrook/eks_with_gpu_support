@@ -25,6 +25,7 @@ locals {
   pic_dns_zone_id_secret_arn      = data.terraform_remote_state.foundation.outputs.route53_zone_id_secret_arn_pic
   stratis_dns_zone_id_secret_arn  = data.terraform_remote_state.foundation.outputs.route53_zone_id_secret_arn_stratis
   hauliday_dns_zone_id_secret_arn = data.terraform_remote_state.foundation.outputs.route53_zone_id_secret_arn_hauliday
+  tolby_dns_zone_id_secret_arn    = data.terraform_remote_state.foundation.outputs.route53_zone_id_secret_arn_tolby
   ec2_ssh_key_pair_id             = data.terraform_remote_state.foundation.outputs.ec2_ssh_key_pair_id
 }
 
@@ -78,6 +79,18 @@ data "aws_route53_zone" "hosted_zone_hauliday" {
   zone_id = local.route53_zone_id_hauliday
 }
 
+data "aws_secretsmanager_secret" "route53_zone_id_tolby_arn" {
+  arn = local.tolby_dns_zone_id_secret_arn
+}
+
+data "aws_secretsmanager_secret_version" "route53_zone_id_tolby" {
+  secret_id = data.aws_secretsmanager_secret.route53_zone_id_tolby_arn.id
+}
+
+data "aws_route53_zone" "hosted_zone_tolby" {
+  zone_id = local.route53_zone_id_tolby
+}
+
 
 locals {
   route53_zone_id            = jsondecode(data.aws_secretsmanager_secret_version.route53_zone_id.secret_string).zone_id
@@ -88,5 +101,7 @@ locals {
   route53_zone_name_stratis  = data.aws_route53_zone.hosted_zone_stratis.name
   route53_zone_id_hauliday   = jsondecode(data.aws_secretsmanager_secret_version.route53_zone_id_hauliday.secret_string).zone_id
   route53_zone_name_hauliday = data.aws_route53_zone.hosted_zone_hauliday.name
+  route53_zone_id_tolby      = jsondecode(data.aws_secretsmanager_secret_version.route53_zone_id_tolby.secret_string).zone_id
+  route53_zone_name_tolby    = data.aws_route53_zone.hosted_zone_tolby.name
   alb_logs_bucket_arn        = data.terraform_remote_state.storage.outputs.alb_logs_bucket_arn
 }
