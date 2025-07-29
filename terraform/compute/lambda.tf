@@ -1,11 +1,17 @@
 # Lambda function for Hauliday notifications
+
+variable "lambda_image_tag" {
+  description = "Docker image tag for Lambda function"
+  type        = string
+  default     = "latest"
+}
 resource "aws_lambda_function" "hauliday_notifications" {
   function_name = "hauliday-notifications-${var.environment}"
   role          = aws_iam_role.hauliday_lambda_role.arn
 
   # Container image configuration
   package_type = "Image"
-  image_uri    = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-west-2.amazonaws.com/lambda_hauliday:latest"
+  image_uri    = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-west-2.amazonaws.com/lambda_hauliday:${var.lambda_image_tag}"
 
   # Function configuration
   timeout     = 60
