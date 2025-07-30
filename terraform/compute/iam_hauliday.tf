@@ -41,6 +41,14 @@ resource "aws_iam_policy" "hauliday_policy" {
         Resource = [                                                # Replace with your DynamoDB table ARN
           "arn:aws:dynamodb:us-west-2:891377073036:table/hauliday*" # Replace with your DynamoDB table ARN
         ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "arn:aws:logs:us-west-2:${data.aws_caller_identity.current.account_id}:*"
       }
     ]
   })
