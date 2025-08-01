@@ -92,11 +92,44 @@ resource "aws_iam_role_policy" "lambda_bedrock_access" {
       {
         Effect = "Allow"
         Action = [
+          "dynamodb:Get*",
+          "dynamodb:Scan",
+          "dynamodb:Query",
+          "dynamodb:List*"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ]
         Resource = "arn:aws:logs:*:*:*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "lambda_dynamodb_access" {
+  name = "${var.project_name}-lambda-dynamodb-policy"
+  role = aws_iam_role.lambda_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:PutItem",
+          "dynamodb:GetItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:Scan",
+          "dynamodb:Query"
+        ]
+        Resource = "arn:aws:dynamodb:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:table/hauliday_reservations"
       }
     ]
   })
@@ -177,6 +210,28 @@ resource "aws_iam_role_policy" "connect_lex_access" {
           "lex:StartConversation"
         ]
         Resource = "*"
+      }
+    ]
+  })
+}
+
+# CloudWatch Logs permissions for Connect
+resource "aws_iam_role_policy" "connect_cloudwatch_logs" {
+  name = "${var.project_name}-connect-cloudwatch-policy"
+  role = aws_iam_role.connect_service_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams"
+        ]
+        Resource = "${aws_cloudwatch_log_group.connect_logs.arn}:*"
       }
     ]
   })

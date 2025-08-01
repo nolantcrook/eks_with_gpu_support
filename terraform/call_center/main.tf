@@ -38,6 +38,24 @@ resource "aws_connect_instance_storage_config" "call_recordings" {
   }
 }
 
+# Note: Contact trace records are not supported for all instance types
+# This will be set up manually if needed
+
+# Note: Contact flow logs are not supported via Terraform aws_connect_instance_storage_config
+# They need to be enabled manually in the AWS Console or via AWS CLI
+# We'll create the log group for when you enable it manually
+
+################################################################################
+# CloudWatch Log Group for Connect Logs
+################################################################################
+
+resource "aws_cloudwatch_log_group" "connect_logs" {
+  name              = "/aws/connect/${aws_connect_instance.main.id}"
+  retention_in_days = 7
+
+  tags = var.tags
+}
+
 ################################################################################
 # S3 Bucket for Connect Logs and Recordings
 ################################################################################
@@ -84,21 +102,21 @@ resource "random_string" "bucket_suffix" {
 # Amazon Lex Bot for Voice Interactions
 ################################################################################
 
-resource "aws_lexv2models_bot" "knowledge_base_bot" {
-  name     = "${var.project_name}-knowledge-base-bot"
+resource "aws_lexv2models_bot" "rental_bot" {
+  name     = "${var.project_name}-rental-bot"
   role_arn = aws_iam_role.lex_bot_role.arn
 
   data_privacy {
     child_directed = false
   }
 
-  idle_session_ttl_in_seconds = 300
+  idle_session_ttl_in_seconds = 600
 
   tags = var.tags
 }
 
-resource "aws_lexv2models_bot_version" "knowledge_base_bot" {
-  bot_id = aws_lexv2models_bot.knowledge_base_bot.id
+resource "aws_lexv2models_bot_version" "rental_bot" {
+  bot_id = aws_lexv2models_bot.rental_bot.id
 
   locale_specification = {
     en_US = {
@@ -107,12 +125,12 @@ resource "aws_lexv2models_bot_version" "knowledge_base_bot" {
   }
 
   depends_on = [
-    aws_lexv2models_intent.knowledge_query_intent
+    null_resource.build_bot_locale
   ]
 }
 
 resource "aws_lexv2models_bot_locale" "en_us" {
-  bot_id      = aws_lexv2models_bot.knowledge_base_bot.id
+  bot_id      = aws_lexv2models_bot.rental_bot.id
   bot_version = "DRAFT"
   locale_id   = "en_US"
 
@@ -121,27 +139,26 @@ resource "aws_lexv2models_bot_locale" "en_us" {
     voice_id = "Joanna"
   }
 
-  depends_on = [aws_lexv2models_bot.knowledge_base_bot]
+  depends_on = [aws_lexv2models_bot.rental_bot]
 }
 
 # Note: Using built-in AMAZON.AlphaNumeric slot type instead of custom slot type
 # to avoid provider inconsistency issues with complex slot configurations
 
-# Intent for handling knowledge base queries
-resource "aws_lexv2models_intent" "knowledge_query_intent" {
-  bot_id      = aws_lexv2models_bot.knowledge_base_bot.id
+# Intent for handling rental queries
+resource "aws_lexv2models_intent" "rental_query_intent" {
+  bot_id      = aws_lexv2models_bot.rental_bot.id
   bot_version = "DRAFT"
   locale_id   = "en_US"
-  name        = "KnowledgeQueryIntent"
+  name        = "RentalQueryIntent"
 
-  description = "Intent for querying the knowledge base"
+  description = "Intent for handling equipment rental queries"
 
-  # Sample utterances for the intent
-  # Note: These are configured manually in the AWS Console for Lex V2
-  # The current working utterance is: "I want you to describe this knowledgebase"
-
-  # No slots defined - the Lambda function handles the query processing
-  # without requiring specific slot extraction
+  # Sample utterances will include:
+  # "What equipment do you have"
+  # "How much does the cotton candy machine cost"
+  # "Is the cotton candy machine available on August 28th"
+  # These need to be configured manually in AWS Console
 
   depends_on = [
     aws_lexv2models_bot_locale.en_us
@@ -157,19 +174,19 @@ resource "aws_lexv2models_intent" "knowledge_query_intent" {
 # Lambda Function for Bedrock Knowledge Base Integration
 ################################################################################
 
-resource "aws_lambda_function" "knowledge_base_query" {
+resource "aws_lambda_function" "rental_query" {
   filename         = data.archive_file.lambda_zip.output_path
-  function_name    = "${var.project_name}-knowledge-base-query"
+  function_name    = "${var.project_name}-rental-query"
   role             = aws_iam_role.lambda_role.arn
   handler          = "lambda_function.lambda_handler"
   runtime          = "python3.11"
-  timeout          = 30
+  timeout          = 60
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 
   environment {
     variables = {
-      KNOWLEDGE_BASE_ID = local.knowledge_base_id
-      MODEL_ID          = var.bedrock_model_id
+      DYNAMODB_TABLE_NAME = "hauliday_reservations"
+      MODEL_ID            = var.bedrock_model_id
     }
   }
 
@@ -178,7 +195,7 @@ resource "aws_lambda_function" "knowledge_base_query" {
   depends_on = [
     aws_iam_role_policy_attachment.lambda_basic_execution,
     aws_iam_role_policy.lambda_bedrock_access,
-    # aws_cloudwatch_log_group.lambda_logs
+    aws_iam_role_policy.lambda_dynamodb_access,
   ]
 }
 
@@ -195,10 +212,7 @@ data "archive_file" "lambda_zip" {
   type        = "zip"
   output_path = "${path.module}/lambda_function.zip"
   source {
-    content = templatefile("${path.module}/lambda_function.py", {
-      knowledge_base_id = local.knowledge_base_id
-      model_id          = var.bedrock_model_id
-    })
+    content  = file("${path.module}/lambda_function.py")
     filename = "lambda_function.py"
   }
 }
@@ -207,9 +221,9 @@ data "archive_file" "lambda_zip" {
 resource "aws_lambda_permission" "allow_lex" {
   statement_id  = "AllowExecutionFromLex"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.knowledge_base_query.function_name
+  function_name = aws_lambda_function.rental_query.function_name
   principal     = "lexv2.amazonaws.com"
-  source_arn    = "arn:aws:lex:us-west-2:891377073036:bot-alias/QEPIRCXWA6/TSTALIASID"
+  source_arn    = "arn:aws:lex:${var.aws_region}:${data.aws_caller_identity.current.account_id}:bot-alias/*"
 }
 
 
@@ -231,10 +245,15 @@ resource "aws_connect_phone_number" "main" {
 # Connect Queue
 ################################################################################
 
-resource "aws_connect_queue" "knowledge_base_queue" {
+
+################################################################################
+# Connect Queue
+################################################################################
+
+resource "aws_connect_queue" "rental_queue" {
   instance_id           = aws_connect_instance.main.id
-  name                  = "KnowledgeBaseQueue"
-  description           = "Queue for knowledge base queries"
+  name                  = "RentalQueue"
+  description           = "Queue for equipment rental queries"
   hours_of_operation_id = aws_connect_hours_of_operation.main.hours_of_operation_id
 
   tags = var.tags
@@ -359,26 +378,132 @@ resource "aws_connect_hours_of_operation" "main" {
 # This is necessary because Terraform AWS provider doesn't support Lambda code hooks for Lex V2 aliases
 resource "null_resource" "configure_lex_alias_with_lambda" {
   depends_on = [
-    aws_lexv2models_bot.knowledge_base_bot,
-    aws_lexv2models_bot_version.knowledge_base_bot,
-    aws_lambda_function.knowledge_base_query,
+    aws_lexv2models_bot.rental_bot,
+    aws_lexv2models_bot_version.rental_bot,
+    aws_lambda_function.rental_query,
     aws_lambda_permission.allow_lex
   ]
 
   provisioner "local-exec" {
     command = <<-EOT
-      LEX_BOT_ID=${aws_lexv2models_bot.knowledge_base_bot.id} \
+      LEX_BOT_ID=${aws_lexv2models_bot.rental_bot.id} \
       LEX_ALIAS_NAME=TestBotAlias \
-      LAMBDA_ARN=${aws_lambda_function.knowledge_base_query.arn} \
-      python3 ${path.module}/create_lex_alias_with_lambda.py
+      LAMBDA_ARN=${aws_lambda_function.rental_query.arn} \
+      ~/venv/bin/python ${path.module}/create_lex_alias_with_lambda.py
     EOT
   }
 
   # Trigger on changes to the Lambda function or bot
   triggers = {
-    lambda_arn        = aws_lambda_function.knowledge_base_query.arn
-    bot_id            = aws_lexv2models_bot.knowledge_base_bot.id
+    lambda_arn        = aws_lambda_function.rental_query.arn
+    bot_id            = aws_lexv2models_bot.rental_bot.id
     lambda_permission = aws_lambda_permission.allow_lex.id
+  }
+}
+
+################################################################################
+# Build Bot Locale with Sample Utterances
+################################################################################
+
+# Add sample utterances and build the bot locale
+resource "null_resource" "build_bot_locale" {
+  depends_on = [
+    aws_lexv2models_intent.rental_query_intent,
+    aws_lexv2models_bot_locale.en_us
+  ]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      # Wait for bot to be ready (not in versioning state)
+      echo "Waiting for bot to be ready..."
+      while true; do
+        BOT_STATUS=$(aws lexv2-models describe-bot \
+          --bot-id ${aws_lexv2models_bot.rental_bot.id} \
+          --query 'botStatus' \
+          --output text)
+
+        if [ "$BOT_STATUS" = "Available" ]; then
+          echo "✅ Bot is ready!"
+          break
+        elif [ "$BOT_STATUS" = "Failed" ]; then
+          echo "❌ Bot failed!"
+          exit 1
+        else
+          echo "⏳ Bot status: $BOT_STATUS"
+          sleep 5
+        fi
+      done
+
+      # Add sample utterances to the intent
+      aws lexv2-models update-intent \
+        --bot-id ${aws_lexv2models_bot.rental_bot.id} \
+        --bot-version DRAFT \
+        --locale-id en_US \
+        --intent-id ${aws_lexv2models_intent.rental_query_intent.intent_id} \
+        --intent-name RentalQueryIntent \
+        --sample-utterances '[
+          {"utterance": "What equipment do you have"},
+          {"utterance": "What can I rent"},
+          {"utterance": "Show me your rental equipment"},
+          {"utterance": "How much does the cotton candy machine cost"},
+          {"utterance": "Is the cotton candy machine available"},
+          {"utterance": "Can I rent the cargo carrier"},
+          {"utterance": "What are your prices"},
+          {"utterance": "I need to rent something"},
+          {"utterance": "Tell me about your equipment"},
+          {"utterance": "I want to make a reservation"},
+          {"utterance": "Is it available"},
+          {"utterance": "How much does it cost"},
+          {"utterance": "Can I book it"}
+        ]'
+
+      # Wait a moment for the intent update to process
+      sleep 3
+
+      # Build the bot locale
+      echo "Building bot locale..."
+      aws lexv2-models build-bot-locale \
+        --bot-id ${aws_lexv2models_bot.rental_bot.id} \
+        --bot-version DRAFT \
+        --locale-id en_US
+
+      # Wait for build to complete
+      echo "Waiting for bot locale to build..."
+      RETRY_COUNT=0
+      MAX_RETRIES=60
+      while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+        STATUS=$(aws lexv2-models describe-bot-locale \
+          --bot-id ${aws_lexv2models_bot.rental_bot.id} \
+          --bot-version DRAFT \
+          --locale-id en_US \
+          --query 'botLocaleStatus' \
+          --output text)
+
+        if [ "$STATUS" = "Built" ]; then
+          echo "✅ Bot locale built successfully!"
+          break
+        elif [ "$STATUS" = "Failed" ]; then
+          echo "❌ Bot locale build failed!"
+          exit 1
+        else
+          echo "⏳ Bot locale status: $STATUS (attempt $((RETRY_COUNT+1))/$MAX_RETRIES)"
+          sleep 10
+          RETRY_COUNT=$((RETRY_COUNT+1))
+        fi
+      done
+
+      if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+        echo "❌ Bot locale build timed out after $MAX_RETRIES attempts"
+        exit 1
+      fi
+    EOT
+  }
+
+  # Trigger on changes to the bot or intents
+  triggers = {
+    bot_id    = aws_lexv2models_bot.rental_bot.id
+    intent_id = aws_lexv2models_intent.rental_query_intent.intent_id
+    locale_id = aws_lexv2models_bot_locale.en_us.id
   }
 }
 
@@ -386,28 +511,29 @@ resource "null_resource" "configure_lex_alias_with_lambda" {
 # Lex Bot Association with Amazon Connect
 ################################################################################
 
-# Associate Lex bot with Amazon Connect instance using a null_resource
-# This automates the manual association step
-# resource "null_resource" "associate_lex_with_connect" {
-#   depends_on = [
-#     aws_connect_instance.main,
-#     aws_lexv2models_bot.knowledge_base_bot,
-#     null_resource.configure_lex_alias_with_lambda
-#   ]
+# Associate Lex bot with Amazon Connect instance using a shell script
+resource "null_resource" "associate_lex_with_connect" {
+  depends_on = [
+    aws_connect_instance.main,
+    aws_lexv2models_bot.rental_bot,
+    null_resource.configure_lex_alias_with_lambda,
+    null_resource.build_bot_locale
+  ]
 
-#   provisioner "local-exec" {
-#     command = <<-EOT
-#       CONNECT_INSTANCE_ID=${aws_connect_instance.main.id} \
-#       LEX_BOT_NAME=${aws_lexv2models_bot.knowledge_base_bot.name} \
-#       LEX_REGION=${var.aws_region} \
-#       python3 ${path.module}/associate_lex_with_connect.py
-#     EOT
-#   }
+  provisioner "local-exec" {
+    command = <<-EOT
+      CONNECT_INSTANCE_ID=${aws_connect_instance.main.id} \
+      LEX_BOT_ID=${aws_lexv2models_bot.rental_bot.id} \
+      LEX_BOT_ALIAS_ID=TSTALIASID \
+      ${path.module}/associate_lex_with_connect.sh
+    EOT
+  }
 
-#   # Trigger on changes to the Connect instance or Lex bot
-#   triggers = {
-#     connect_instance_id = aws_connect_instance.main.id
-#     lex_bot_name = aws_lexv2models_bot.knowledge_base_bot.name
-#     lex_alias_configured = null_resource.configure_lex_alias_with_lambda.id
-#   }
-# }
+  # Trigger on changes to the Connect instance or Lex bot
+  triggers = {
+    connect_instance_id  = aws_connect_instance.main.id
+    lex_bot_id           = aws_lexv2models_bot.rental_bot.id
+    lex_alias_configured = null_resource.configure_lex_alias_with_lambda.id
+    bot_built            = null_resource.build_bot_locale.id
+  }
+}

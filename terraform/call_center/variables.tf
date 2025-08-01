@@ -45,8 +45,3 @@ variable "tags" {
     ManagedBy   = "terraform"
   }
 }
-
-variable "environment" {
-  description = "Environment"
-  type        = string
-}

@@ -15,27 +15,27 @@ output "connect_instance_alias" {
 
 output "lex_bot_id" {
   description = "ID of the Lex bot"
-  value       = aws_lexv2models_bot.knowledge_base_bot.id
+  value       = aws_lexv2models_bot.rental_bot.id
 }
 
 output "lex_bot_arn" {
   description = "ARN of the Lex bot"
-  value       = aws_lexv2models_bot.knowledge_base_bot.arn
+  value       = aws_lexv2models_bot.rental_bot.arn
 }
 
 output "lex_bot_name" {
   description = "Name of the Lex bot"
-  value       = aws_lexv2models_bot.knowledge_base_bot.name
+  value       = aws_lexv2models_bot.rental_bot.name
 }
 
 output "lambda_function_name" {
   description = "Name of the Lambda function"
-  value       = aws_lambda_function.knowledge_base_query.function_name
+  value       = aws_lambda_function.rental_query.function_name
 }
 
 output "lambda_function_arn" {
   description = "ARN of the Lambda function"
-  value       = aws_lambda_function.knowledge_base_query.arn
+  value       = aws_lambda_function.rental_query.arn
 }
 
 output "s3_bucket_name" {
@@ -48,9 +48,9 @@ output "phone_number" {
   value       = var.claim_phone_number ? aws_connect_phone_number.main[0].phone_number : null
 }
 
-output "knowledge_base_id" {
-  description = "ID of the Bedrock knowledge base being used"
-  value       = local.knowledge_base_id
+output "dynamodb_table_name" {
+  description = "Name of the DynamoDB table for rental reservations"
+  value       = "hauliday_reservations"
 }
 
 output "lex_bot_manual_setup_required" {
@@ -69,8 +69,8 @@ output "lex_bot_manual_setup_required" {
 
     Resources available:
     - Connect Instance: ${aws_connect_instance.main.instance_alias}
-    - Lex Bot: ${aws_lexv2models_bot.knowledge_base_bot.name}
-    - Lambda Function: ${aws_lambda_function.knowledge_base_query.function_name}
+    - Lex Bot: ${aws_lexv2models_bot.rental_bot.name}
+    - Lambda Function: ${aws_lambda_function.rental_query.function_name}
   EOT
 }
 
@@ -82,36 +82,49 @@ output "setup_instructions" {
     ✅ Completed automatically:
     ✓ Connect instance created
     ✓ Lex bot created and configured
-    ✓ Lambda function deployed for Bedrock integration
+    ✓ Lambda function deployed for rental queries
     ✓ S3 bucket configured for call recordings
     ✓ Lex bot alias configured with Lambda code hook
+    ✓ Lex bot built with sample utterances
     ✓ Lex bot associated with Amazon Connect
+    ✓ DynamoDB integration with hauliday_reservations table
+
+    AVAILABLE SCRIPTS:
+
+    1. Test the entire system:
+       ./test_system.py
+
+    2. Manual Connect-Lex association (if needed):
+       ./associate_lex_with_connect.sh
 
     NEXT STEPS:
 
-    1. Create Contact Flow (choose one method):
-       Method A - AWS Console:
+    1. Test the system:
+       ./test_system.py
+
+    2. Create Contact Flow in AWS Console:
        - Go to AWS Connect Console -> Contact flows
        - Create a new contact flow
        - Add a "Get customer input" block
-       - Configure it to use your Lex bot: ${aws_lexv2models_bot.knowledge_base_bot.name}
+       - Configure it to use your Lex bot: ${aws_lexv2models_bot.rental_bot.name}
 
-       Method B - Terraform:
-       - Uncomment the contact flow resource in main.tf
-       - Run terraform apply again
+    3. Test with phone calls:
+       - Ask: "What equipment do you have?"
+       - Ask: "How much does the cotton candy machine cost?"
+       - Ask: "Is the cotton candy machine available August 30th?"
 
-    2. Configure Contact Flow Routing:
-       - Associate the contact flow with a phone number or queue
-
-    3. Test the Setup:
-       - Call the Connect instance
-       - Ask questions about your knowledge base
-       - The system will use Lex to capture your query and Lambda to query Bedrock
+    SYSTEM CAPABILITIES:
+    ✓ Equipment catalog queries
+    ✓ Pricing information
+    ✓ Availability checking (integrates with Hauliday reservations)
+    ✓ Conversation memory across call session
+    ✓ Input validation and guardrails
 
     Resources Created:
     - Connect Instance: ${aws_connect_instance.main.instance_alias}
-    - Lex Bot: ${aws_lexv2models_bot.knowledge_base_bot.name}
-    - Lambda Function: ${aws_lambda_function.knowledge_base_query.function_name}
+    - Lex Bot: ${aws_lexv2models_bot.rental_bot.name}
+    - Lambda Function: ${aws_lambda_function.rental_query.function_name}
     - S3 Bucket: ${aws_s3_bucket.connect_logs.bucket}
+    - DynamoDB Table: hauliday_reservations
   EOT
 }
