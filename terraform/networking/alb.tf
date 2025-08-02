@@ -153,14 +153,14 @@ resource "aws_lb_listener_certificate" "tolby_cert" {
   ]
 }
 
-# resource "aws_lb_listener_certificate" "treasure_cert" {
-#   listener_arn    = aws_lb_listener.eks_alb.arn
-#   certificate_arn = aws_acm_certificate.hosted_zone_acm_certificate_treasure.arn
+resource "aws_lb_listener_certificate" "treasure_cert" {
+  listener_arn    = aws_lb_listener.eks_alb.arn
+  certificate_arn = aws_acm_certificate.hosted_zone_acm_certificate_treasure.arn
 
-#   depends_on = [
-#     aws_acm_certificate_validation.hosted_zone_acm_certificate_validation_treasure
-#   ]
-# }
+  depends_on = [
+    aws_acm_certificate_validation.hosted_zone_acm_certificate_validation_treasure
+  ]
+}
 
 # Create a listener rule specifically for the WebSocket path
 resource "aws_lb_listener_rule" "websocket_rule" {
