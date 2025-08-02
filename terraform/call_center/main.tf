@@ -19,6 +19,7 @@ resource "aws_connect_instance" "main" {
   instance_alias                   = var.connect_instance_alias
   auto_resolve_best_voices_enabled = true
   tags                             = var.tags
+  contact_flow_logs_enabled        = true
 }
 
 # Note: Contact trace records storage may not be supported in all regions
@@ -102,68 +103,70 @@ resource "random_string" "bucket_suffix" {
 # Amazon Lex Bot for Voice Interactions
 ################################################################################
 
-resource "aws_lexv2models_bot" "rental_bot" {
-  name     = "${var.project_name}-rental-bot"
-  role_arn = aws_iam_role.lex_bot_role.arn
+# resource "aws_lexv2models_bot" "rental_bot" {
+#   name     = "${var.project_name}-rental-bot"
+#   role_arn = aws_iam_role.lex_bot_role.arn
 
-  data_privacy {
-    child_directed = false
-  }
+#   data_privacy {
+#     child_directed = false
+#   }
 
-  idle_session_ttl_in_seconds = 600
+#   idle_session_ttl_in_seconds = 600
 
-  tags = var.tags
-}
+#   tags = merge(var.tags,{
+#     AmazonConnectEnabled = "True"
+#   })
+# }
 
-resource "aws_lexv2models_bot_version" "rental_bot" {
-  bot_id = aws_lexv2models_bot.rental_bot.id
+# resource "aws_lexv2models_bot_version" "rental_bot" {
+#   bot_id = aws_lexv2models_bot.rental_bot.id
 
-  locale_specification = {
-    en_US = {
-      source_bot_version = "DRAFT"
-    }
-  }
+#   locale_specification = {
+#     en_US = {
+#       source_bot_version = "DRAFT"
+#     }
+#   }
 
-  depends_on = [
-    null_resource.build_bot_locale
-  ]
-}
+# depends_on = [
+#   null_resource.build_bot_locale
+# ]
+# }
 
-resource "aws_lexv2models_bot_locale" "en_us" {
-  bot_id      = aws_lexv2models_bot.rental_bot.id
-  bot_version = "DRAFT"
-  locale_id   = "en_US"
+# resource "aws_lexv2models_bot_locale" "en_us" {
+#   bot_id      = aws_lexv2models_bot.rental_bot.id
+#   bot_version = "DRAFT"
+#   locale_id   = "en_US"
 
-  n_lu_intent_confidence_threshold = 0.40
-  voice_settings {
-    voice_id = "Joanna"
-  }
+#   n_lu_intent_confidence_threshold = 0.40
+#   voice_settings {
+#     voice_id = "Joanna"
+#   }
 
-  depends_on = [aws_lexv2models_bot.rental_bot]
-}
+#   depends_on = [aws_lexv2models_bot.rental_bot]
+# }
 
 # Note: Using built-in AMAZON.AlphaNumeric slot type instead of custom slot type
 # to avoid provider inconsistency issues with complex slot configurations
 
 # Intent for handling rental queries
-resource "aws_lexv2models_intent" "rental_query_intent" {
-  bot_id      = aws_lexv2models_bot.rental_bot.id
-  bot_version = "DRAFT"
-  locale_id   = "en_US"
-  name        = "RentalQueryIntent"
+# resource "aws_lexv2models_intent" "rental_query_intent" {
+#   bot_id      = aws_lexv2models_bot.rental_bot.id
+#   bot_version = "DRAFT"
+#   locale_id   = "en_US"
+#   name        = "RentalQueryIntent"
 
-  description = "Intent for handling equipment rental queries"
+#   description = "Intent for handling equipment rental queries"
 
-  # Sample utterances will include:
-  # "What equipment do you have"
-  # "How much does the cotton candy machine cost"
-  # "Is the cotton candy machine available on August 28th"
-  # These need to be configured manually in AWS Console
+#   # Sample utterances will include:
+#   # "What equipment do you have"
+#   # "How much does the cotton candy machine cost"
+#   # "Is the cotton candy machine available on August 28th"
+#   # These need to be configured manually in AWS Console
 
-  depends_on = [
-    aws_lexv2models_bot_locale.en_us
-  ]
-}
+#   depends_on = [
+#     aws_lexv2models_bot_locale.en_us
+#   ]
+# }
 
 
 # Note: The Lex bot configuration will need to be completed manually in the AWS Console
@@ -374,166 +377,166 @@ resource "aws_connect_hours_of_operation" "main" {
 # Lex Bot Alias Configuration with Lambda Code Hook
 ################################################################################
 
-# Configure Lex bot alias with Lambda code hook using a null_resource
-# This is necessary because Terraform AWS provider doesn't support Lambda code hooks for Lex V2 aliases
-resource "null_resource" "configure_lex_alias_with_lambda" {
-  depends_on = [
-    aws_lexv2models_bot.rental_bot,
-    aws_lexv2models_bot_version.rental_bot,
-    aws_lambda_function.rental_query,
-    aws_lambda_permission.allow_lex
-  ]
+# # Configure Lex bot alias with Lambda code hook using a null_resource
+# # This is necessary because Terraform AWS provider doesn't support Lambda code hooks for Lex V2 aliases
+# resource "null_resource" "configure_lex_alias_with_lambda" {
+#   depends_on = [
+#     aws_lexv2models_bot.rental_bot,
+#     aws_lexv2models_bot_version.rental_bot,
+#     aws_lambda_function.rental_query,
+#     aws_lambda_permission.allow_lex
+#   ]
 
-  provisioner "local-exec" {
-    command = <<-EOT
-      LEX_BOT_ID=${aws_lexv2models_bot.rental_bot.id} \
-      LEX_ALIAS_NAME=TestBotAlias \
-      LAMBDA_ARN=${aws_lambda_function.rental_query.arn} \
-      ~/venv/bin/python ${path.module}/create_lex_alias_with_lambda.py
-    EOT
-  }
+#   provisioner "local-exec" {
+#     command = <<-EOT
+#       LEX_BOT_ID=${aws_lexv2models_bot.rental_bot.id} \
+#       LEX_ALIAS_NAME=TestBotAlias \
+#       LAMBDA_ARN=${aws_lambda_function.rental_query.arn} \
+#       ~/venv/bin/python ${path.module}/create_lex_alias_with_lambda.py
+#     EOT
+#   }
 
-  # Trigger on changes to the Lambda function or bot
-  triggers = {
-    lambda_arn        = aws_lambda_function.rental_query.arn
-    bot_id            = aws_lexv2models_bot.rental_bot.id
-    lambda_permission = aws_lambda_permission.allow_lex.id
-  }
-}
+#   # Trigger on changes to the Lambda function or bot
+#   triggers = {
+#     lambda_arn        = aws_lambda_function.rental_query.arn
+#     bot_id            = aws_lexv2models_bot.rental_bot.id
+#     lambda_permission = aws_lambda_permission.allow_lex.id
+#   }
+# }
 
 ################################################################################
 # Build Bot Locale with Sample Utterances
 ################################################################################
 
-# Add sample utterances and build the bot locale
-resource "null_resource" "build_bot_locale" {
-  depends_on = [
-    aws_lexv2models_intent.rental_query_intent,
-    aws_lexv2models_bot_locale.en_us
-  ]
+# # Add sample utterances and build the bot locale
+# resource "null_resource" "build_bot_locale" {
+#   depends_on = [
+#     aws_lexv2models_intent.rental_query_intent,
+#     aws_lexv2models_bot_locale.en_us
+#   ]
 
-  provisioner "local-exec" {
-    command = <<-EOT
-      # Wait for bot to be ready (not in versioning state)
-      echo "Waiting for bot to be ready..."
-      while true; do
-        BOT_STATUS=$(aws lexv2-models describe-bot \
-          --bot-id ${aws_lexv2models_bot.rental_bot.id} \
-          --query 'botStatus' \
-          --output text)
+#   provisioner "local-exec" {
+#     command = <<-EOT
+#       # Wait for bot to be ready (not in versioning state)
+#       echo "Waiting for bot to be ready..."
+#       while true; do
+#         BOT_STATUS=$(aws lexv2-models describe-bot \
+#           --bot-id ${aws_lexv2models_bot.rental_bot.id} \
+#           --query 'botStatus' \
+#           --output text)
 
-        if [ "$BOT_STATUS" = "Available" ]; then
-          echo "✅ Bot is ready!"
-          break
-        elif [ "$BOT_STATUS" = "Failed" ]; then
-          echo "❌ Bot failed!"
-          exit 1
-        else
-          echo "⏳ Bot status: $BOT_STATUS"
-          sleep 5
-        fi
-      done
+#         if [ "$BOT_STATUS" = "Available" ]; then
+#           echo "✅ Bot is ready!"
+#           break
+#         elif [ "$BOT_STATUS" = "Failed" ]; then
+#           echo "❌ Bot failed!"
+#           exit 1
+#         else
+#           echo "⏳ Bot status: $BOT_STATUS"
+#           sleep 5
+#         fi
+#       done
 
-      # Add sample utterances to the intent
-      aws lexv2-models update-intent \
-        --bot-id ${aws_lexv2models_bot.rental_bot.id} \
-        --bot-version DRAFT \
-        --locale-id en_US \
-        --intent-id ${aws_lexv2models_intent.rental_query_intent.intent_id} \
-        --intent-name RentalQueryIntent \
-        --sample-utterances '[
-          {"utterance": "What equipment do you have"},
-          {"utterance": "What can I rent"},
-          {"utterance": "Show me your rental equipment"},
-          {"utterance": "How much does the cotton candy machine cost"},
-          {"utterance": "Is the cotton candy machine available"},
-          {"utterance": "Can I rent the cargo carrier"},
-          {"utterance": "What are your prices"},
-          {"utterance": "I need to rent something"},
-          {"utterance": "Tell me about your equipment"},
-          {"utterance": "I want to make a reservation"},
-          {"utterance": "Is it available"},
-          {"utterance": "How much does it cost"},
-          {"utterance": "Can I book it"}
-        ]'
+#       # Add sample utterances to the intent
+#       aws lexv2-models update-intent \
+#         --bot-id ${aws_lexv2models_bot.rental_bot.id} \
+#         --bot-version DRAFT \
+#         --locale-id en_US \
+#         --intent-id ${aws_lexv2models_intent.rental_query_intent.intent_id} \
+#         --intent-name RentalQueryIntent \
+#         --sample-utterances '[
+#           {"utterance": "What equipment do you have"},
+#           {"utterance": "What can I rent"},
+#           {"utterance": "Show me your rental equipment"},
+#           {"utterance": "How much does the cotton candy machine cost"},
+#           {"utterance": "Is the cotton candy machine available"},
+#           {"utterance": "Can I rent the cargo carrier"},
+#           {"utterance": "What are your prices"},
+#           {"utterance": "I need to rent something"},
+#           {"utterance": "Tell me about your equipment"},
+#           {"utterance": "I want to make a reservation"},
+#           {"utterance": "Is it available"},
+#           {"utterance": "How much does it cost"},
+#           {"utterance": "Can I book it"}
+#         ]'
 
-      # Wait a moment for the intent update to process
-      sleep 3
+#       # Wait a moment for the intent update to process
+#       sleep 3
 
-      # Build the bot locale
-      echo "Building bot locale..."
-      aws lexv2-models build-bot-locale \
-        --bot-id ${aws_lexv2models_bot.rental_bot.id} \
-        --bot-version DRAFT \
-        --locale-id en_US
+#       # Build the bot locale
+#       echo "Building bot locale..."
+#       aws lexv2-models build-bot-locale \
+#         --bot-id ${aws_lexv2models_bot.rental_bot.id} \
+#         --bot-version DRAFT \
+#         --locale-id en_US
 
-      # Wait for build to complete
-      echo "Waiting for bot locale to build..."
-      RETRY_COUNT=0
-      MAX_RETRIES=60
-      while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-        STATUS=$(aws lexv2-models describe-bot-locale \
-          --bot-id ${aws_lexv2models_bot.rental_bot.id} \
-          --bot-version DRAFT \
-          --locale-id en_US \
-          --query 'botLocaleStatus' \
-          --output text)
+#       # Wait for build to complete
+#       echo "Waiting for bot locale to build..."
+#       RETRY_COUNT=0
+#       MAX_RETRIES=60
+#       while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+#         STATUS=$(aws lexv2-models describe-bot-locale \
+#           --bot-id ${aws_lexv2models_bot.rental_bot.id} \
+#           --bot-version DRAFT \
+#           --locale-id en_US \
+#           --query 'botLocaleStatus' \
+#           --output text)
 
-        if [ "$STATUS" = "Built" ]; then
-          echo "✅ Bot locale built successfully!"
-          break
-        elif [ "$STATUS" = "Failed" ]; then
-          echo "❌ Bot locale build failed!"
-          exit 1
-        else
-          echo "⏳ Bot locale status: $STATUS (attempt $((RETRY_COUNT+1))/$MAX_RETRIES)"
-          sleep 10
-          RETRY_COUNT=$((RETRY_COUNT+1))
-        fi
-      done
+#         if [ "$STATUS" = "Built" ]; then
+#           echo "✅ Bot locale built successfully!"
+#           break
+#         elif [ "$STATUS" = "Failed" ]; then
+#           echo "❌ Bot locale build failed!"
+#           exit 1
+#         else
+#           echo "⏳ Bot locale status: $STATUS (attempt $((RETRY_COUNT+1))/$MAX_RETRIES)"
+#           sleep 10
+#           RETRY_COUNT=$((RETRY_COUNT+1))
+#         fi
+#       done
 
-      if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
-        echo "❌ Bot locale build timed out after $MAX_RETRIES attempts"
-        exit 1
-      fi
-    EOT
-  }
+#       if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+#         echo "❌ Bot locale build timed out after $MAX_RETRIES attempts"
+#         exit 1
+#       fi
+#     EOT
+#   }
 
-  # Trigger on changes to the bot or intents
-  triggers = {
-    bot_id    = aws_lexv2models_bot.rental_bot.id
-    intent_id = aws_lexv2models_intent.rental_query_intent.intent_id
-    locale_id = aws_lexv2models_bot_locale.en_us.id
-  }
-}
+#   # Trigger on changes to the bot or intents
+#   triggers = {
+#     bot_id    = aws_lexv2models_bot.rental_bot.id
+#     intent_id = aws_lexv2models_intent.rental_query_intent.intent_id
+#     locale_id = aws_lexv2models_bot_locale.en_us.id
+#   }
+# }
 
 ################################################################################
 # Lex Bot Association with Amazon Connect
 ################################################################################
 
-# Associate Lex bot with Amazon Connect instance using a shell script
-resource "null_resource" "associate_lex_with_connect" {
-  depends_on = [
-    aws_connect_instance.main,
-    aws_lexv2models_bot.rental_bot,
-    null_resource.configure_lex_alias_with_lambda,
-    null_resource.build_bot_locale
-  ]
+# # Associate Lex bot with Amazon Connect instance using a shell script
+# resource "null_resource" "associate_lex_with_connect" {
+#   depends_on = [
+#     aws_connect_instance.main,
+#     aws_lexv2models_bot.rental_bot,
+#     null_resource.configure_lex_alias_with_lambda,
+#     null_resource.build_bot_locale
+#   ]
 
-  provisioner "local-exec" {
-    command = <<-EOT
-      CONNECT_INSTANCE_ID=${aws_connect_instance.main.id} \
-      LEX_BOT_ID=${aws_lexv2models_bot.rental_bot.id} \
-      LEX_BOT_ALIAS_ID=TSTALIASID \
-      ${path.module}/associate_lex_with_connect.sh
-    EOT
-  }
+#   provisioner "local-exec" {
+#     command = <<-EOT
+#       CONNECT_INSTANCE_ID=${aws_connect_instance.main.id} \
+#       LEX_BOT_ID=${aws_lexv2models_bot.rental_bot.id} \
+#       LEX_BOT_ALIAS_ID=TSTALIASID \
+#       ${path.module}/associate_lex_with_connect.sh
+#     EOT
+#   }
 
-  # Trigger on changes to the Connect instance or Lex bot
-  triggers = {
-    connect_instance_id  = aws_connect_instance.main.id
-    lex_bot_id           = aws_lexv2models_bot.rental_bot.id
-    lex_alias_configured = null_resource.configure_lex_alias_with_lambda.id
-    bot_built            = null_resource.build_bot_locale.id
-  }
-}
+#   # Trigger on changes to the Connect instance or Lex bot
+#   triggers = {
+#     connect_instance_id  = aws_connect_instance.main.id
+#     lex_bot_id           = aws_lexv2models_bot.rental_bot.id
+#     lex_alias_configured = null_resource.configure_lex_alias_with_lambda.id
+#     bot_built            = null_resource.build_bot_locale.id
+#   }
+# }

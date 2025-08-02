@@ -58,3 +58,15 @@ resource "aws_dynamodb_table" "hauliday_reservations" {
     Service     = "hauliday"
   }
 }
+
+
+resource "aws_dynamodb_table" "treasure_users" {
+  name         = "treasure_users"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "user_id"
+
+  attribute {
+    name = "user_id"
+    type = "S"
+  }
+}
