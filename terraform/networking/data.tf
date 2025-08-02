@@ -26,8 +26,8 @@ locals {
   stratis_dns_zone_id_secret_arn  = data.terraform_remote_state.foundation.outputs.route53_zone_id_secret_arn_stratis
   hauliday_dns_zone_id_secret_arn = data.terraform_remote_state.foundation.outputs.route53_zone_id_secret_arn_hauliday
   tolby_dns_zone_id_secret_arn    = data.terraform_remote_state.foundation.outputs.route53_zone_id_secret_arn_tolby
-  treasure_dns_zone_id_secret_arn = data.terraform_remote_state.foundation.outputs.route53_zone_id_secret_arn_treasure
-  ec2_ssh_key_pair_id             = data.terraform_remote_state.foundation.outputs.ec2_ssh_key_pair_id
+  # treasure_dns_zone_id_secret_arn = data.terraform_remote_state.foundation.outputs.route53_zone_id_secret_arn_treasure
+  ec2_ssh_key_pair_id = data.terraform_remote_state.foundation.outputs.ec2_ssh_key_pair_id
 }
 
 
@@ -92,17 +92,17 @@ data "aws_route53_zone" "hosted_zone_tolby" {
   zone_id = local.route53_zone_id_tolby
 }
 
-data "aws_secretsmanager_secret" "route53_zone_id_treasure_arn" {
-  arn = local.treasure_dns_zone_id_secret_arn
-}
+# data "aws_secretsmanager_secret" "route53_zone_id_treasure_arn" {
+#   arn = local.treasure_dns_zone_id_secret_arn
+# }
 
-data "aws_secretsmanager_secret_version" "route53_zone_id_treasure" {
-  secret_id = data.aws_secretsmanager_secret.route53_zone_id_treasure_arn.id
-}
+# data "aws_secretsmanager_secret_version" "route53_zone_id_treasure" {
+#   secret_id = data.aws_secretsmanager_secret.route53_zone_id_treasure_arn.id
+# }
 
-data "aws_route53_zone" "hosted_zone_treasure" {
-  zone_id = local.route53_zone_id_treasure
-}
+# data "aws_route53_zone" "hosted_zone_treasure" {
+#   zone_id = local.route53_zone_id_treasure
+# }
 
 
 
@@ -117,7 +117,7 @@ locals {
   route53_zone_name_hauliday = data.aws_route53_zone.hosted_zone_hauliday.name
   route53_zone_id_tolby      = jsondecode(data.aws_secretsmanager_secret_version.route53_zone_id_tolby.secret_string).zone_id
   route53_zone_name_tolby    = data.aws_route53_zone.hosted_zone_tolby.name
-  route53_zone_id_treasure   = jsondecode(data.aws_secretsmanager_secret_version.route53_zone_id_treasure.secret_string).zone_id
-  route53_zone_name_treasure = data.aws_route53_zone.hosted_zone_treasure.name
-  alb_logs_bucket_arn        = data.terraform_remote_state.storage.outputs.alb_logs_bucket_arn
+  # route53_zone_id_treasure   = jsondecode(data.aws_secretsmanager_secret_version.route53_zone_id_treasure.secret_string).zone_id
+  # route53_zone_name_treasure = data.aws_route53_zone.hosted_zone_treasure.name
+  alb_logs_bucket_arn = data.terraform_remote_state.storage.outputs.alb_logs_bucket_arn
 }
