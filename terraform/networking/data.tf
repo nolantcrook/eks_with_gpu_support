@@ -118,5 +118,6 @@ locals {
   route53_zone_id_tolby      = jsondecode(data.aws_secretsmanager_secret_version.route53_zone_id_tolby.secret_string).zone_id
   route53_zone_name_tolby    = data.aws_route53_zone.hosted_zone_tolby.name
   route53_zone_id_treasure   = jsondecode(data.aws_secretsmanager_secret_version.route53_zone_id_treasure.secret_string).zone_id
+  route53_zone_name_treasure = data.aws_route53_zone.hosted_zone_treasure.name
   alb_logs_bucket_arn        = data.terraform_remote_state.storage.outputs.alb_logs_bucket_arn
 }
