@@ -63,6 +63,19 @@ module "umami_setup" {
   listener_arn         = aws_lb_listener.eks_alb.arn
 }
 
+module "treasure_setup" {
+  source               = "./cognito_website_setup"
+  website_name         = "treasure"
+  website_domain       = local.route53_zone_name
+  route53_zone_id      = local.route53_zone_id
+  priority             = 1700
+  alb_target_group_arn = aws_lb_target_group.eks_alb.arn
+  alb_dns_name         = aws_lb.eks_alb.dns_name
+  alb_zone_id          = aws_lb.eks_alb.zone_id
+  listener_arn         = aws_lb_listener.eks_alb.arn
+}
+
+
 locals {
   website_setups = {
     game_2048 = {
@@ -217,32 +230,6 @@ module "website_setups_tolby" {
   subdomain            = each.value.subdomain
   website_domain       = local.route53_zone_name_tolby
   route53_zone_id      = local.route53_zone_id_tolby
-  priority             = each.value.priority
-  alb_target_group_arn = each.value.target_group_arn
-  alb_dns_name         = aws_lb.eks_alb.dns_name
-  alb_zone_id          = aws_lb.eks_alb.zone_id
-  listener_arn         = aws_lb_listener.eks_alb.arn
-}
-
-
-locals {
-  treasure_website_setups = {
-    treasure = {
-      subdomain        = "treasure"
-      source           = "./website_setup"
-      priority         = 1700
-      target_group_arn = aws_lb_target_group.eks_alb.arn
-    }
-  }
-}
-
-module "website_setups_treasure" {
-  for_each             = local.treasure_website_setups
-  source               = "./website_setup"
-  website_name         = each.key
-  subdomain            = each.value.subdomain
-  website_domain       = local.route53_zone_name_treasure
-  route53_zone_id      = local.route53_zone_id_treasure
   priority             = each.value.priority
   alb_target_group_arn = each.value.target_group_arn
   alb_dns_name         = aws_lb.eks_alb.dns_name
