@@ -35,7 +35,7 @@ output "route53_zone_id_secret_arn_tolby" {
 
 output "route53_zone_id_secret_arn_treasure" {
   description = "ARN of the Route53 Zone ID secret"
-  value       = aws_secretsmanager_secret.route53_zone_id_tolby.arn
+  value       = aws_secretsmanager_secret.route53_zone_id_treasure.arn
 }
 
 output "ec2_ssh_key_pair_id" {
