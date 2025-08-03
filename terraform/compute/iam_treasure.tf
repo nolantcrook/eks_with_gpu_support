@@ -19,7 +19,7 @@ resource "aws_iam_policy" "treasure_policy" {
         Action = [
           "dynamodb:GetItem",
           "dynamodb:PutItem",
-          "dyanamo:UpdateItem",
+          "dynamodb:UpdateItem",
           "dynamodb:Scan",
           "dynamodb:Query"
         ]
