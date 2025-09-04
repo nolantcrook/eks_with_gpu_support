@@ -56,6 +56,19 @@ resource "aws_iam_policy" "demo_knowledgebase_secrets_access" {
       {
         Effect = "Allow"
         Action = [
+          "dynamodb:Query",
+          "dynamodb:Scan",
+          "dynamodb:Get*",
+          "dynamodb:Describe*",
+          "dynamodb:List*"
+        ]
+        Resource = [
+          "*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
           "bedrock:InvokeModel"
         ]
         Resource = [
