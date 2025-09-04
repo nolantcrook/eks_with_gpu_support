@@ -22,7 +22,7 @@ resource "aws_lambda_function" "hauliday_notifications" {
     variables = {
       ENVIRONMENT            = var.environment
       SNS_TOPIC_ARN          = aws_sns_topic.hauliday_notifications.arn
-      SES_SOURCE_EMAIL       = "nolan@haulidayrentals.com"
+      SES_SOURCE_EMAIL       = "info@haulidayrentals.com"
       DYNAMODB_STREAM_MODE   = "enabled"
       RESERVATION_TABLE_NAME = local.hauliday_reservations_table_name
     }

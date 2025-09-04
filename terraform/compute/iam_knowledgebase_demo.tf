@@ -47,6 +47,15 @@ resource "aws_iam_policy" "demo_knowledgebase_secrets_access" {
       {
         Effect = "Allow"
         Action = [
+          "lambda:InvokeFunction",
+          "lambda:List*",
+          "lambda:Get*"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
           "bedrock:InvokeModel"
         ]
         Resource = [

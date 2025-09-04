@@ -1,6 +1,6 @@
 # Hauliday SES Email Identity
 resource "aws_ses_email_identity" "hauliday" {
-  email = "nolan@haulidayrentals.com" # Replace with your actual email
+  email = "info@haulidayrentals.com" # Replace with your actual email
 }
 
 # SES Configuration Set for Hauliday
