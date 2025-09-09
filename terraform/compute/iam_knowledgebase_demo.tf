@@ -96,6 +96,17 @@ resource "aws_iam_policy" "demo_knowledgebase_secrets_access" {
       {
         Effect = "Allow"
         Action = [
+          "events:Get*",
+          "events:List*",
+          "events:Describe*",
+        ]
+        Resource = [
+          "*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
           "s3:Get*",
           "s3:List*",
           "s3:Put*",
