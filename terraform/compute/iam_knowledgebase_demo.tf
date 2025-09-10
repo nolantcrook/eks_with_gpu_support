@@ -71,6 +71,15 @@ resource "aws_iam_policy" "demo_knowledgebase_secrets_access" {
       {
         Effect = "Allow"
         Action = [
+          "dynamodb:DeleteItem"
+        ]
+        Resource = [
+          "arn:aws:dynamodb:us-west-2:891377073036:table/aalf-pdf-reports"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
           "bedrock:InvokeModel"
         ]
         Resource = [
