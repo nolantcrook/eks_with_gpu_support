@@ -60,7 +60,9 @@ resource "aws_iam_policy" "demo_knowledgebase_secrets_access" {
           "dynamodb:Scan",
           "dynamodb:Get*",
           "dynamodb:Describe*",
-          "dynamodb:List*"
+          "dynamodb:List*",
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem"
         ]
         Resource = [
           "*"
